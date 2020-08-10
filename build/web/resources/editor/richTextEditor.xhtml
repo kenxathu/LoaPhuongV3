@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:cc="http://java.sun.com/jsf/composite" xmlns:ui="http://java.sun.com/jsf/facelets">
+<cc:interface>
+    <cc:attribute name ="tinyValue"/>
+    <cc:editableValueHolder name="textarea"/>
+</cc:interface>
+<cc:implementation>
+
+    
+     
+    <script type="text/javascript">
+            tinyMCE.init({
+            language : 'vi',
+            //paste_as_text: true,
+            //plugins: "paste",
+                
+             menu: {
+                file: {title: 'File', items: 'newdocument print'},
+                edit: {title: 'Edit', items: 'undo redo | cut copy paste | searchreplace selectall'},
+                insert: {title: 'Insert', items: 'link media image | charmap toc'},
+                view: {title: 'View', items: 'preview fullscreen help'},
+                format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'},
+                table: {title: 'Table', items: 'inserttable deletetable'},
+                
+            },
+            table_toolbar: "tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
+
+            style_formats: [
+                    {title: 'Headers', items: [
+                      {title: 'Header 1', format: 'h1'},
+                      {title: 'Header 2', format: 'h2'},
+                      {title: 'Header 3', format: 'h3'},
+                      {title: 'Header 4', format: 'h4'},
+                      {title: 'Header 5', format: 'h5'},
+                      {title: 'Header 6', format: 'h6'}
+                    ]},
+                    {title: 'Alignment', items: [
+                      {title: 'Left', icon: 'alignleft', format: 'alignleft'},
+                      {title: 'Center', icon: 'aligncenter', format: 'aligncenter'},
+                      {title: 'Right', icon: 'alignright', format: 'alignright'},
+                      {title: 'Justify', icon: 'alignjustify', format: 'alignjustify'}
+                    ]}
+                  ],
+            
+                
+            selector: 'textarea',
+            //mode:"specific_textareas",
+            height: 450,
+            theme: 'modern',
+            setup: function(editor){
+                editor.on('change',function(){
+                    tinyMCE.triggerSave();
+                    
+                });
+            },
+            
+            init_instance_callback: function (editor) {
+                editor.on('NodeChange', function (e) {
+                  console.log('Node changed');
+                  if(e){
+                      console.log(e);
+                    if (e.element.nodeName.toLowerCase() == 'img') {
+                        
+                             tinyMCE.DOM.setAttribs(e.element, {'width': null, 'height': null});
+                             console.log(e);
+
+                    }
+                }
+                });
+              },
+            
+
+            plugins: [
+                  'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+                  'searchreplace wordcount visualblocks visualchars code fullscreen',
+                  'insertdatetime media nonbreaking save table contextmenu directionality',
+                  'emoticons template paste textcolor colorpicker textpattern imagetools codesample toc help'
+                ],
+                toolbar1: 'undo redo  | styleselect | fontselect fontsizeselect | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview | help',
+                //image_advtab: true,
+                templates: [
+                  { title: 'Test template 1', content: 'Test 1' },
+                  { title: 'Test template 2', content: 'Test 2' }
+                ],
+                content_css: [
+                  '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i',
+                  '//www.tinymce.com/css/codepen.min.css'
+                ],
+                // enable title field in the Image dialog
+                image_title: true, 
+                // enable automatic uploads of images represented by blob or data URIs
+                automatic_uploads: true,
+                images_upload_url: '/',
+                file_picker_types: 'image', 
+                // and here's our custom image picker
+                
+                images_upload_credentials: true,
+                images_upload_handler: function (blobInfo, success, failure) {
+                    /*var xhr, formData;
+                    alert("1");
+                    xhr = new XMLHttpRequest();
+                    xhr.withCredentials = false;
+                    xhr.open('GET', 'client/ajax');
+
+                    xhr.onload = function() {
+                      var json;
+                    alert(xhr.responseText);
+                      if (xhr.status != 200) {
+                        failure('HTTP Error: ' + xhr.status);
+                        return;
+                      }
+
+                      json = JSON.parse(xhr.responseText);
+
+                      if (!json || typeof json.location != 'string') {
+                        failure('Invalid JSON: ' + xhr.responseText);
+                        return;
+                      }
+                      
+                      
+                      
+                      
+                      
+                      success(json.location);*/
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blobInfo.blob());
+                    
+                    reader.onload = function () {
+                       var base64 = reader.result.split(',')[1];
+                       var date = (new Date()).getTime().toString();
+                       //alert(base64);
+                       uploadAssets ([{
+                            name : 'file',
+                            value : base64
+                           },   
+                           {
+                             name : 'filename',
+                             value : date + "_" + blobInfo.filename()
+                           }  
+                         ]);  
+                         //success('../../hnrespository/resource/images/'+ date + "_" + blobInfo.filename());
+                         //success('http://itdev.mobifone.vn/hnrespository/resource/images/'+ date + "_" + blobInfo.filename());
+                         success('#{NewsController.mediaServer}/resource/images/'+ date + "_" + blobInfo.filename());
+                    };
+                      
+                    //};
+
+                    /*formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                    xhr.send(formData);*/
+                  }
+            /*images_upload_handler: function (blobInfo, success, failure) {
+                var form;
+                form = new FormData();
+                form.append('file', blobInfo.blob(), blobInfo.filename());
+                alert("");
+                $.ajax
+                ({
+                  type: "POST",
+                  contentType: 'multipart/form-data',
+                    xhrFields: {
+                        withCredentials: false
+                    },
+                  url: "client/ajax",
+                  async: true,
+                  data: form,
+                  success: function (){
+                  alert('Thanks for your comment!'); 
+                  },
+                  error: function() {
+                    alert( "error" );
+                    }
+              });
+              
+          }*/
+            });
+    </script>
+    
+    <h:inputTextarea id="textarea" value="#{cc.attrs.tinyValue}" />
+</cc:implementation>
+</ui:composition>

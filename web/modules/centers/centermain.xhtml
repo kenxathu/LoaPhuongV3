@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core">
+    <h:head>
+        
+        
+
+    </h:head>
+    <h:body>
+        <ui:composition>
+            <script src="#{request.contextPath}/resources/js/highcharts.js"></script>
+            <script src="#{request.contextPath}/resources/js/exporting.js"></script>
+            
+            <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2nGDxgbOEzdU-cS6FHGYUtwGKUAx0B5s"></script>
+
+            
+
+            <style type="text/css" >
+                #formChooseOrg\:treeOrg .ui-tree-container {
+                    max-height: 450px;
+                }
+
+                #formMain\:treeOrg {
+                    overflow: auto;
+                }
+
+                hr {
+                    border: 0;
+                    height: 2px;
+                    background: #999999;
+                }
+
+                .btn-right {
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                }
+
+                .org-name {
+                    font-size: 1.1em;
+                    font-weight: bold;
+                    color: #666666;
+                    text-transform: uppercase;
+                    line-height: 2.5em;
+                    margin-right: 10px;
+                }
+                .ui-selectonemenu{
+                    width: 5%;
+                    margin: 0px 5px 0 0 ;
+                }
+                .ui-selectonemenu
+                .ui-selectonemenu-label{
+                    color: black !important;
+                    width: 95% !important;
+                }
+            </style>            
+            <h:form id="formMain">
+                <section class="content">
+                    <div class="row">
+                        <ui:fragment rendered="#{DashBoardController.allowHouseManagement}">
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-orange">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_area}
+                                        </h3>
+                                        <p>
+                                            Địa bàn
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa fa-map-marker"></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/client/area-management" class="small-box-footer" >Quản lý địa bàn <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            
+                            <div class="col-lg-2 col-xs-6" >
+                                <!-- small box -->
+                                <div class="small-box bg-aqua">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_household}</h3>
+                                        <p>
+                                            Hộ gia đình
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa fa-home "></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/client/holdhouse-management" class="small-box-footer">Quản lý hộ gia đình <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- ./col -->
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-green">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_mcu}</h3>
+                                        <p>
+                                            Thiết bị
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa fa-fax "></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/client/mcu-management" class="small-box-footer">Quản lý thiết bị <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-yellow-active">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_user}</h3>
+                                        <p>
+                                            Tài khoản người dân
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-person-add"></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/module/user-normal" class="small-box-footer">Quản lý TK người dân <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-red">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_record}
+                                        </h3>
+                                        <p>
+                                            Thông báo
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-speakerphone"></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/client/record-management" class="small-box-footer">Quản lý thông báo <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-blue">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_news}</h3>
+                                        <p>
+                                            Tin tức
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa fa-newspaper-o"></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/client/news-management" class="small-box-footer">Quản lý tin tức <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            
+                        </ui:fragment>
+                        
+                        <ui:fragment rendered="#{!DashBoardController.allowHouseManagement}">
+                            <div class="col-lg-3 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-orange">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_area}
+                                        </h3>
+                                        <p>
+                                            Địa bàn
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa fa-map-marker"></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/client/area-management" class="small-box-footer" >Quản lý địa bàn <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- ./col -->
+                            <div class="col-lg-3 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-green">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_mcu}</h3>
+                                        <p>
+                                            Thiết bị
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa fa-fax "></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/client/mcu-management" class="small-box-footer">Quản lý thiết bị <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-3 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-yellow-active">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_user}</h3>
+                                        <p>
+                                            Tài khoản người dân
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-person-add"></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/module/user-normal" class="small-box-footer">Quản lý TK người dân <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-3 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-red">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_record}
+                                        </h3>
+                                        <p>
+                                            Thông báo
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-speakerphone"></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/client/record-management" class="small-box-footer">Quản lý thông báo <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-3 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-blue">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_news}</h3>
+                                        <p>
+                                            Tin bài
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fa fa-newspaper-o"></i>
+                                    </div>
+                                    <a href="#{request.contextPath}/client/news-management" class="small-box-footer">Quản lý tin bài <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            
+                        </ui:fragment>
+                    </div>
+         </section>
+       
+                
+                
+        <section >
+          
+            <h:form id="frmMCUmap" >  
+               
+                <p:panelGrid id="pnlScheduleConfig" columns="5" columnClasses="ui-grid-col-3,ui-grid-col-2,ui-grid-col-2,ui-grid-col-11,ui-grid-col-1" styleClass="ui-panelgrid-blank stf-view" layout="grid" >  
+                    <h5 style="float: left; font-weight: bold">Bản đồ thiết bị trên địa bàn</h5>
+                    
+                    <p:inputText id="txtarea" value="#{DashBoardController.selectedArea.areaName}" readonly="true"
+                                 style="font-size: 12px" onclick="PF('olPanel').loadContents();" />    
+                    
+                    <p:selectOneMenu  rendered="true" id="recMode" value="#{DashBoardController.status}"  label="Trạng thái"
+                                              effect="fade"   >     
+                                <f:selectItem itemLabel="Tất cả" itemValue="0"/>
+                                <f:selectItem itemLabel="Đang kết nối" itemValue="1"/>
+                                <f:selectItem itemLabel="Mất kết nối" itemValue="2"/>
+                                <p:ajax update="formMain:frmMCUmap:gmap formMain:frmMCUmap:infoWindow
+                                      formMain:frmMCUmap:MCUnum :grow_main_dt" />
+                            </p:selectOneMenu>
+                    
+                    
+                    <h5  style="float: right; margin-top: 16px;" > Số thiết bị:</h5>
+                    <p:outputLabel value="#{DashBoardController.advancedModel.markers.size()}" id="MCUnum" style="margin-top: 10px; float: left; font-size: 20px" ></p:outputLabel>
+          
+                </p:panelGrid>
+
+                <p:gmap id="gmap" fitBounds="true" center="#{DashBoardController.center.lat},#{DashBoardController.center.lng}" zoom="15" type="ROADMAP" model="#{DashBoardController.advancedModel}" style="width:100%;height:600px">
+                    
+                    <p:ajax event="overlaySelect" listener="#{DashBoardController.onMarkerSelect}" />
+                    
+                    <p:gmapInfoWindow id="infoWindow" >
+                        <p:outputPanel style="height: 150px" >
+                            <p:panelGrid id="MCUInfo" columns="2" columnClasses="ui-grid-col-6,ui-grid-col-6" styleClass="ui-panelgrid-blank  stf-view" layout="grid" >  
+
+                                <p:outputLabel value="#{DashBoardController.marker.data.mcu_type==1?'Tên chủ hộ':'Tên MIRA'}" for="housename" style="float: left"/>
+                                <p:inputText id="housename" value="#{DashBoardController.marker.title}" disabled="true" style="border: none" /> 
+                                
+                                <p:outputLabel value="Địa chỉ" for="addr" style="float: left"/>
+                                <p:inputTextarea id="addr" value="#{DashBoardController.marker.data.address}" disabled="true" rows="1" cols="3"/>
+                                
+                                <p:outputLabel value="Trạng thái" for="status" style="float: left" />
+                                <p:inputText id="status" value="#{DashBoardController.marker.shadow}" disabled="true" />
+
+                            </p:panelGrid>
+                        </p:outputPanel>
+                    </p:gmapInfoWindow>
+                </p:gmap>
+
+ 
+                
+                <p:overlayPanel id="timePanel" widgetVar="olPanel" 
+                                for="txtarea" style="height: fit-content; width: 280px;" hideEffect="fade" >
+                    <h:form id="formPlayTimeConf2">
+                        <p:tree id="docs" style="margin-top: 10px; width: 250px;" value="#{DashBoardController.areaRoot}" var="doc" selectionMode="single" 
+                                        selection="#{DashBoardController.selectedArea}" dynamic="true"  >                    
+                            <p:ajax event="select" update="formMain:frmMCUmap:txtarea formMain:frmMCUmap:gmap formMain:frmMCUmap:infoWindow
+                                      formMain:frmMCUmap:MCUnum :grow_main_dt" />
+                                
+                                <p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+                                    <h:outputText value="#{doc.areaName}" style="font-weight:bold;"/>
+                                </p:treeNode>
+                                <p:treeNode type="vn" icon="ui-icon-document">
+                                    <h:outputText value="#{doc.areaName}" style="font-weight:bold;" />
+                                </p:treeNode>
+                                <p:treeNode type="tp">
+                                <h:outputText value="#{DashBoardController.isCityMode? 'TP.' :'T.'} #{doc.areaName}" style="font-weight:bold;" />
+                                </p:treeNode>
+                                <p:treeNode type="q">
+                                    <h:outputText value="#{DashBoardController.isCityMode? 'Q.' :'H.'} #{doc.areaName}" style="font-weight:bold;"/>
+                                </p:treeNode>
+                                <p:treeNode type="p" >
+                                    <h:outputText value="#{DashBoardController.isCityMode? 'P.' :'X.'} #{doc.areaName}"/>
+                                </p:treeNode>
+                                <p:treeNode type="t" >
+                                    <h:outputText value="#{DashBoardController.isCityMode? 'T.' :'T/X.'} #{doc.areaName}"/>
+                                </p:treeNode>
+                                <p:treeNode type="document" >
+                                    <h:outputText value="#{doc.areaName}" />
+                                </p:treeNode>
+                      
+                            </p:tree>
+                    </h:form>
+
+                </p:overlayPanel>
+            </h:form>
+            
+            
+        </section>
+               
+        </h:form>
+        </ui:composition>
+    </h:body>
+</html>

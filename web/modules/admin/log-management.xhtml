@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+    <h:head>
+    </h:head>
+    <h:body>
+        <ui:composition>
+            <script type="text/javascript" >
+                function clearFilter() {
+                    try {
+                        PF('dtUser').clearFilters();
+                    } catch (err) {
+
+                    }
+                }
+
+            </script>
+            <style type="text/css" >
+                #formPermission\:panelCheckAll tr, #formPermission\:panelCheckAll .ui-panelgrid-cell {
+                    border: 0;
+                }
+                .ui-fileupload-buttonbar .ui-button {
+                    vertical-align:middle;
+                    margin-right:0.2em;
+                    width: 100%;
+                }
+                .stf-view-header .ui-overlaypanel-content .ui-button.btn-primary {
+                    width: 45%!important;
+                    margin-right: 10%!important;
+                    float :left;
+
+                }
+                .stf-view-header .ui-overlaypanel-content .ui-button.btn-danger{
+                    width: 45% !important;;
+                    background-color: red !important;
+                }
+                .ui-selectonemenu .ui-selectonemenu-trigger{
+                    height: 100%!important;
+
+                }
+
+                .stf-view .ui-selectonemenu-label{
+                    font-size: 13px!important;
+                }
+                .ui-selectonemenu-label{
+                    color: black!important;
+                }
+            </style>
+
+            <script>
+                function handleSubmitRequest(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgUserInfo').hide();
+                        clearFilter();
+                    }
+                }
+
+                function handleSubmitRequestDel(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('cfmDelete').hide();
+                        clearFilter();
+                    }
+                }
+                function handleSubmitRequestReset(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('cfmReset').hide();
+                        clearFilter();
+                    }
+                }
+                
+                function clearFilter() {
+                    try {
+                        PF('widgetRole').clearFilters();
+                    } catch (err) {
+
+                    }
+                }
+            </script>
+
+            <h:form id="form_main" >
+                <p:panel id ="pnl_main">
+                    
+                    <div class="stf-table">
+                        <p:dataTable id="dtUser" value="#{LogController.listLog}" var="log"
+                                     rowKey="#{log.id}"
+                                     paginator="true"  
+                                     rows="20"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                     rowsPerPageTemplate="20,30,40" draggableColumns="true"                     
+                                     widgetVar="dtUser" style="margin-top: 5px;"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     filterDelay="500" >
+
+
+                             <f:facet name="header">
+                                <div class="stf-table-label">
+                                    <p:panelGrid columns="7" columnClasses="ui-grid-col-4,ui-grid-col-1,ui-grid-col-2,ui-grid-col-1,ui-grid-col-2,ui-grid-col-2" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                                        <h4 style="color: #0259A4; margin-top: 38px; position: absolute; left: 0px;">
+                                            Danh sách tác động
+                                        </h4>
+                                        <p:outputLabel value="Từ ngày" for="txtFrom" style="float: right; color: #0259A4"/>
+                                        <p:calendar pattern="dd/MM/yyyy" id="txtFrom" timeZone="GMT+7" locale="vi"
+                                                            label="Chọn ngày" style="color: #0259A4" value="#{RecordController.fromDate}"
+                                                            converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy" timeZone="GMT+7" />
+                                                    <p:ajax event="dateSelect" listener="#{LogController.changeFilterTimeEvent(evt)}" update="form_main:dtUser :grow_main_dt"></p:ajax>
+                                                </p:calendar>
+
+                                        <p:outputLabel value="Đến ngày" for="txtTo" style="float: right; color: #0259A4"/>
+                                                <p:calendar pattern="dd/MM/yyyy" id="txtTo" timeZone="GMT+7" locale="vi"
+                                                            label="Chọn ngày" value="#{RecordController.toDate}"
+                                                            converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy" timeZone="GMT+7" />
+                                                    <p:ajax event="dateSelect" listener="#{LogController.changeFilterTimeEvent(evt)}" update="form_main:dtUser :grow_main_dt"></p:ajax>
+                                                </p:calendar>
+                                        
+                                    </p:panelGrid>
+
+                                </div>
+
+                            </f:facet>
+
+                            <p:column headerText="#{PP_SHARED.rownum}"  style="width: 60px;" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column rendered="false" headerText="Hành động" filterMatchMode="contains" filterBy="#{log.log_name}" sortBy="#{log.log_name}"  >  
+                                <h:outputText value="#{log.log_name}">
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Hành động" filterMatchMode="contains" filterBy="#{log.log_code}" sortBy="#{log.log_code}"  >  
+                                <h:outputText value="#{log.log_code}">
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Người tác động" filterMatchMode="contains" filterBy="#{log.username}" sortBy="#{log.username}"  >  
+                                <h:outputText value=" #{log.username}">
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Thời gian" filterMatchMode="contains" filterBy="#{log.date}" sortBy="#{log.date}"  >  
+                                <h:outputText value="#{log.date}"  style="text-transform: lowercase;"> 
+                                </h:outputText>
+                            </p:column> 
+                            
+                           
+                            <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 150px;"  >
+                                                          
+                                <p:commandLink global="false"  id="cmdEdit" process="@this"  title="Xem chi tiết"  resetValues="true"
+                                               actionListener="#{LogController.viewLog(log)}" oncomplete="PF('dlgUserInfo').show();" update=":dlgUserInfo" styleClass="fa fa-eye btn-margin"  > 
+                                    <p:resetInput target=":frmDlg:pnl_add"/>
+                                </p:commandLink>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </p:panel>
+            </h:form>
+
+            <p:dialog header="Chi tiết hành động" id="dlgUserInfo" widgetVar="dlgUserInfo" modal="true" appendTo="@(body)" showEffect="fade" resizable="false" width="1000" closeOnEscape="true" >
+
+                <h:form id="frmDlg" >
+                    <p:panel id="pnl_add">
+                        <div class="stf-view">
+                            <p:panelGrid id="pnlUserInfo3" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                <p:outputLabel value="Hành động" for="txtUserName"/>
+                                <p:inputText id="txtUserName" value="#{LogController.selectedLog.log_code}" maxlength="30" disabled="true"
+                                             validator="ValidatorNumber"  >
+                                </p:inputText>
+                                
+                                <p:outputLabel value="Người tác động" for="txtPass" />
+                                <p:inputText id="txtPass" value="#{LogController.selectedLog.username}" disabled="true" />
+                                
+                                <p:outputLabel value="Thời gian" for="txtTime"/>
+                                <p:inputText id="txtTime"  disabled="true"
+                                             value="#{LogController.selectedLog.date}"/>
+
+                            </p:panelGrid>  
+                            
+                            <p:panelGrid id="pnlUserInfo2" columns="2" columnClasses="ui-grid-col-2,ui-grid-col-12" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                <p:outputLabel value="Dữ liệu đầu vào" for="txtInputData"/>
+                                <p:inputTextarea id="txtInputData" value="#{LogController.selectedLog.input_data}" readonly="true"
+                                             cols="10" rows="10" >
+                                </p:inputTextarea>
+                                <p:outputLabel value="Dữ liệu trả về" for="txtOutputData"/>
+                                <p:inputTextarea id="txtOutputData" value="#{LogController.selectedLog.output_data}" readonly="true"
+                                              cols="10" rows="10" >
+                                </p:inputTextarea>
+                            </p:panelGrid>  
+                        </div>
+                    </p:panel>
+                     <div class="ui-dialog-action">
+                        <p:commandButton styleClass="btn-primary" 
+                                         icon="fa fa-check-square" value="#{PP_SHARED.ok}" oncomplete="handleSubmitRequest(xhr, status, args); PF('dtUser').clearFilters();" 
+                                         process="@this, :frmDlg:pnl_add " actionListener="#{LogController.savelPNormalUser()}"  
+                                         update=":form_main:pnl_main,:frmDlg:pnl_add, :grow_main_dt"/>
+                        <p:commandButton global="false"  style="width: 100px;" icon="fa fa-times-circle" styleClass="btn-danger btn-margin" value="#{PP_SHARED.cancel}"  oncomplete="PF('dlgUserInfo').hide();clearFilter();" actionListener="#{LogController.preCancel}"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:confirmDialog styleClass="stf-confirm" message="#{PP_SHARED.confirm_delete}" header="#{PP_SHARED.delete_dialog_header}" id="cfmDelete" severity="alert" widgetVar="cfmDelete" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton   value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{LogController.savelPNormalUser()}" update=":form_main:dtUser, :grow_main_dt" 
+                                     oncomplete="handleSubmitRequestDel(xhr, status, args);  PF('dtUser').clearFilters();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="false"  value="#{PP_SHARED.no}" onclick="PF('cfmDelete').hide();" styleClass="btn-danger" type="button" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog>     
+            
+             <p:confirmDialog styleClass="stf-confirm" message="Mật khẩu tài khoản sẽ trở về mặc định (123456). Bạn có chắc đặt lại mật khẩu tài khoản?" header="Xác nhận đặt lại mật khẩu" id="cfmReset" severity="alert" widgetVar="cfmReset" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton   value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{LogController.savelPNormalUser()}" update=":form_main:dtUser, :grow_main_dt" 
+                                     oncomplete="handleSubmitRequestReset(xhr, status, args)" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="false"  value="#{PP_SHARED.no}" onclick="PF('cfmReset').hide();" styleClass="btn-danger" type="button" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog>   
+        </ui:composition>
+    </h:body>
+</html>            

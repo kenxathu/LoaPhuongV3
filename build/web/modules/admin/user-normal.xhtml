@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+    <h:head>
+    </h:head>
+    <h:body>
+        <ui:composition>
+            <script type="text/javascript" >
+                function clearFilter() {
+                    try {
+                        PF('dtUser').clearFilters();
+                    } catch (err) {
+
+                    }
+                }
+
+            </script>
+            <style type="text/css" >
+                #formPermission\:panelCheckAll tr, #formPermission\:panelCheckAll .ui-panelgrid-cell {
+                    border: 0;
+                }
+                .ui-fileupload-buttonbar .ui-button {
+                    vertical-align:middle;
+                    margin-right:0.2em;
+                    width: 100%;
+                }
+                .stf-view-header .ui-overlaypanel-content .ui-button.btn-primary {
+                    width: 45%!important;
+                    margin-right: 10%!important;
+                    float :left;
+
+                }
+                .stf-view-header .ui-overlaypanel-content .ui-button.btn-danger{
+                    width: 45% !important;;
+                    background-color: red !important;
+                }
+                .ui-selectonemenu .ui-selectonemenu-trigger{
+                    height: 100%!important;
+
+                }
+
+                .stf-view .ui-selectonemenu-label{
+                    font-size: 13px!important;
+                }
+                .ui-selectonemenu-label{
+                    color: black!important;
+                }
+            </style>
+
+            <script>
+                function handleSubmitRequest(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgUserInfo').hide();
+                        clearFilter();
+                    }
+                }
+
+                function handleSubmitRequestDel(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('cfmDelete').hide();
+                        clearFilter();
+                    }
+                }
+                function handleSubmitRequestReset(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('cfmReset').hide();
+                        clearFilter();
+                    }
+                }
+                
+                function clearFilter() {
+                    try {
+                        PF('widgetRole').clearFilters();
+                    } catch (err) {
+
+                    }
+                }
+            </script>
+
+            <h:form id="form_main" >
+                <p:panel id ="pnl_main">
+                    <div class="stf-view-header stf-table-label">
+                        <p:commandButton global="false"  id="cmdAdd" value="Thêm TK người dân"  icon="fa fa-plus-square" styleClass="left" resetValues="true" 
+                                         rendered="#{UserController.allowInsertUser()}"
+                                         actionListener="#{UserController.addUser}" oncomplete="PF('dlgUserInfo').show()" update=":dlgUserInfo"/>                      
+                       
+                    </div>
+                    <div class="stf-table">
+                        <p:dataTable id="dtUser" value="#{UserController.mlistUser}" var="user"
+                                     rowKey="#{user.userId}" filteredValue="#{UserController.mlistUserFilter}"
+                                     paginator="true"  selectionMode="single"
+                                     rows="20"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                     rowsPerPageTemplate="20,30,40" draggableColumns="true"                     
+                                     widgetVar="dtUser" style="margin-top: 5px;"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     currentPageReportTemplate="{totalRecords} users" emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+
+
+                            <f:facet name="header">
+                               
+                            </f:facet>
+
+                            <p:column headerText="#{PP_SHARED.rownum}"  style="width: 60px;" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column headerText="Số điện thoại đăng nhập" filterMatchMode="contains" filterBy="#{user.userName}" sortBy="#{user.userName}"  >  
+                                <h:outputText value="#{user.userName}">
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Họ Tên" filterMatchMode="contains" filterBy="#{user.name}" sortBy="#{user.name}"  >  
+                                <h:outputText value=" #{user.name}">
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Email" filterMatchMode="contains" filterBy="#{user.email}" sortBy="#{user.email}"  >  
+                                <h:outputText value="#{user.email}"  style="text-transform: lowercase;"> 
+                                </h:outputText>
+                            </p:column> 
+                            
+                            <p:column rendered="false" headerText="SDT" filterMatchMode="contains" filterBy="#{user.phone}" sortBy="#{user.phone}"  >  
+                                <h:outputText value="#{user.phone}">
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText=" Số CMND" filterMatchMode="contains" filterBy="#{user.idCard}" sortBy="#{user.idCard}"  >  
+                                <h:outputText value="#{user.idCard}">
+                                </h:outputText>
+                            </p:column>   
+                            <p:column headerText="Hộ gia đình" rendered="#{UserController.allowHouseManagement}" filterMatchMode="contains" filterBy="#{user.holder_name}" sortBy="#{user.holder_name}"  >  
+                                <h:outputText value="#{user.holder_name}">
+                                </h:outputText>
+                            </p:column>  
+                            <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 150px;"  >
+                                                          
+                                <p:commandLink global="false"  id="cmdEdit" process="@this"  title="#{PP_SHARED.edit}"  resetValues="true"
+                                               rendered="#{UserController.allowUpdateUser()}"
+                                               actionListener="#{UserController.editUser(user)}" oncomplete="PF('dlgUserInfo').show();" update=":dlgUserInfo" styleClass="fa fa-pencil"  > 
+                                    <p:resetInput target=":frmDlg:pnl_add"/>
+                                </p:commandLink>
+                                <p:commandLink global="false"  id="cmdDelete" process="@this"  title="#{PP_SHARED.del}"  
+                                               rendered="#{UserController.allowDeleteUser()}" style="color: red!important"
+                                               actionListener="#{UserController.preDeleteUser(user)}" oncomplete="PF('cfmDelete').show();" styleClass="fa fa-trash"  >  
+                                </p:commandLink>
+                                <p:commandLink global="false" id="resetPass" process="@this"  title="Reset mật khẩu"  
+                                               rendered="#{UserController.allowUpdateUser()}" style="color: royalblue!important"
+                                               actionListener="#{UserController.preResetPass(user)}" oncomplete="PF('cfmReset').show();" styleClass="fa fa-undo"  >  
+                                </p:commandLink>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </p:panel>
+            </h:form>
+
+            <p:dialog header="#{UserController.mstrDialogHeader} #{PP_USER.userInfo}" id="dlgUserInfo" widgetVar="dlgUserInfo" modal="true" appendTo="@(body)" showEffect="fade" resizable="false" width="800" closeOnEscape="true" >
+
+                <h:form id="frmDlg" >
+                    <p:panel id="pnl_add">
+                        <div class="stf-view">
+                            <p:panelGrid id="pnlUserInfo" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                <p:outputLabel value="SĐT đăng nhập" for="txtUserName"/>
+                                <p:inputText id="txtUserName" value="#{UserController.muser.userName}" maxlength="30" disabled="#{UserController.mflag ne 'CREATE'}"
+                                             required="true" requiredMessage="#{PP_USER.label_UserName}#{PP_SHARED.can_not_be_empty}" 
+                                             validator="ValidatorNumber" validatorMessage="#{PP_USER.label_Mobile}#{PP_SHARED.is_not_valid}" >
+                                             <pe:keyFilter regEx="/[0-9]/i" preventPaste="false" />
+                                </p:inputText>
+                                <p:outputLabel value="Mật khẩu" for="txtPass" rendered="#{UserController.mflag eq 'CREATE'}"/>
+                                <h:outputText id="txtPass" value="123456" rendered="#{UserController.mflag eq 'CREATE'}" />
+                                
+                                <p:outputLabel value="#{PP_USER.label_Fullname}" for="txtFullname"/>
+                                <p:inputText id="txtFullname" value="#{UserController.muser.name}" maxlength="100" disabled="#{UserController.mflag eq 'SELECT'}"
+                                             required="true" requiredMessage="#{PP_USER.label_Fullname}#{PP_SHARED.can_not_be_empty}"/>
+
+                                <p:outputLabel value="#{PP_USER.label_Email}" for="txtEmail"/>
+                                <p:inputText id="txtEmail" value="#{UserController.muser.email}" maxlength="100" disabled="#{UserController.mflag eq 'SELECT'}"
+                                             style="text-transform: uppercase;"
+                                             validator="ValidatorUserEmail" validatorMessage="#{PP_USER.label_Email}#{PP_SHARED.is_not_valid}" >
+                                   
+                                </p:inputText>
+
+                                <p:outputLabel rendered="false" value="#{PP_USER.label_Mobile}" for="txtMobile"/>
+                                <p:inputText rendered="false" id="txtMobile" value="#{UserController.muser.phone}" maxlength="15" disabled="#{UserController.mflag eq 'SELECT'}"
+                                             validator="ValidatorNumber" validatorMessage="#{PP_USER.label_Mobile}#{PP_SHARED.is_not_valid}" >
+                                    <pe:keyFilter regEx="/[0-9]/i" preventPaste="false" />
+                                </p:inputText>
+                                
+                                <p:outputLabel value="Số CMTND " for="CMTND"/>
+                                <p:inputText id="CMTND" value="#{UserController.muser.idCard}" maxlength="15" disabled="#{UserController.mflag eq 'SELECT'}"
+                                      required="false" requiredMessage="Số CMTND #{PP_SHARED.can_not_be_empty}" validator="ValidatorNumber" validatorMessage="Số CMND #{PP_SHARED.is_not_valid}" >
+                                    <pe:keyFilter regEx="/[0-9]/i" preventPaste="false" />
+                                </p:inputText>
+                                
+                                <p:outputLabel value="Hộ gia đình" for="txtHouse" rendered="#{UserController.allowHouseManagement}"/>
+                                <p:selectOneMenu id="txtHouse" value="#{UserController.muser.houseHouseHoldId}" filter="true" filterMatchMode="contains" rendered="#{UserController.allowHouseManagement}"
+                                                 requiredMessage="Hộ gia đình #{PP_SHARED.can_not_be_empty}"  disabled="#{UserController.mflag eq 'SELECT'}">
+                                    <f:selectItem itemValue="" itemLabel="" />
+                                    <f:selectItems value="#{UserController.mlistHouse}" var="house" itemLabel="#{house.holder_name}" itemDescription="#{house.address}" itemValue="#{house.id}" />
+                                </p:selectOneMenu>   
+                                
+                                <p:outputLabel value="Quyền chủ hộ" rendered="#{UserController.allowHouseManagement}" for="checkboxOwner"/>
+                                <p:selectBooleanCheckbox id="checkboxOwner" value="#{UserController.muser.isHouseOwnerBool}" rendered="#{UserController.allowHouseManagement}" />
+                            </p:panelGrid>  
+                        </div>
+                    </p:panel>
+                     <div class="ui-dialog-action">
+                        <p:commandButton styleClass="btn-primary" 
+                                         icon="fa fa-check-square" value="#{PP_SHARED.ok}" oncomplete="handleSubmitRequest(xhr, status, args); PF('dtUser').clearFilters();" 
+                                         process="@this, :frmDlg:pnl_add " actionListener="#{UserController.savelPNormalUser()}"  
+                                         update=":form_main:pnl_main,:frmDlg:pnl_add, :grow_main_dt"/>
+                        <p:commandButton global="false"  style="width: 100px;" icon="fa fa-times-circle" styleClass="btn-danger btn-margin" value="#{PP_SHARED.cancel}"  oncomplete="PF('dlgUserInfo').hide();clearFilter();" actionListener="#{UserController.preCancel}"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:confirmDialog styleClass="stf-confirm" message="#{PP_SHARED.confirm_delete}" header="#{PP_SHARED.delete_dialog_header}" id="cfmDelete" severity="alert" widgetVar="cfmDelete" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton   value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{UserController.savelPNormalUser()}" update=":form_main:dtUser, :grow_main_dt" 
+                                     oncomplete="handleSubmitRequestDel(xhr, status, args);  PF('dtUser').clearFilters();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="false"  value="#{PP_SHARED.no}" onclick="PF('cfmDelete').hide();" styleClass="btn-danger" type="button" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog>     
+            
+             <p:confirmDialog styleClass="stf-confirm" message="Mật khẩu tài khoản sẽ trở về mặc định (123456). Bạn có chắc đặt lại mật khẩu tài khoản?" header="Xác nhận đặt lại mật khẩu" id="cfmReset" severity="alert" widgetVar="cfmReset" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton   value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{UserController.savelPNormalUser()}" update=":form_main:dtUser, :grow_main_dt" 
+                                     oncomplete="handleSubmitRequestReset(xhr, status, args)" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="false"  value="#{PP_SHARED.no}" onclick="PF('cfmReset').hide();" styleClass="btn-danger" type="button" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog>   
+        </ui:composition>
+    </h:body>
+</html>            

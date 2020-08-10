@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+    <h:head>
+        <title>#{PP_ROLE.title}</title>
+    </h:head>
+    <h:body>
+        <ui:composition> 
+            <script type="text/javascript" >
+                function clearFilter() {
+                    try {
+                        PF('widgetRole').clearFilters();
+                    } catch (err) {
+
+                    }
+                }
+                function onSubmit(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAdd').hide();
+                        clearFilter();
+                    }
+                }
+            </script>
+            <style>
+                .content-no-border .ui-panel-titlebar {
+                    border-bottom: 0;
+                }
+
+                .content-no-border .ui-panel-content {
+                    padding: 0 !important;
+                    border: 0 !important;
+                }
+                .col1 {
+                    width: 30%;
+                }
+                .col2 {
+                    width: 70%;
+                }
+            </style>
+            <h:form id="form_main">
+                <p:panel>
+                    <div class="stf-view-header">
+                        <p:commandButton  styleClass="left" id="btnAdd" process="@this" value="#{PP_ROLE.add}" actionListener="#{roleController.addRole}" icon="fa fa-plus-square" 
+                                          update=":form_dlg:pnl_add :dlgAdd" oncomplete="PF('dlgAdd').show();">
+                            <p:resetInput target=":form_dlg:pnl_add"/>
+                        </p:commandButton> 
+                    </div>
+
+                    <p:outputPanel id="pnlList" >
+                        <div class="ui-fluid stf-table">
+                            <p:dataTable id="dtRole"  value="#{roleController.mlistRole}" var="role"
+                                         rowKey="#{role.roleId}" style="width: 100%; margin-top: 5px;"   filteredValue="#{roleController.mlistRoleFilter}"
+                                         paginator="true"
+                                         rows="20"  paginatorPosition="bottom" rowIndexVar="rowNum"
+                                         rowsPerPageTemplate="10,20,30" 
+                                         widgetVar="widgetRole" paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                         emptyMessage="#{PP_SHARED.empty_message}">
+                                <f:facet name="header">
+
+
+                                </f:facet>
+                                <p:column headerText="STT" style="width: 5%; text-align: center;}" >  
+                                    <h:outputText value="#{rowNum + 1}">
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="#{PP_ROLE.label_RoleName}" filterMatchMode="contains" filterBy="#{role.roleName}" sortBy="#{role.roleName}" >  
+                                    <h:outputText value="#{role.roleName}">
+                                    </h:outputText>
+                                </p:column>
+
+                                <p:column headerText="#{PP_SHARED.manipulate}" style="text-align: center; width: 15%;">
+                                    <p:commandButton global="false"  icon="fa fa-pencil-square" styleClass="btn-xs btn-info" id="cmdEdit" process="@this"  title="#{PP_SHARED.edit}" value="#{PP_SHARED.edit}" 
+                                                     style=""
+                                                     actionListener="#{roleController.editRole(role)}" oncomplete="PF('dlgAdd').show();" update=":form_main:pnlList :form_dlg:pnl_add :dlgAdd" > 
+                                        <p:resetInput target=":form_dlg:pnl_add"/>
+                                    </p:commandButton>
+                                    <p:commandButton global="false"  icon="fa fa-trash-o" styleClass="btn-xs btn-danger btn-margin" id="cmdDelete"  process="@this" title="#{PP_SHARED.del}" value="#{PP_SHARED.del}" style="color: red; width: 60px;"
+                                                     actionListener="#{roleController.preDeleteRole(role)}" oncomplete="PF('cfmDelete').show();" >  
+                                    </p:commandButton>
+                                </p:column>     
+                            </p:dataTable>
+                        </div>
+                    </p:outputPanel>
+                </p:panel>
+            </h:form>
+
+            <p:dialog appendTo="@(body)" closeOnEscape="true" resizable="false" id="dlgAdd" widgetVar="dlgAdd" modal="true" showEffect="fade" >
+                <f:facet name="header">
+                    <h:outputText value="#{PP_ROLE.add_new}" rendered="#{roleController.isADD}"/>
+                    <h:outputText value="#{PP_ROLE.edit_new}" rendered="#{roleController.isEDIT}"/>
+                </f:facet>
+                <h:form id="form_dlg" styleClass="stf-dialog-edit">
+                    <p:panel id="pnl_add">
+                        <div class="ui-fluid stf-view">
+                            <p:panelGrid id="pnl_add_content" columnClasses="ui-grid-col-4,ui-grid-col-8" columns="2" layout="grid" styleClass="ui-panelgrid-blank" style="width: 600px;">
+                                <p:outputLabel value="#{PP_ROLE.label_RoleName}" for="txtRoleName"/>
+                                <p:inputText maxlength="100" required="true" requiredMessage="#{PP_ROLE.label_RoleName}#{PP_SHARED.can_not_be_empty}" style="width: 100%;" id="txtRoleName" value="#{roleController.mrole.roleName}" />
+
+                                <p:outputLabel value="#{PP_ROLE.label_function}" styleClass="label label-info"/>
+                                <p:outputPanel>
+                                    <p:tree style="width: 100%;" id="tree" value="#{roleController.treeModule}" var="tree" 
+                                            selection="#{roleController.selectedNodes}" selectionMode="checkbox" propagateSelectionDown="true" propagateSelectionUp="true">
+                                        <p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+                                            #{tree.actionName}
+                                        </p:treeNode>
+                                    </p:tree>
+                                </p:outputPanel>
+                            </p:panelGrid>
+                        </div>
+                        <p:contextMenu id="context_menu" for="tree">
+                            <p:menuitem icon="fa fa-expand" value="#{PP_SHARED.expand_all}" global="false" process="@this" actionListener="#{roleController.expandTree(true)}" update="tree" />
+                            <p:menuitem icon="fa fa-compress" value="#{PP_SHARED.collapse_all}" global="false" process="@this" actionListener="#{roleController.expandTree(false)}" update="tree" />
+                        </p:contextMenu>
+                    </p:panel>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton global="false" styleClass="btn-primary" icon="fa fa-check-square" value="#{PP_ROLE.save}" oncomplete="onSubmit(xhr, status, args);" process="@this :form_dlg:pnl_add" actionListener="#{roleController.saveRole}" update=":form_main:pnlList, :form_dlg:pnl_add :grow_main_dt"/>
+                        <p:commandButton global="false" icon="fa fa-times-circle" styleClass="btn-danger btn-margin" value="#{PP_ROLE.cancel}" actionListener="#{roleController.backRole}" oncomplete="PF('dlgAdd').hide(); clearFilter();"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:confirmDialog message="#{PP_SHARED.confirm_delete}" header="#{PP_SHARED.delete_dialog_header}" id="cfmDelete" 
+                             widgetVar="cfmDelete" appendTo="@(body)" closeOnEscape="true" styleClass="stf-confirm">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="false"  value="#{PP_SHARED.yes}" styleClass="btn-primary"  icon="fa fa-trash-o" process="@this"  actionListener="#{roleController.deleteRole}" 
+                                     update=":form_main:pnlList, :grow_main_dt" 
+                                     oncomplete="PF('cfmDelete').hide(); clearFilter();"/>
+                    <p:commandButton global="false"  styleClass="btn-danger" icon="fa fa-ban" style="color: blue;" value="#{PP_SHARED.no}" onclick="PF('cfmDelete').hide();
+                            clearFilter();" type="button" />
+                </div>
+            </p:confirmDialog>
+
+        </ui:composition>
+    </h:body>
+</html>
+

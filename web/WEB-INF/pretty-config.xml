@@ -1,0 +1,53 @@
+<pretty-config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns="http://ocpsoft.com/prettyfaces/3.3.0"
+               xsi:schemaLocation="http://ocpsoft.com/prettyfaces/3.3.0
+                                   		http://ocpsoft.com/xml/ns/prettyfaces/ocpsoft-pretty-faces-3.3.0.xsd" >
+    
+    <rewrite match="^(.*)\?TARGE.+$" substitute="$1" redirect="301"/>
+    <rewrite match="(?i)^(.*);jsessionid=\w+(.*)" substitute="$1$2" redirect="chain" />
+                         
+    <url-mapping id="index" >
+        <pattern value="/" />
+        <view-id value="/faces/index.xhtml" />
+    </url-mapping>   
+    <url-mapping id="home" >
+        <pattern value="/home" />
+        <view-id value="/faces/index.xhtml" />
+    </url-mapping>    
+    <url-mapping id="jasper" >
+        <pattern value="/jasper/#{jName}" />
+        <view-id value="/faces/jasper.xhtml" />
+    </url-mapping>
+    <url-mapping id="login" >
+        <pattern value="/login" />
+        <view-id value="/faces/login.xhtml" />
+    </url-mapping>  
+    <url-mapping id="viewModule" >
+        <pattern value="/module/#{moduleName}" />
+        <view-id value="/faces/index.xhtml" />
+    </url-mapping>
+    <url-mapping id="client" >
+        <pattern value="/client/#{clientName}" />
+        <view-id value="/faces/client.xhtml" />
+    </url-mapping>
+    <url-mapping id="clientf1" >
+        <pattern value="/client/#{folder1}/#{clientName}" />
+        <view-id value="/faces/client.xhtml" />
+    </url-mapping>
+    <url-mapping id="clientf2" >
+        <pattern value="/client/#{folder1}/#{folder2}/#{clientName}" />
+        <view-id value="/faces/client.xhtml" />
+    </url-mapping>
+    <url-mapping id="clientf3" >
+        <pattern value="/client/#{folder1}/#{folder2}/#{folder3}/#{clientName}" />
+        <view-id value="/faces/client.xhtml" />
+    </url-mapping>
+    <url-mapping id="clientf4" >
+        <pattern value="/client/#{folder1}/#{folder2}/#{folder3}/#{folder4}/#{clientName}" />
+        <view-id value="/faces/client.xhtml" />
+    </url-mapping>
+    <url-mapping id="notFound" >
+        <pattern value="/#{str}" />
+        <view-id value="/faces/index.xhtml" />
+    </url-mapping>   
+</pretty-config>

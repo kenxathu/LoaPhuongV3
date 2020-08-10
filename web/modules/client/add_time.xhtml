@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:p="http://primefaces.org/ui">
+     
+    <h:head>
+        <title>Cars</title>
+        <style type="text/css">
+            .ui-widget {
+                font-size: 90%;
+            }
+        </style>
+    </h:head>
+     
+    <h:body>
+        
+        
+                                                    <p:outputLabel value="Xin mời chọn giờ" />
+                                                    <p:inputText id="txtPlayTime3" value="#{RecordController.hourAdded}" >
+                                                </p:inputText> 
+                                        
+
+
+                                       
+
+                                        <p:commandButton   id="btnSave2" value="#{PP_SHARED.ok}" icon="fa fa-check-square" process = "@this txtPlayTime3"
+                                                               update="formAddRecord:txtPlayTime :grow_main_dt" actionListener="#{RecordController.saveTimeEvent(evt)}"
+                                                               styleClass="btn-primary btn-width"  />        
+ 
+        
+    </h:body>
+     
+</html>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:cc="http://java.sun.com/jsf/composite" xmlns:ui="http://java.sun.com/jsf/facelets">
+<cc:interface>
+    <cc:attribute name ="tinyValue"/>
+    <cc:editableValueHolder name="textarea"/>
+</cc:interface>
+<cc:implementation>
+
+    
+     
+    <script type="text/javascript">
+            tinyMCE.init({selector: 'textarea',
+            //mode:"specific_textareas",
+            menubar:false,
+            statusbar: false,
+            height: 450,
+            readonly : 1,
+            theme: 'modern',
+            setup: function(editor){
+                editor.on('change',function(){
+                    tinyMCE.triggerSave();
+                });
+            },
+    
+               
+                //image_advtab: true,
+           
+                content_css: [
+                  '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i',
+                  '//www.tinymce.com/css/codepen.min.css'
+                ],
+            });
+    </script>
+    
+    <h:inputTextarea id="textarea" value="#{cc.attrs.tinyValue}" />
+</cc:implementation>
+</ui:composition>

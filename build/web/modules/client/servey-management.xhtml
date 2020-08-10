@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:mce="http://java.sun.com/jsf/composite/editor">
+    
+    <h:head>
+       
+    </h:head>
+    <h:body>
+        
+        <ui:composition>
+
+          
+            
+       
+            <!--<script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/tinymce.min.js"> </script>
+            <script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/jquery.tinymce.min.js"></script>-->
+            
+            
+            
+            
+            <style>
+
+                .menu
+                {
+                    font-weight: bold;
+                }
+
+                #frmDlgSubmission\:dtlist table{
+                    table-layout: fixed;
+                }
+                .ui-selectonemenu-list-item{
+                    white-space: normal!important;
+                }
+                .someClass {
+                    word-wrap: break-word;
+                    white-space: normal!important;
+                }
+                .import-btn{
+                    width: 130px!important;
+                }
+                .panelUploadFile.ui-overlaypanel{
+                    margin-bottom: 50px!important;
+                }
+            </style>
+
+            <script>
+                function handleSubmitRequestArea(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddArea').hide();
+                    }
+                }
+                
+                function handleSubmitRequestHouse(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddHouse').hide();
+                    }
+                }
+                function handleSubmitRequestRecord(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddRecord').hide();
+                    }
+                }
+                function handleSubmitRequestNews(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddNews').hide();
+                    }
+                }
+                
+
+            </script>
+
+            <h:form id="form_main" onkeypress="if (event.keyCode == 13) {
+                        return false;
+                    }" >
+
+                <p:panel id="pnl_main">  
+                  
+
+                            <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%">
+
+                                <p:dataTable id="dtNews" value="#{ServeyController.listServey}" var="servey"
+                                                  rowKey="#{news.id}" 
+                                                     paginator="true"  
+                                                     rows="10"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                                     rowsPerPageTemplate="10,20,30" 
+                                                     widgetVar="dtNews" 
+                                                     sortBy="#{news.createDate}"
+                                                     sortOrder="descending"
+                                                     selectionMode="single"
+                                                     emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500"
+                                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                                     currentPageReportTemplate="{startRecord} - {endRecord} / {totalRecords} tin bài">
+                                                        
+                                        <f:facet name="header">
+                                                    <div class="stf-table-label">
+                                                        <p:panelGrid columns="6" columnClasses="ui-grid-col-4,ui-grid-col-1,ui-grid-col-2,ui-grid-col-1,ui-grid-col-2,ui-grid-col-2" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                                                                <h4 style="color: #0259A4; margin-top: 38px; position: absolute">
+                                                                    Danh sách mẫu khảo sát
+                                                                </h4>
+                                                                <p:outputLabel value="Từ ngày" for="txtFrom" style="float: right; color: #0259A4"/>
+                                                                        <p:calendar pattern="dd/MM/yyyy" id="txtFrom" timeZone="GMT+7" 
+                                                                                    label="Chọn ngày" style="color: #0259A4" value="#{NewsController.fromDate}"
+                                                                                    converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                                                            <f:convertDateTime pattern="dd/MM/yyyy" timeZone="GMT+7" />
+                                                                            <p:ajax event="dateSelect" listener="#{NewsController.changeFilterTimeEvent(evt)}" update="form_main:dtNews :grow_main_dt"></p:ajax>
+
+                                                                        </p:calendar>
+
+                                                                <p:outputLabel value="Đến ngày" for="txtTo" style="float: right; color: #0259A4"/>
+                                                                        <p:calendar pattern="dd/MM/yyyy" id="txtTo" timeZone="GMT+7" 
+                                                                                    label="Chọn ngày" value="#{NewsController.toDate}"
+                                                                                    converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                                                            <f:convertDateTime pattern="dd/MM/yyyy" timeZone="GMT+7" />
+                                                                            <p:ajax event="dateSelect" listener="#{NewsController.changeFilterTimeEvent(evt)}" update="form_main:dtNews :grow_main_dt"></p:ajax>
+                                                                        </p:calendar>
+                                                                
+                                                                <p:commandButton id="cmdAddNews" process="@this" value="Thêm tin tức" icon="fa fa-plus-square"  style="font-weight: 400; float: right"
+                                                                styleClass=" btn-success btn-auto" actionListener="#{NewsController.addNewsEvent()}" update="dlgAddNews"
+                                                                oncomplete="PF('dlgAddNews').show();" rendered="#{NewsController.isAllowInsertNEW()}"/>
+                                                            </p:panelGrid>
+                                                        
+                                                    </div>
+                                           
+                                                    <!--                                <div class="clear" />-->
+                                        </f:facet>
+
+
+
+                                             <p:column headerText="STT" style="width: 5%!important" >
+                                                 #{rownum + 1}
+                                             </p:column>
+
+                                             <p:column headerText="Tiêu đề" style="width: 20%!important" filterMatchMode="contains" filterBy="#{servey.survey_name}" sortBy="#{servey.survey_name}" >  
+                                                 <h:outputText value=" #{servey.survey_name}">
+                                                 </h:outputText>
+                                             </p:column>
+                   
+                                             <p:column headerText="Mô tả" style="width: 7%!important"  filterMatchMode="contains" filterBy="#{servey.survey_description}" sortBy="#{servey.survey_description}" >  
+                                                 <h:outputText value=" #{servey.survey_description}">
+                                                 </h:outputText>
+                                             </p:column>
+
+                                             <p:column headerText="Trạng thái" filterMatchMode="exact" filterBy="#{servey.status}" sortBy="#{servey.status}" width="7%">  
+                                                     <f:facet name="filter">
+                                                         <p:selectOneMenu  onchange="PF('dtNews').filter()">
+                                                             <f:selectItem itemValue="" itemLabel="" />
+                                                             <f:selectItem itemValue="0" itemLabel="Chờ duyệt" />
+                                                             <f:selectItem itemValue="1" itemLabel="Đã duyệt" />
+                                                             <f:selectItem itemValue="-1" itemLabel="Đã hủy" />
+                                                         </p:selectOneMenu>
+                                                     </f:facet>
+                                                   <h:outputText value=" #{servey.status eq 0 ? 'Chờ duyệt' : servey.status eq 1 ? 'Đã duyệt' : 'Đã hủy'}"
+                                                                 style="color: #{servey.status eq 1 ? 'blue' : servey.status eq -1 ? 'red' : 'black'}">
+                                                 </h:outputText>
+                                             </p:column> 
+
+
+                                             <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 5%!important;" >
+                                                 <p:commandLink id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin" 
+                                                                 actionListener="#{NewsController.viewNewsEvent(news)}" update="dlgAddNews" oncomplete="PF('dlgAddNews').show();">
+                                                 </p:commandLink>
+                                                 <p:commandLink rendered="#{news.status eq 0 and NewsController.isAllowUpdateNEW() and (news.area_type_id eq NewsController.selectedArea.areaType)}"
+                                                                id="bntEdit" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil" global="false" process="@this" 
+                                                                actionListener="#{NewsController.editNewsEvent(news)}" update="dlgAddNews" oncomplete="PF('dlgAddNews').show();" >
+                                                 </p:commandLink>
+                                                 <p:commandLink rendered="#{news.status eq 0 and  NewsController.isAllowDeleteNEW() and (news.area_type_id eq NewsController.selectedArea.areaType)}"  id="bntDelete" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                                actionListener="#{NewsController.deleteNewsEvent(news)}" update="cfmDeleteNews" oncomplete="PF('cfmDeleteNews').show();" styleClass="btn-margin fa fa-trash" >
+                                                 </p:commandLink>
+                                                 <p:commandLink rendered="#{news.status eq 1 and  NewsController.isAllowApprovalNEW()}"  id="bntCancel" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                                actionListener="#{NewsController.deleteNewsEvent(news)}" update="cfmDeleteNews" oncomplete="PF('cfmDeleteNews').show();" styleClass="btn-margin fa fa-times" >
+                                                 </p:commandLink>
+                                                 <p:commandLink rendered="#{news.status eq 0 and NewsController.isAllowApprovalNEW() and NewsController.selectedArea.areaType ne 4}" id="bntApprove" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-check" global="false" process="@this" 
+                                                                actionListener="#{NewsController.approveNewsEvent(news)}" update="dlgAddNews" oncomplete="PF('dlgAddNews').show();" >
+                                                 </p:commandLink>
+
+                                                 <p:tooltip for="bntView" value="#{PP_SHARED.view}" trackMouse="true" />
+                                                 <p:tooltip for="bntEdit" value="#{PP_SHARED.edit}" trackMouse="true" />
+                                                 <p:tooltip for="bntDelete" value="Xóa" trackMouse="true" />
+                                                 <p:tooltip for="bntCancel" value="Hủy" trackMouse="true" />
+                                                 <p:tooltip for="bntApprove" value="Duyệt tin" trackMouse="true" />
+                                             </p:column>
+                                         </p:dataTable>
+
+                          </h:panelGrid>
+                   
+                </p:panel>
+            </h:form>   
+            
+            
+            <p:dialog id="dlgAddNews" widgetVar="dlgAddNews" width="1300" height="600px" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <f:facet name="header" >
+                    <h:outputText value="Thêm tin tức" rendered="#{NewsController.newsActtionFlag eq 'CREATE'}"/>
+                    <h:outputText value="Sửa tin tức" rendered="#{NewsController.newsActtionFlag eq 'UPDATE'}"/>
+                    <h:outputText value="Xem tin tức" rendered="#{NewsController.newsActtionFlag eq 'VIEW'}"/>
+                    <h:outputText value="Phê duyệt tin tức" rendered="#{NewsController.newsActtionFlag eq 'APPROVE'}"/>
+                </f:facet>
+                <h:form enctype="multipart/form-data" id="newsDetail" >
+                    <div>
+                        
+                        <p:panel  style="float:left; overflow-y: auto; height: 590px; width: 1300px">
+                        
+                            <p:panelGrid id="pnlMCUInfo" columns="2" style="margin-top: 10px" columnClasses="ui-grid-col-2,ui-grid-col-12" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                
+                                <p:outputLabel value="Tiêu đề" for="txtNewsTitle"/>
+                                <p:inputText id="txtNewsTitle"  value="#{NewsController.selectedNews.title}" style="white-space: normal;"
+                                             required="true" requiredMessage="Tiêu đề #{PP_SHARED.can_not_be_empty}" maxlength="130"
+                                            disabled="#{NewsController.newsActtionFlag eq 'VIEW' or NewsController.newsActtionFlag eq 'APPROVE'}"
+                                             >                             
+                                </p:inputText>
+  
+                                <p:outputLabel value="Mô tả ngắn" for="txtNewsShortDesc"/>
+                                <p:inputText id="txtNewsShortDesc"   value="#{NewsController.selectedNews.short_description}"
+                                             required="true" requiredMessage="Mô tả ngắn #{PP_SHARED.can_not_be_empty}"
+                                             disabled="#{NewsController.newsActtionFlag eq 'VIEW' or NewsController.newsActtionFlag eq 'APPROVE'}" >
+                                </p:inputText>
+                                 
+                            </p:panelGrid>    
+                                 
+                            <p:panelGrid id="pnlMCUInfo2" columns="7" style="margin-top: 0px; padding-top: 0px" columnClasses="ui-grid-col-2,ui-grid-col-2,ui-grid-col-2,ui-grid-col-1,ui-grid-col-1,ui-grid-col-3,ui-grid-col-3" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                
+                                    <p:outputLabel value="Danh mục" for="slCategory"  />
+                                    <p:selectOneMenu id="slCategory" value="#{NewsController.selectedNews.category_id}" filter="true" filterMatchMode="contains"  
+                                                    required="true" requiredMessage="Danh mục #{PP_SHARED.can_not_be_empty}"
+                                                    disabled="#{NewsController.newsActtionFlag eq 'VIEW' or NewsController.newsActtionFlag eq 'APPROVE'}" >       
+                                        <f:selectItems value="#{NewsController.listNewsCategory}" var="recordCat" itemLabel="#{recordCat.name}" itemValue="#{recordCat.id}"/>
+                                        </p:selectOneMenu>
+                                    
+                                    <p:outputLabel value="Gửi thông báo" for="txtNewsNotifyFlag"/>
+                                    <p:selectBooleanCheckbox id="txtNewsNotifyFlag" value="#{NewsController.selectedNews.notifyFlagBool}" 
+                                                             disabled="#{NewsController.newsActtionFlag eq 'VIEW'}"/>
+                                
+                                    
+                                    <p:outputLabel value=""  for="uploadImage"/>
+                                    <p:inputText id="label" value="#{PP_SHARED.news_cover}" disabled="true" style="font-weight:bold;"
+                                                 rendered="#{!(NewsController.newsActtionFlag eq 'CREATE' or NewsController.newsActtionFlag eq 'UPDATE')}">
+                                    </p:inputText>
+                                    <p:fileUpload id="uploadImage" value="#{NewsController.image}" required="true"
+                                                  mode="advanced" rendered="#{NewsController.newsActtionFlag eq 'CREATE' or NewsController.newsActtionFlag eq 'UPDATE' }"
+                                                  skinSimple="true" auto="true" fileUploadListener="#{NewsController.eventUploadAvar}"
+                                                  styleClass="fileupload-simple"
+                                                  update=" avarView cropAvar :grow_main_dt" 
+                                                  
+                                                  label="Ảnh bìa tin tức"/>
+                                    
+                                    <p:inputText id="labelvideo" value="#{PP_SHARED.news_video}" disabled="true" style="font-weight:bold; float: right" 
+                                                 rendered="#{!(NewsController.newsActtionFlag eq 'CREATE' or NewsController.newsActtionFlag eq 'UPDATE')}">
+                                    </p:inputText>
+                                    
+                                    <p:fileUpload id="uploadVideo" value="#{NewsController.video}" required="true" style="float: left"
+                                                  mode="advanced" rendered="#{NewsController.newsActtionFlag eq 'CREATE' or NewsController.newsActtionFlag eq 'UPDATE' }"
+                                                  skinSimple="true" auto="true" fileUploadListener="#{NewsController.eventUploadVideo}"
+                                                  styleClass="fileupload-simple"
+                                                  update=" videoFileName  :grow_main_dt " 
+                                                  
+                                                  label="Tải lên video"/>
+                                    
+
+                                    <p:outputLabel value="Ngày bắt đầu" for="txtStartDate"/>
+                                    <p:calendar pattern="dd/MM/yyyy HH:mm:ss" id="txtStartDate" timeZone="GMT+7" 
+                                                value="#{NewsController.selectedNews.fromDate}" mindate="#{RecordController.today}"
+                                                disabled="#{NewsController.newsActtionFlag eq 'VIEW' or NewsController.newsActtionFlag eq 'APPROVE'}"
+                                                required="true" requiredMessage="Ngày bắt đầu #{PP_SHARED.can_not_be_empty}" converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy HH:mm:ss)">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="GMT+7" />
+                                    </p:calendar>
+                                    
+                                    <p:outputLabel value="Tin đầu mục" for="txtNewsSticky"/>
+                                    <p:selectBooleanCheckbox id="txtNewsSticky" value="#{NewsController.selectedNews.isStickyBool}" 
+                                                             disabled="#{NewsController.newsActtionFlag eq 'VIEW'}"/>
+                                    
+                                    <p:outputLabel value="" />
+                                    <h:graphicImage id="avarView"  height="100" value="#{NewsController.imageContent}"  />
+                                    
+
+
+                                    <p:row id="videoInfo">
+                                        <p:outputLabel id="videoFileName" rendered="#{NewsController.newsActtionFlag eq 'CREATE'}" value="#{NewsController.videoFileName}" 
+                                                       style="color: #005CAC; width: 200px; float: left; text-align: left" />
+                                        
+                                        <p:commandLink id="videoFileName3" process="@this" update="dlgVideoPlayer :grow_main_dt" style="width: 150px" 
+                                                   rendered="#{NewsController.newsActtionFlag ne 'CREATE' and NewsController.selectedNews.image ne 'null'}" oncomplete="PF('dlgVideoPlayer').show();" >
+                                        <h:outputText value="#{NewsController.selectedNews.image}" style="color: #005CAC; float: left; width: 150px"/>
+                                        </p:commandLink>
+                                        
+                                        <p:tooltip id="toolTipFade" for="videoFileName3" value="Xem video" position="top"/>
+                                        
+                                        <p:commandLink id="bntCancel" style=" float: bottom; color: red;" rendered="false" global="false" process="@this"
+                                               styleClass="btn-margin fa fa-times" />
+                                        <p:tooltip for="bntCancel" value="Xóa" trackMouse="true" />
+                                    </p:row>
+                                    
+                             
+
+
+                            </p:panelGrid>
+
+
+
+
+                            <p:remoteCommand name="uploadAssets" id="uploadAssets" action="#{NewsController.uploadAssets}" process="@this" />
+                            <div style="margin-left: 20px; margin-right: 20px; height: 250px">
+                                <p:outputLabel value="Nội dung:" for="newsEditor" style="font-weight: bold"/>
+                                <mce:loadRichTextEditor/>
+                                <mce:richTextEditor rendered="#{NewsController.newsActtionFlag eq 'CREATE' or NewsController.newsActtionFlag eq 'UPDATE'}" id="newsEditor" tinyValue="#{NewsController.selectedNews.full_description}"/>
+                                <mce:richTextEditorViewOnly rendered="#{NewsController.newsActtionFlag eq 'VIEW' or NewsController.newsActtionFlag eq 'APPROVE'}" id="newsEditorView" tinyValue="#{NewsController.selectedNews.full_description}"/>
+                            </div>
+
+                        </p:panel>
+
+
+                            
+<!--                            <ui:include src="user-management.xhtml"/>-->
+                        
+             
+                        
+                        <div class="ui-dialog-action" style="position: absolute !important; bottom: 0px !important; right: 0px; left: 0px;">
+                            <p:commandButton   rendered="#{NewsController.newsActtionFlag ne 'VIEW'}" id="btnSave" value="#{PP_SHARED.ok}"  actionListener="#{NewsController.saveNews(evt)}" icon="fa fa-check-square" 
+                                               update="form_main:dtNews :grow_main_dt"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestNews(xhr, status, args);"
+                                               />   
+                            
+                            <p:commandButton global="false"  id="btnReject" process="@this" icon="fa fa-times-circle"  value="Hủy" actionListener="#{NewsController.cancelNews(evt)}"
+                                             oncomplete="handleSubmitRequestNews(xhr, status, args);" styleClass="btn-danger btn-margin btn-width" rendered="#{NewsController.newsActtionFlag eq 'APPROVE'}"
+                                             update="form_main:dtNews :grow_main_dt"/> 
+                            
+                            <p:commandButton global="false"  id="btnBack" process="@this"  
+                                             value="#{NewsController.newsActtionFlag ne 'VIEW' ? PP_SHARED.cancel : 'Đóng'}" 
+                                             oncomplete="PF('dlgAddNews').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            
+            <p:dialog header="Chỉnh sửa ảnh bìa tin tức"  modal="true" id="cropAvar" widgetVar="cropAvar"  appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                
+                <h:form>
+                    <p:growl id="msgs" showDetail="true"/>
+
+                    <h:panelGrid columns="2">
+                        <p:imageCropper value="#{NewsController.croppedImage}" aspectRatio="1.5" boxHeight="500" image="https://truyenthong.mobifone.vn/hnrespository#{NewsController.selectedNews.url}"  initialCoords="225,75,300,125"/>
+                  
+                    </h:panelGrid>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton global="true"  immediate="true"
+                                         value="Crop" actionListener="#{NewsController.crop(evt)}" icon="ui-icon-scissors" update="newsDetail:avarView"/>
+                    </div>
+                </h:form>
+        </p:dialog>
+            
+            <p:dialog header="Xem video tin tức" width="600" height="400" modal="true" id="dlgVideoPlayer" widgetVar="dlgVideoPlayer"  appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                 <p:ajax event="close" onstart="PF('dlgVideoPlayer').content.empty()"/>
+                <h:form>
+                    <p:media value="#{NewsController.mediaServer}#{NewsController.selectedNews.image}" width="100%" height="400px"
+                             rendered="#{! empty NewsController.selectedNews.image}" cache="false">
+	            					<f:param name="autoPlay" value="false" />  
+		            				<f:param name="wmode" value="opaque" />
+		            				<f:param name="cache" value="false" />
+                                                        <f:param name="download" value="false" />
+		            				<f:param name="controller" value="true"/>
+		            				<f:param name="autostart" value="false"/>
+                                                                        </p:media>
+                    
+           
+                </h:form>
+        </p:dialog>
+            
+
+           
+                        
+            <p:confirmDialog styleClass="stf-confirm" message="#{NewsController.selectedNews.status eq 0? 'Bạn có chắc muốn xóa tin tức?':'Bạn có chắc muốn hủy tin tức?'}" 
+                             header="#{NewsController.selectedNews.status eq 0? 'Xóa tin tức':'Hủy tin tức'}" id="cfmDeleteNews" severity="alert" widgetVar="cfmDeleteNews" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{NewsController.saveNews(evt)}" update="form_main:dtNews :grow_main_dt" 
+                                     onclick="PF('cfmDeleteNews').hide();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}" 
+                                     onclick="PF('cfmDeleteNews').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog> 
+            
+            
+        </ui:composition>
+    </h:body>
+</html>            

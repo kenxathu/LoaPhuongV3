@@ -1,0 +1,732 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:mce="http://java.sun.com/jsf/composite/editor">
+    
+    <head>
+        
+        
+    </head>
+    
+    <h:head>
+
+    </h:head>
+    <h:body>
+        
+        <ui:composition>
+        <link href="#{request.contextPath}/resources/js/video-js.min.css" rel="stylesheet"/>
+        <link href="#{request.contextPath}/resources/assets/css/videojs.record.css" rel="stylesheet"/>
+        <link href="#{request.contextPath}/resources/assets/css/style.css" rel="stylesheet"/>
+
+        <script src="#{request.contextPath}/resources/js/video.min.js"></script>
+          <script src="#{request.contextPath}/resources/js/recorder.js"></script>
+        <script src="#{request.contextPath}/resources/js/wavesurfer.min.js"></script>
+        <script src="#{request.contextPath}/resources/js/wavesurfer.microphone.min.js"></script>
+        <script src="#{request.contextPath}/resources/js/videojs.wavesurfer.min.js"></script>
+
+        <script src="#{request.contextPath}/resources/js/videojs.record.min.js"></script>
+        <script src="#{request.contextPath}/resources/js/videojs.record.recorderjs.min.js"></script>    
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/jquery.loading/1.2.0/jquery.loading.min.css"></link>
+            
+      
+
+        <link rel="stylesheet" href="#{request.contextPath}/resources/js/timepicker/css/timepicker.css"/>
+        <script src="#{request.contextPath}/resources/js/timepicker/js/timepicker.js"></script>
+        
+
+         
+<script>
+    
+    var player;
+    var player2;
+    var fileRecorded;
+    var audioFile;
+
+    $( document ).ready(function() {
+
+
+    });
+
+
+    function uploadFile(){
+        var fd = new FormData();  
+        var viewstate = $('#recorderForm').children('input[name="javax.faces.ViewState"]').val();
+        var f = new File([player.recordedData],'File_Ghi_Am.wav');
+        console.log(viewstate);
+        fd.append('recorderForm','recorderForm');
+        fd.append('javax.faces.ViewState',viewstate);
+        fd.append('javax.faces.partial.ajax',true);
+        fd.append('javax.faces.partial.execute','recorderForm:uploadAudio');
+        fd.append('javax.faces.source','recorderForm:uploadAudio');
+        fd.append('recorderForm:uploadAudio',f);
+        if(audioFile){
+            $.ajax({
+                url: 'record-management',
+                type: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function(e){
+                    console.log('success');
+                    audioFile = null;
+                    reloadPlayer();
+                    // some code here
+                }
+            });   
+        }
+
+    }
+    
+    function stopPlayer(){
+        console.log('function stopPlayer');
+        $('#playback')[0].src='';
+        $('#playback').hide();
+    }
+
+    
+    
+    function showDownloadAudioButton(isShow){
+        console.log('showDownloadAudioButton '+isShow);
+       if(isShow){
+           $('#playback')[0].controlsList='';
+       }else{
+           $('#playback')[0].controlsList='nodownload';
+       }
+    }
+    
+    function stopRecorder(){
+        if(player){
+            player.recorder.destroy();             
+        }
+        reloadPlayer();
+        
+    }
+    
+    
+    function reloadPlayer(){
+        console.log('function reloadPlayer');
+        
+        //<![CDATA[
+        var viewstate = $('#downloadAudio').children('input[name="javax.faces.ViewState"]').val();
+        var url = 'record-management?downloadAudio=downloadAudio&downloadAudio%3AbtnDownload=&javax.faces.ViewState='+viewstate;
+        $('#playback').show();            
+        $('#playback')[0].src=url;
+        //]]>
+    }
+    
+    
+    
+    function showRecorder(){
+        
+       stopPlayer();
+        console.log('init recorder');        
+        player = videojs("myAudio",
+        {
+            controls: true,
+            width: 780,
+            height: 300,
+            plugins: {
+                wavesurfer: {
+                    src: "live",
+                    waveColor: "black",
+                    progressColor: "#2E732D",
+                    debug: true,
+                    cursorWidth: 1,
+                    msDisplayMax: 20,
+                    hideScrollbar: true
+                },
+                record: {
+                    audio: true,
+                    video: false,
+                    maxLength: 12000,
+                    debug: true,
+                    audioEngine: "recorder.js"
+                }
+            }
+        });
+
+
+        // error handling
+        player.on('deviceError', function()
+        {
+            console.log('device error:', player.deviceErrorCode);
+        });
+        player.on('error', function(error)
+        {
+            console.log('error:', error);
+        });
+
+        // user clicked the record button and started recording
+        player.on('startRecord', function()
+        {
+            console.log('started recording!');
+        });
+
+        // user completed recording and stream is available
+        player.on('finishRecord', function()
+        {
+            audioFile = player.recordedData;
+        });
+    }
+    
+
+
+</script>
+       
+            <!--<script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/tinymce.min.js"> </script>
+            <script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/jquery.tinymce.min.js"></script>-->
+            
+            
+            
+            
+            <style>
+
+                .menu
+                {
+                    font-weight: bold;
+                }
+
+                #frmDlgSubmission\:dtlist table{
+                    table-layout: fixed;
+                }
+                .ui-selectonemenu-list-item{
+                    white-space: normal!important;
+                }
+                .someClass {
+                    word-wrap: break-word;
+                    white-space: normal!important;
+                }
+                .import-btn{
+                    width: 130px!important;
+                }
+                .panelUploadFile.ui-overlaypanel{
+                    margin-bottom: 50px!important;
+                }
+            </style>
+
+            <script>
+                function handleSubmitRequestArea(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddArea').hide();
+                    }
+                }
+                
+                function handleSubmitRequestHouse(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddHouse').hide();
+                    }
+                }
+                function handleSubmitRequestRecord(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddRecord').hide();
+                    }
+                }
+                function handleSubmitRequestNews(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddNews').hide();
+                    }
+                }
+                function handleAddPlayTime(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddTime').hide();
+                    }
+                }
+                
+                
+                
+
+            </script>
+
+            <h:form id="form_main" onkeypress="if (event.keyCode == 13) {
+                        return false;
+                    }" >
+
+                <p:panel id="pnl_main">  
+
+                  
+                                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%">
+
+                                            <p:dataTable id="dtRecord" value="#{RecordController.listRecord}" var="record"
+                                                         rowKey="#{record.rec_id}" 
+                                                            paginator="true"  
+                                                            rows="10"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                                            rowsPerPageTemplate="10,20,30"
+                                                            widgetVar="dtRecord" 
+                                                            sortBy="#{record.create_date}"
+                                                            sortOrder="descending"
+                                                            emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+                                                    
+                                                    <f:facet name="header">
+                                                                <div class="stf-table-label">
+                                                                    <h4>
+                                                                        Danh sách Thông báo
+                                                                    </h4>
+                                                                    <div class="stf-unit">
+                                                                             <p:commandButton id="cmdAddRecord" process="@this" value="Thêm thông báo" icon="fa fa-plus-square"  
+                                                                            styleClass=" btn-success btn-auto" actionListener="#{RecordController.addRecordEvent()}" update="dlgAddRecord"
+                                                                            oncomplete="PF('dlgAddRecord').show();" rendered="#{RecordController.isAllowInsertRECORD()}">
+                                                                            <p:resetInput target="formAddRecord formPlayListConf"/> </p:commandButton>
+                                                                        
+                                                                    </div>
+                                                                </div>
+
+                                                                <!--                                <div class="clear" />-->
+                                                    </f:facet>
+
+
+
+                                                    <p:column headerText="STT" style="width: 5%!important" >
+                                                        #{rownum + 1}
+                                                    </p:column>
+                                                    <p:column headerText="Nội dung chính" style="width: 25%!important" filterMatchMode="contains" filterBy="#{record.rec_summary}" sortBy="#{record.rec_summary}">  
+                                                        <h:outputText value="#{record.rec_summary}">
+                                                        </h:outputText>
+                                                    </p:column> 
+
+                                                    <p:column headerText="Danh mục" style="width: 10%" filterMatchMode="exact" width="7%" filterBy="#{record.categoryName}" sortBy="#{record.categoryName}">  
+                                                        <f:facet name="filter">
+                                                            <p:selectOneMenu  onchange="PF('dtRecord').filter()">
+                                                                <f:selectItem itemValue="" itemLabel="" />
+                                                                <f:selectItems value="#{RecordController.listRecordcategory}" var="cate" itemValue="#{cate.name}" itemLabel="#{cate.name}" />
+                                                            </p:selectOneMenu>
+                                                        </f:facet>
+                                                        <h:outputText  value="#{record.categoryName}">
+                                                        </h:outputText>
+                                                    </p:column>
+                                                    <p:column headerText="Ngày tạo" style="width: 8%!important" filterMatchMode="contains" filterBy="#{record.create_date}" sortBy="#{record.create_date}">  
+                                                        <h:outputText value=" #{record.create_date}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    
+                                                    <p:column headerText="Thời gian phát" style="width: 10%!important" filterMatchMode="contains" filterBy="#{record.rec_play_timeString}" sortBy="#{record.rec_play_timeString}">  
+                                                        <h:outputText value=" #{record.rec_play_timeString}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    <p:column rendered="false" headerText="Ngày bắt đầu" style="width: 8%!important" filterMatchMode="contains" filterBy="#{record.rec_play_start}" sortBy="#{record.rec_play_start}">  
+                                                        <h:outputText value=" #{record.rec_play_start}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    <p:column headerText="Kiểu phát" style="width: 8%!important" filterMatchMode="exact" filterBy="#{record.rec_receipt_type}" sortBy="#{record.rec_receipt_type}" width="7%">  
+                                                        <f:facet name="filter">
+                                                         <p:selectOneMenu  onchange="PF('dtRecord').filter()">
+                                                             <f:selectItem itemValue="" itemLabel="" />
+                                                             <f:selectItem itemValue="1" itemLabel="Danh sách địa bàn" />
+                                                             <f:selectItem itemValue="0" itemLabel="Danh sách MCU" />
+                                                         </p:selectOneMenu>
+                                                        </f:facet>
+                                                        <h:outputText value=" #{record.rec_receipt_type eq 1 ? 'Danh sách địa bàn' : ecord.rec_receipt_type eq 0 ? 'Danh sách MCU' : ''}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    <p:column headerText="Danh sách phát" style="width: 20%!important" filterMatchMode="contains" filterBy="#{record.rec_receipt}" sortBy="#{record.rec_receipt}">  
+                                                        <h:outputText value=" #{record.listPlayName}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    <p:column headerText="Lặp lại" style="width: 8%!important" filterMatchMode="exact" filterBy="#{record.rec_play_repeat_type}" sortBy="#{record.rec_play_repeat_type}" width="7%">  
+                                                        <f:facet name="filter">
+                                                            <p:selectOneMenu  onchange="PF('dtRecord').filter()">
+                                                                <f:selectItem itemValue="" itemLabel="" />
+                                                                <f:selectItem itemValue="0" itemLabel="Theo tuần" />
+                                                                <f:selectItem itemValue="1" itemLabel="Theo tháng" />
+                                                            </p:selectOneMenu>
+                                                        </f:facet>
+                                                        <h:outputText value="#{record.rec_play_repeat_type eq 0 ? 'Theo tuần' : 'Theo tháng'}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                      <p:column headerText="Trạng thái" style="width: 10%!important" filterMatchMode="exact" filterBy="#{record.status}" sortBy="#{record.status}" width="7%">  
+                                                          <f:facet name="filter">
+                                                            <p:selectOneMenu  onchange="PF('dtRecord').filter()">
+                                                                <f:selectItem itemValue="" itemLabel="" />
+                                                                <f:selectItem itemValue="0" itemLabel="Chờ duyệt" />
+                                                                <f:selectItem itemValue="1" itemLabel="Đã duyệt" />
+                                                                <f:selectItem itemValue="-1" itemLabel="Đã hủy" />
+                                                            </p:selectOneMenu>
+                                                          </f:facet>
+                                                          <h:outputText value=" #{record.status eq 0 ? 'Chờ duyệt' : record.status eq 1 ? 'Đã duyệt' : record.status eq -1 ? 'Đã hủy' : 'Đã xóa'}">
+                                                          </h:outputText>
+                                                    </p:column> 
+                                                    
+
+                                                    <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 10%!important;" >
+                                                        <p:commandLink id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin" 
+                                                                        actionListener="#{RecordController.viewRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();">
+                                                        </p:commandLink>
+                                                        <p:commandLink rendered="#{record.status eq 0 and RecordController.isIsAllowView(permitCode) and RecordController.isAllowUpdateRECORD()}" 
+                                                                       id="bntEdit" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil-square" global="false" process="@this" 
+                                                                       actionListener="#{RecordController.editRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();" >
+                                                            <p:resetInput target="formAddRecord formPlayListConf"/>
+                                                        </p:commandLink>
+                                                        <p:commandLink rendered="#{RecordController.isAllowDeleteRECORD() and record.status eq 0}"  id="bntDelete" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                                       actionListener="#{RecordController.deleteRecordEvent(record)}" update="cfmDeleteRecord" oncomplete="PF('cfmDeleteRecord').show();" styleClass="btn-margin fa fa-trash" />
+                                                        <p:commandLink rendered="#{RecordController.isAllowDeleteRECORD() and record.status eq 1}"  id="bntCancel" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                                       actionListener="#{RecordController.deleteRecordEvent(record)}" update="cfmDeleteRecord" oncomplete="PF('cfmDeleteRecord').show();" styleClass="btn-margin fa fa-times" />
+                                                        <p:commandLink rendered="#{record.status eq 0 and RecordController.isAllowApprovalRECORD()}" id="bntApprove" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-check-square" global="false" process="@this" 
+                                                                       actionListener="#{RecordController.approveRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();" >
+                                                        </p:commandLink>
+                                                        
+                                                        <p:tooltip for="bntView" value="#{PP_SHARED.view}" trackMouse="true" />
+                                                        <p:tooltip for="bntEdit" value="#{PP_SHARED.edit}" trackMouse="true" />
+                                                        <p:tooltip for="bntDelete" value="Xóa" trackMouse="true" />
+                                                        <p:tooltip for="bntCancel" value="Hủy" trackMouse="true" />
+                                                        <p:tooltip for="bntApprove" value="Phê duyệt" trackMouse="true" />
+                                                    </p:column>
+                                                </p:dataTable>
+                                           
+                                     </h:panelGrid>
+                                     
+
+                
+                </p:panel>
+            </h:form>   
+            
+
+        <p:dialog id="dlgAddRecord" onShow="onShowAddRecordPopup(); " onHide="onHideAddRecordPopup(); PF('dlgAddPlayTime').hide();" widgetVar="dlgAddRecord" width="1200" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+          
+            <f:facet name="header" >
+                    <h:outputText value="Thêm thông báo" rendered="#{RecordController.recordActtionFlag eq 'CREATE'}"/>
+                    <h:outputText value="Sửa thông báo" rendered="#{RecordController.recordActtionFlag eq 'UPDATE'}"/>
+                    <h:outputText value="Xem thông báo" rendered="#{RecordController.recordActtionFlag eq 'VIEW'}"/>
+                    <h:outputText value="Phê duyệt thông báo" rendered="#{RecordController.recordActtionFlag eq 'APPROVE'}"/>
+                </f:facet>
+            <h:form id="eventForm">
+                <p:remoteCommand name="onShowAddRecordPopup"  actionListener="#{RecordController.onShowAddRecordPopup}" />
+                <p:remoteCommand name="onHideAddRecordPopup"  actionListener="#{RecordController.onHideAddRecordPopup}" />
+            </h:form>
+
+               
+            <h:form id="downloadAudio" style="display:none">
+                <p:commandButton id ="btnDownload" value="Download" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-arrowthick-1-s">
+                        <p:fileDownload value="#{RecordController.playbackStream}" />
+                    </p:commandButton>
+                </h:form>
+                
+                <h:form id="formAddRecord" enctype="multipart/form-data">
+                    <div>
+
+                        <p:panelGrid columns="2" columnClasses="ui-grid-col-2,ui-grid-col-10" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Nội dung chính" for="txtRecSummary"/>
+                            <p:inputText id="txtRecSummary"   value="#{RecordController.selectedRecord.rec_summary}"  style="width: 100%!important"
+                                         disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"
+                                         required="true" requiredMessage="Nội dung chính #{PP_SHARED.can_not_be_empty}"
+                                          >
+                            </p:inputText>
+                        </p:panelGrid>
+                            
+                        <p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="File thông báo" for="uploadFile"/>
+                            <p:row rendered="#{!(RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE')}">
+                                    <p:column colspan="8">
+                                    <p:fileUpload id="uploadFile" value="#{RecordController.audioFile}" 
+                                          mode="advanced" 
+                                          skinSimple="true" auto="true" fileUploadListener="#{RecordController.uploadAudioHandler}"
+                                          styleClass="fileupload-simple"
+                                          update="fileName :grow_main_dt"
+                                          label="Tải lên"
+                                          required="true"
+                                          onstart="PF('statusDialog').show();" oncomplete="PF('statusDialog').hide();"
+                                          />
+                                    </p:column>
+                                    <p:column colspan="3">
+                                            <p:commandButton id="cmdAddRecord" process="@this" value="Ghi âm" icon="fa fa-plus-square"  
+                                             styleClass=" btn-success btn-auto"  update="dlgRec"
+                                                                            oncomplete="PF('dlgRec').show();" />
+                                    </p:column>
+                                 
+                            </p:row>
+                            <p:outputLabel value="" rendered="#{!(RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE')}"/>
+                            <p:row>
+                                <p:outputLabel id="fileName" value="#{RecordController.selectedRecord.recFileName}" style="color: #005CAC; text-align: left"/>
+                                <audio preload="auto" id="playback" src="" autobuffer ="true" controls="controls" controlsList="nodownload" style="display: none;"></audio>
+                            </p:row>
+                            <p:outputLabel value="" rendered="#{(RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE')}"/>
+                            
+                            <p:outputLabel value="" rendered="#{(RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE')}"/>
+                            
+                            <p:outputLabel for="slCategory" value="Danh mục"/>
+                            <p:selectOneMenu id="slCategory"  filter="true" filterMatchMode="contains"  
+                                             value="#{RecordController.selectedRecord.category_id}"  required="true"
+                                             disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItems value="#{RecordController.listRecordcategory}" var="recordCat" itemLabel="#{recordCat.name}" itemValue="#{recordCat.id}"/>
+                            </p:selectOneMenu>
+         
+
+                            
+                            <p:outputLabel for="playNow" value="Phát ngay lập tức"/>
+                            <p:selectOneMenu  rendered="false" id="recMode"  value="#{RecordController.selectedRecord.rec_play_mode}" filter="true" filterMatchMode="contains"  required="true"
+                                                 effect="fade" disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItem itemLabel="Phát theo lịch" itemValue="1"/>
+                                    <f:selectItem itemLabel="Phát ngay lập tức" itemValue="2"/>
+                                    <f:selectItem itemLabel="Không phát" itemValue="0"/>
+                                <p:ajax update="@this formAddRecord:txtPlayTime formAddRecord:repeatType" />
+                             </p:selectOneMenu>
+                            <p:selectBooleanCheckbox id="playNow" value="#{RecordController.selectedRecord.playNow}" 
+                                                    disabled="#{RecordController.recordActtionFlag eq 'VIEW'}"/>
+                            
+                            <p:outputLabel value="Giờ phát" for="txtPlayTime"/>
+                            <p:row>
+                                <p:inputText id="txtPlayTime" value="#{RecordController.recPlayTimeString}" 
+                                             style="width: 85%; float: left"   immediate="true"            
+                                 title="Mời nhập vào giờ phát dạng HH:mm cách nhau bởi dấu phẩy"
+                                 required="true" requiredMessage="Giờ phát #{PP_SHARED.can_not_be_empty}"
+                                 disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">
+                                </p:inputText>
+
+                                <p:commandButton id="cmdAddTimePlay"  icon="fa fa-plus-square" oncomplete="PF('dlgAddPlayTime').show();" update="dlgAddPlayTime"
+                                                 rendered="#{RecordController.recordActtionFlag eq 'CREATE' or RecordController.recordActtionFlag eq 'UPDATE'}" 
+                                                 style="width: 15%; float: left" >
+                                <p:resetInput target="formPlayTimeConf"/> </p:commandButton>
+                                 
+                            </p:row>
+                            
+
+                            <p:outputLabel value="Mức độ ưu tiên" for="txtPriority"/>
+                            <p:selectOneMenu id="txtPriority"  value="#{RecordController.selectedRecord.rec_priority}" filter="true" filterMatchMode="contains"  required="true"
+                                                 effect="fade"  disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItem itemLabel="Bình thường" itemValue="1"/>
+                                    <f:selectItem itemLabel="Quan trọng" itemValue="2"/>
+                                    <f:selectItem itemLabel="Rất quan trọng" itemValue="3"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="playMode" value="Kiểu phát"/>
+                            <p:selectOneMenu id="playMode" required="true"  value="#{RecordController.selectedRecord.rec_receipt_type}" filter="true" filterMatchMode="contains"  
+                                                 effect="fade" disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItem itemLabel="Phát đến danh sách địa bàn" itemValue="1" />
+                                    <f:selectItem itemLabel="Phát đến danh sách MCU" itemValue="2" />
+                                    <p:ajax update="formPlayListConf txtRecListPlay  " listener="#{RecordController.eventChangeReceiptType(evt)}" />
+                                </p:selectOneMenu>
+                            
+                            <p:outputLabel for="repeatType" value="Kiểu lặp lại"/>
+                            <p:selectOneMenu id="repeatType"  value="#{RecordController.selectedRecord.rec_play_repeat_type}" filter="true" filterMatchMode="contains" 
+                                             
+                                             required="true" effect="fade" 
+                                             disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItem itemLabel="Theo tuần" itemValue="0" />
+                                    <f:selectItem itemLabel="Theo tháng" itemValue="1" />
+                                    <p:ajax update="selectDaysInWeek" listener="#{RecordController.eventChangeRepeatType(evt)}"/>
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel value="Danh sách phát" for="txtRecListPlay"/>
+                            
+                                    <p:inputTextarea rendered="#{RecordController.selectedRecord.rec_receipt_type eq 1}" id="txtRecListPlay" value="#{RecordController.selectedRecord.listPlayName}" rows="1" cols="5"
+                                                 onclick="PF('dlgPlayListConfig').show();" required="true" requiredMessage="Danh sách phát #{PP_SHARED.can_not_be_empty}"
+                                                 disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">
+                                        <p:ajax event="click" listener="#{RecordController.eventChangeRepeatType(evt)}" update="formPlayListConf" />
+                                    </p:inputTextarea>
+
+                                    <p:selectCheckboxMenu id="selectHouse" rendered="#{RecordController.selectedRecord.rec_receipt_type eq 2}"  label=" "  
+                                                              style="width: 100%!important"   multiple="true"
+                                                              filter="true" filterMatchMode="contains" 
+                                                              disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"> 
+                                        <f:selectItems value="#{RecordController.listMCUHouse}" var="house" itemLabel="#{house.holder_name}" itemLabelEscaped="#{house.address}" itemDescription="#{house.address}" itemValue="#{house.id}" />
+
+                                    </p:selectCheckboxMenu>
+
+                            <p:commandButton rendered="false" id="cmdAPlayListConfig" process="@this" value="Cấu hình danh sách phát" icon="fa fa-plus-square"  
+                                                             styleClass=" btn-success btn-auto" onclick="PF('dlgPlayListConfig').show();" 
+                                                             />
+                            
+   
+                            <p:outputLabel value="Cấu hình lặp lại" for="selectDaysInWeek"/>
+                            <p:selectCheckboxMenu id="selectDaysInWeek" value="#{RecordController.listDaysSelected2}" label="wfwffw "  required="true" requiredMessage="Cấu hình lặp lại #{PP_SHARED.can_not_be_empty}"
+                                                  style="width: 100%!important"   multiple="true"
+                                                  disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"> 
+                                    <f:selectItems value="#{RecordController.selectedRecord.rec_play_repeat_type eq 0 ? RecordController.listDaysWeek : RecordController.listDaysMounth}" var="dayweek" itemLabel="#{dayweek.name}" itemValue="#{dayweek.value}" />
+                            </p:selectCheckboxMenu>
+
+                            <p:outputLabel value="Ngày bắt đầu" for="txtStartDate"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtStartDate" timeZone="GMT+7" value="#{RecordController.selectedRecord.rec_playStartDate}" 
+                                        required="true" requiredMessage="Ngày bắt đầu #{PP_SHARED.can_not_be_empty}" mindate="#{RecordController.today}" label="Chọn ngày"
+                                        disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"/>
+                            
+                            <p:outputLabel value="Ngày kết thúc" for="txtEndDate"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtEndDate" timeZone="GMT+7"  value="#{RecordController.selectedRecord.rec_playExpireDate}" 
+                                        required="true" requiredMessage="Ngày kết thúc #{PP_SHARED.can_not_be_empty}" mindate="#{RecordController.today}"
+                                        disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"/>
+                            
+                            
+                            <p:outputLabel value="Gửi thông báo" for="txtNotifyFlag"/>
+                            <p:selectBooleanCheckbox id="txtNotifyFlag" value="#{RecordController.selectedRecord.notify_flagBoolean}" 
+                                                    disabled="#{RecordController.recordActtionFlag eq 'VIEW'}"/>
+                            
+                            <p:overlayPanel  rendered="false" id="timePanel" widgetVar="olPanel" onShow="#{RecordController.addTimeEvent(evt)}" appendToBody="true" for="txtPlayTime" style="width: 300px; height: 200px" hideEffect="fade">
+                                <h:form>
+                                    <div>
+                                       
+                                                <p:outputLabel value="Xin mời chọn giờ" />
+                                                <p:inputText id="txtPlayTime3" value="#{RecordController.hourAdded}"  >
+                                                        
+                                                </p:inputText> 
+
+
+                                        <p:commandButton   id="btnSave2" value="#{PP_SHARED.ok}" icon="fa fa-check-square" process = "@this txtPlayTime3"
+                                                               update=" :grow_main_dt" actionListener="#{RecordController.saveTimeEvent(evt)}"
+                                                               styleClass="btn-primary btn-width"  />                         
+                                        
+                                    </div>
+                                </h:form>
+                                
+                            </p:overlayPanel>
+                            
+                            <p:commandButton rendered="false" value="Submit" ajax="false" actionListener="#{RecordController.upload}"  />
+                       
+                        </p:panelGrid>
+                        
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave" value="#{RecordController.recordActtionFlag eq 'APPROVE' ? 'Phê duyệt' : 'Đồng ý'}"  actionListener="#{RecordController.saveRecord(evt)}" icon="fa fa-check-square" 
+                                               update="form_main:dtRecord :grow_main_dt"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestRecord(xhr, status, args);"/> 
+                            <p:commandButton global="false"  id="btnReject" process="@this" icon="fa fa-times-circle"  value="Hủy" actionListener="#{RecordController.cancelRecord(evt)}"
+                                             oncomplete="handleSubmitRequestRecord(xhr, status, args);" styleClass="btn-danger btn-margin btn-width" rendered="#{RecordController.recordActtionFlag eq 'APPROVE'}"
+                                             update="form_main:dtRecord :grow_main_dt"/>                     
+                                                 
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}" 
+                                             oncomplete="PF('dlgAddRecord').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+        
+   
+        <p:dialog header="Thêm giờ phát" position="570,490" onShow="$('#formPlayTimeConf\\:txtPlayTime3').timepicker();" id="dlgAddPlayTime" widgetVar="dlgAddPlayTime" height="200" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                
+                <h:form id="formPlayTimeConf">
+                    <div>
+                        <p:panelGrid columns="2" columnClasses="ui-grid-col-4,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                    <p:outputLabel value="Xin mời chọn giờ" />
+                                    <p:inputText id="txtPlayTime3" value="#{RecordController.hourAdded}" style="display: inline">
+                                </p:inputText> 
+                        </p:panelGrid>  
+ 
+                        
+                        <div class="ui-dialog-action" style="position: absolute !important; bottom: 0px !important; right: 0px; left: 0px;">
+                              
+                            <p:commandButton   id="btnSave" value="Thêm" icon="fa fa-plus" 
+                                               update="formAddRecord:txtPlayTime :grow_main_dt" actionListener="#{RecordController.saveTimeEvent(evt)}"
+                                               styleClass="btn-primary btn-width"  />                         
+                        </div>
+                    </div>
+                </h:form>
+        </p:dialog>
+
+       
+        <p:dialog header="Cấu hình danh sách phát" id="dlgPlayListConfig" widgetVar="dlgPlayListConfig" height="420px" width="400" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formPlayListConf">
+                    <p:layout style="height: 340px;" rendered="#{RecordController.selectedRecord.rec_receipt_type eq 1}">
+                            <p:layoutUnit position="west" resizable="true" size="300"  minSize="100" maxSize="400" style="background: white; margin-left: 20px">
+                                <div style="margin-left: 10px">
+                                    <p:outputLabel value="Chọn địa bàn " style="font-weight: bold"/>
+                                 
+                                    <p:tree  id="areaTree" style="width: 250px; height: 290px" value="#{RecordController.areaRoot}" var="doc" 
+                                             selectionMode="checkbox"  selection="#{RecordController.listSelectedArea2}"
+
+                                              >           
+
+                                         <p:ajax event="select" listener="#{RecordController.saveListArea(evt)}" update="formPlayListConf:txtPlayList"/>
+                                        <p:ajax event="unselect" listener="#{RecordController.saveListArea(evt)}" update="formPlayListConf:txtPlayList" />
+
+                                            <p:treeNode  expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed" styleClass="">
+
+                                                <h:outputText value="#{doc.areaName}" style="font-weight:bold;"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="tp" >
+
+                                                <h:outputText value="TP. #{doc.areaName}" style="font-weight:bold;" />
+                                            </p:treeNode>
+                                            <p:treeNode type="q" >
+                                                <h:outputText value="Q. #{doc.areaName}" style="font-weight:bold;" />
+                                            </p:treeNode>
+                                            <p:treeNode type="p" >
+                                                <h:outputText value="P. #{doc.areaName}"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="t" >
+                                                <h:outputText value="T. #{doc.areaName}"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="document" >
+                                                <h:outputText value="#{doc.areaName}" />
+                                            </p:treeNode>
+
+                                    </p:tree>
+                                </div>
+                            </p:layoutUnit>
+
+                            <p:layoutUnit position="center" style="background: white;">
+                                <div style="margin-top: 5px">
+                                    <p:outputLabel id="text" value="Phát đến địa bàn: " for="txtPlayList" style="font-weight: bold"/>
+                                    </div>
+                                            
+                                <p:outputLabel id="txtPlayList"  value="#{RecordController.selectedRecord.listPlayName}" style="color: #005CAC;" >
+                                    </p:outputLabel>       
+
+                             </p:layoutUnit>
+                        </p:layout>
+                    
+                        
+                    <p:outputLabel rendered="#{RecordController.selectedRecord.rec_receipt_type eq 2}" value="Xin mời chọn hộ gia đình:"  style="margin-left: 30px" />
+                        
+                    <p:panelGrid rendered="#{RecordController.selectedRecord.rec_receipt_type eq 2}" columns="1" columnClasses="ui-grid-col-12" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            
+                        <p:selectCheckboxMenu id="selectHouse" value="#{RecordController.listSelectedMCUHouse}" label=" "  
+                                                      style="width: 100%!important"   multiple="true" 
+                                                      filter="true" filterMatchMode="contains" 
+                                                      disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"> 
+                                <f:selectItems value="#{RecordController.listMCUHouse}" var="house" itemLabel="#{house.holder_name} - #{house.address}" itemDescription="#{house.address}" itemValue="#{house}" />
+
+                            </p:selectCheckboxMenu>
+                        
+
+                        
+                        </p:panelGrid>
+                    
+                    
+                    
+                        
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave" value="#{PP_SHARED.ok}" icon="fa fa-check-square" 
+                                               update="formAddRecord:txtRecListPlay :grow_main_dt" actionListener="#{RecordController.eventSaveHouseMCU(evt)}"
+                                               styleClass="btn-primary btn-width" oncomplete="PF('dlgPlayListConfig').hide();"
+                                               
+                                               />   
+                            <p:commandButton rendered="false" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}" 
+                                             oncomplete="PF('dlgPlayListConfig').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                </h:form>
+            </p:dialog>
+        
+
+        <p:dialog header="Ghi âm thông báo" onHide="stopRecorder();" onShow="showRecorder();"  id="dlgRec" widgetVar="dlgRec" width="800" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                    <div style="margin-left: 10px"> 
+                            <ui:include src="audioRecordWidget.xhtml"/>    
+                    </div>
+                    
+                    
+                    <div class="ui-dialog-action">
+                        <p:commandButton   id="btnSaveAudioRecord" value="#{PP_SHARED.ok}" icon="fa fa-check-square" 
+                                           update="formAddRecord:fileName :grow_main_dt" 
+                                           styleClass="btn-primary btn-width" oncomplete="PF('dlgRec').hide();"
+                                           onclick="uploadFile();"
+                                           />   
+                    </div>
+                
+            </p:dialog>
+            
+            <p:confirmDialog styleClass="stf-confirm" header="#{RecordController.selectedRecord.status eq 0? 'Xóa thông báo':'Hủy thông báo'}"
+                             message="#{RecordController.selectedRecord.status eq 0? 'Bạn có chắc muốn xóa thông báo?':'Bạn có chắc muốn hủy thông báo?'}" 
+                             id="cfmDeleteRecord" severity="alert" widgetVar="cfmDeleteRecord" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{RecordController.saveRecord(evt)}" update="form_main:dtRecord :grow_main_dt" 
+                                     onclick="PF('cfmDeleteRecord').hide();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}" 
+                                     onclick="PF('cfmDeleteRecord').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog> 
+            
+        </ui:composition>
+    </h:body>
+
+</html>            

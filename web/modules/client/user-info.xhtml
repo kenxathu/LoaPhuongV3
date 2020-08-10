@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core">
+    
+    <h:head>
+    </h:head>
+    <h:body>
+        <ui:composition>
+
+            <link rel="stylesheet" href="#{request.contextPath}/resources/css/jquery.loading.min.css"></link>
+            <script type="text/javascript" src="#{request.contextPath}/resources/js/jquery.loading.min.js"></script>
+            <style>
+                .menu
+                {
+                    font-weight: bold;
+                }
+
+                #frmDlgSubmission\:dtlist table{
+                    table-layout: fixed;
+                }
+                .ui-selectonemenu-list-item{
+                    white-space: normal!important;
+                }
+                .someClass {
+                    word-wrap: break-word;
+                    white-space: normal!important;
+                }
+                .import-btn{
+                    width: 130px!important;
+                }
+                .panelUploadFile.ui-overlaypanel{
+                    margin-bottom: 50px!important;
+                }
+            </style>
+            <script>
+                
+                function handleSubmitRequestPass(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgChangePass').hide();
+                    }
+                }
+                function handleUpdateInfo(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('updateUserInfo').hide();
+                    }
+                }
+            </script>
+
+            <h:form id="form_main" >
+                <div class="stf-view-header" >
+                    <h4 style="margin-bottom: 10px"> Thông tin người sử dụng </h4>     
+        
+                   <p:layout style="height: 800px; " widgetVar="loArea">
+                       <p:layoutUnit position="west" size="260" style="background: white;  border: 1px solid #eee; ">
+                           <img src="#{request.contextPath}/resources/images/user-image.png" width="100%"/> 
+                           
+                           <p:panelGrid id="pnlUserInfo" columns="1" columnClasses="ui-grid-col-10" style="margin-top: 10px" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                               <p:commandLink id="editInfo" process="@this" update="updateUserInfo :grow_main_dt" actionListener="#{secuser.updateInfoEvent(evt)}"
+                                               oncomplete="PF('updateUserInfo').show();"        >
+                                             <h:outputText value="Chỉnh sửa thông tin" style=" float: left; color: #005CAC; margin-top: 10px; font-weight: 400 "/>
+                                              <p:resetInput target="updateUserInfo"/> 
+                                 </p:commandLink>
+
+                               <p:commandLink id="editPass" process="@this" update="dlgChangePass :grow_main_dt" actionListener="#{secuser.changePassEvent(evt)}" oncomplete="PF('dlgChangePass').show();">
+                                             <h:outputText value="Thay đổi mật khẩu" style=" float: left; color: #005CAC; font-weight: 400 "/>
+                                 </p:commandLink>
+                           </p:panelGrid>
+                           
+                       </p:layoutUnit>
+
+                       <p:layoutUnit position="center" style="background: white; border: 1px solid #eee; ">
+                        
+                           <h:form id="formUserDetail">    
+                           
+                                <p:tabView id="general" cache="false" style="margin-top: 0px"  >
+                                  
+                                <p:tab  title="Thông tin chung">
+                                    
+                                    
+                                    <p:panelGrid id="pnlUserInfo" columns="2" columnClasses="ui-grid-col-2,ui-grid-col-6" style="margin-top: 20px" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            
+                                            <p:outputLabel value="Tên đăng nhập" for="txtUserName"/>
+                                            <p:inputText id="txtUserName" value="#{secuser.getUserLogged().userName}" disabled="true">
+                                            </p:inputText>
+
+                                            <p:outputLabel value="Tên người dùng" for="txtName"/>
+                                            <p:inputText id="txtName" disabled="true" value="#{secuser.getUserLogged().name}" >                             
+                                            </p:inputText>
+
+
+                                            <p:outputLabel value="Số CMND" for="txtCMND"  />
+                                            <p:inputText id="txtCMND" value="#{secuser.getUserLogged().idCard}" disabled="true"  >
+                                            </p:inputText>
+
+                                            <p:outputLabel value="Điện thoại liên hệ" for="txtTel"/>
+                                            <p:inputText id="txtTel" value="#{secuser.getUserLogged().phone}" disabled="true"   >
+                                            </p:inputText>
+                                            
+                                            <p:outputLabel value="Email" for="txtMail"/>
+                                            <p:inputText id="txtMail" value="#{secuser.getUserLogged().email}" disabled="true"   >
+                                            </p:inputText>
+                                            
+                                            <p:outputLabel value="Địa bàn quản lý" for="txtArea"/>
+                                            <p:inputText id="txtArea" value="#{secuser.getUserLogged().areaName}" disabled="true"   >
+                                            </p:inputText>
+
+                                        </p:panelGrid>
+                                    
+                                </p:tab>
+                                <p:tab title="Vai trò" >
+                                    <h:form id="formHouseDetail"> 
+                                        
+                                    </h:form> 
+                                     
+                                </p:tab>
+                               
+                            </p:tabView>
+
+                        </h:form>
+                    </p:layoutUnit>
+                </p:layout>
+                
+              </div>
+            </h:form>   
+            
+            
+            
+            <p:dialog header="Thay đổi mật khẩu" 
+                      id="dlgChangePass" widgetVar="dlgChangePass" width="700" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formDlgChangePass" >
+                    <div>
+
+                        <p:panelGrid id="pnlUserInfo" columns="2" columnClasses="ui-grid-col-4,ui-grid-col-6" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Mật khẩu cũ" for="txtOldPass"/>
+                            <p:password id="txtOldPass"   value="#{secuser.oldPass}" maxlength="20" 
+                                         required="true" requiredMessage="Mật khẩu cũ #{PP_SHARED.can_not_be_empty}" >                             
+                            </p:password>
+                            
+                            <p:outputLabel value="Mật khẩu mới" for="txtNewPass"/>
+                            <p:password id="txtNewPass"   value="#{secuser.newPass}" maxlength="20"
+                                         required="true" requiredMessage="Mật khẩu mới #{PP_SHARED.can_not_be_empty}">                             
+                            </p:password>
+                            
+                            <p:outputLabel value="Nhập lại mật khẩu mới" for="txtNewPass2"/>
+                            <p:password id="txtNewPass2"   value="#{secuser.newPass2}" maxlength="20"
+                                         required="true" requiredMessage="Nhập lại mật khẩu mới #{PP_SHARED.can_not_be_empty}">                             
+                            </p:password>
+                            
+              
+                          
+                        </p:panelGrid>
+                       
+                        
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave"  value="#{PP_SHARED.ok}"  actionListener="#{secuser.savePass(evt)}" icon="fa fa-check-square" 
+                                               update=":grow_main_dt" oncomplete="handleSubmitRequestPass(xhr, status, args);"
+                                               styleClass="btn-primary btn-width" 
+                                               />   
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}" 
+                                             oncomplete="PF('dlgChangePass').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            
+            <p:dialog header="Cập nhật thông tin người dùng" id="updateUserInfo" widgetVar="updateUserInfo" modal="true" appendTo="@(body)" showEffect="fade" resizable="false" width="900" closeOnEscape="true" >
+
+                <h:form id="frmDlg" >
+                    <p:panel id="pnl_add">
+                        <div class="stf-view">
+                            <p:panelGrid id="pnlUserInfo" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                <p:outputLabel value="#{PP_USER.label_UserName}" for="txtUserName"/>
+                                <p:inputText id="txtUserName" value="#{secuser.updatedUser.userName}" maxlength="30" disabled="true"
+                                             required="true" requiredMessage="#{PP_USER.label_UserName}#{PP_SHARED.can_not_be_empty}" style="text-transform: uppercase;"
+                                             validator="ValidatorUserName" validatorMessage="#{PP_USER.label_UserName}#{PP_SHARED.is_not_valid}" >
+                                </p:inputText>
+                                
+                                <p:outputLabel value=""/>
+                                <p:outputLabel value=""/>
+
+                                <p:outputLabel value="#{PP_USER.label_Fullname}" for="txtFullname"/>
+                                <p:inputText id="txtFullname" value="#{secuser.updatedUser.name}" maxlength="100"
+                                             required="true" requiredMessage="#{PP_USER.label_Fullname}#{PP_SHARED.can_not_be_empty}"/>
+
+                                <p:outputLabel value="#{PP_USER.label_Email}" for="txtEmail"/>
+                                <p:inputText id="txtEmail" value="#{secuser.updatedUser.email}" maxlength="100"
+                                             validator="ValidatorUserEmail" validatorMessage="#{PP_USER.label_Email}#{PP_SHARED.is_not_valid}" >
+
+                                </p:inputText>
+
+                                <p:outputLabel value="#{PP_USER.label_Mobile}" for="txtMobile"/>
+                                <p:inputText id="txtMobile" value="#{secuser.updatedUser.phone}" maxlength="15" 
+                                             validator="ValidatorNumber" validatorMessage="#{PP_USER.label_Mobile}#{PP_SHARED.is_not_valid}" >
+                                    <pe:keyFilter mask="num" />
+                                </p:inputText>
+
+                                <p:outputLabel value="Số CMTND " for="CMTND"/>
+                                <p:inputText id="CMTND" value="#{secuser.updatedUser.idCard}" maxlength="15"
+                                             required="true" requiredMessage="Số CMTND #{PP_SHARED.can_not_be_empty}" validator="ValidatorNumber" validatorMessage="Số CMND #{PP_SHARED.is_not_valid}" >
+                                    <pe:keyFilter mask="num" />
+                                </p:inputText>
+           
+                            </p:panelGrid>  
+                        </div>
+                    </p:panel>
+                    <div class="ui-dialog-action">
+                        <p:commandButton styleClass="btn-primary" 
+                                         icon="fa fa-check-square" value="#{PP_SHARED.ok}"
+                                         process="@form, :frmDlg:pnl_add " actionListener="#{secuser.saveUserInfo(evt)}" oncomplete="handleUpdateInfo(xhr, status, args);"
+                                         update="form_main :grow_main_dt frmDlg" />
+                        <p:commandButton global="false"  style="width: 100px;" icon="fa fa-times-circle" styleClass="btn-danger btn-margin" value="#{PP_SHARED.cancel}"
+                                         onclick="PF('updateUserInfo').hide();"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+
+        </ui:composition>
+    </h:body>
+</html>            

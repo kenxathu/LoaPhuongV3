@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html">
+    <h:head>
+        <title>Oops!</title>
+    </h:head>
+    <h:body>
+        <style type="text/css" >
+            body {
+                white-space: pre-line;
+                font-family: courier;
+                font-size: 13px;
+                color: red;
+                background-color: #000;
+                padding: 0;
+            }
+            
+            .header {
+                font-size: 2em;
+                font-weight: bold;
+            }
+
+            .blink {
+                animation-duration: 1s;
+                animation-name: blink;
+                animation-iteration-count: infinite;
+                animation-direction: alternate;
+                animation-timing-function: ease-in-out;
+            }
+            
+            @keyframes blink {
+                from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+            }
+        </style>
+        <p class="blink header">An error has occurred</p>
+        #{exception.mstrExceptionContent}
+    </h:body>
+</html>

@@ -1,0 +1,361 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 25-Aug-2015, 22: 45: 32
+    Author     : ChienDX
+*/
+
+.ui-panelgrid.ui-panelgrid-blank, .ui-panelgrid.ui-panelgrid-blank > .ui-panelgrid-content {
+    background: none;
+    border: 0 none;
+}
+
+.ui-panelgrid-footer.ui-widget-header {
+    background: none;
+    border-width: 1px 0 0 0;
+}
+
+.ui-splitbutton
+{
+    position: relative;
+    padding-right: 2em
+}
+.ui-splitbutton .ui-button.ui-splitbutton-menubutton
+{
+    width: 32px;
+    position: absolute;
+    right: 0px;
+    top: 0px
+}
+
+/** IE Hacks **/div.ui-button, .ui-splitbutton
+{
+    display: inline-block;
+    zoom: 1
+}
+
+/** Other **/
+.ui-panelgrid .ui-panelgrid-footer {
+    text-align: center; 
+}
+
+.ui-corner-all {
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px; 
+    border-radius: 0px; 
+}
+
+.btn-success {
+    background-image: linear-gradient(rgb(92, 184, 92) 0px, rgb(65, 150, 65) 100%) !important;
+    background-color: rgb(92, 184, 92) !important;
+    border-color: rgb(62, 143, 62) !important;
+    color: #fff !important;
+    text-shadow: none !important;
+}
+
+.btn-success.ui-state-hover {
+    background-color: #419641 !important;
+}
+
+.btn-primary {
+    background-image: linear-gradient(rgb(51, 122, 183) 0px, rgb(38, 90, 136) 100%) !important;
+    background-color: rgb(38, 90, 136) !important;
+    border-color: rgb(32, 77, 116) !important;
+    color: #fff !important;
+    text-shadow: none !important;
+}
+
+.btn-primary.ui-state-hover {
+    background-color: #265a88 !important;
+}
+
+.btn-info {
+    background-image: linear-gradient(rgb(91, 192, 222) 0px, rgb(42, 171, 210) 100%) !important;
+    background-color: rgb(42, 171, 210) !important;
+    border-color: rgb(38, 154, 188) !important;
+    color: #fff !important;
+    text-shadow: none !important;
+}
+
+.btn-info.ui-state-hover {
+    background-color: #2aabd2 !important;
+}
+
+.btn-warning {
+    background-image: linear-gradient(rgb(240, 173, 78) 0px, rgb(235, 147, 22) 100%) !important;
+    background-color: rgb(235, 147, 22) !important;
+    border-color: rgb(213, 133, 18) !important;
+    color: #fff !important;
+    text-shadow: none !important;
+}
+
+.btn-warning.ui-state-hover {
+    background-color: #eb9316 !important;
+}
+
+.btn-danger {
+    background-image: linear-gradient(rgb(217, 83, 79) 0px, rgb(193, 46, 42) 100%) !important;
+    background-color: rgb(193, 46, 42) !important;
+    border-color: rgb(172, 41, 37) !important;
+    color: #fff !important;
+    text-shadow: none !important;
+}
+
+.btn-danger.ui-state-hover {
+    background-color: #c12e2a !important;
+}
+
+.btn-lg {
+    padding: .1em;
+    font-size: 1.1em!important;
+    border-radius: 5px !important;
+}
+
+.btn-sm {
+    font-size: .9em!important;
+    border-radius: 4px !important;
+}
+
+.btn-xs {
+    font-size: .7em!important;
+    border-radius: 3px !important;
+}
+
+.btn-xs .ui-icon {
+    margin-top: -5px !important;
+}
+
+.label {
+    display: inline;
+    padding: .2em .6em .3em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25em;
+}
+
+.label-default {
+    background-color: #777;
+}
+
+.label-primary {
+    background-color: #337ab7;
+}
+
+.label-success {
+    background-color: #5cb85c;
+}
+
+.label-info {
+    background-color: #5bc0de;
+}
+
+.label-warning {
+    background-color: #f0ad4e;
+}
+
+.label-danger {
+    background-color: #d9534f;
+}
+
+.ui-panel {
+    padding: 0;
+    margin-bottom: 20px;
+    background-color: #fff;
+    border: 1px solid #e9e9e9;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);    
+}
+
+.ui-panel .ui-panel-titlebar {
+    background: #f6f6f6;
+    color: #767676;
+    text-align: left;
+    white-space: nowrap;
+    padding: 10px 15px;
+    border: 0;
+    border-bottom: 1px solid #e9e9e9;
+}
+
+.ui-panel.panel-primary {
+    border-color: #1C7EBB !important;
+}
+
+.ui-panel.panel-primary .ui-panel-titlebar {
+    background: #1C7EBB !important;
+    border-color: #1C7EBB !important;
+}
+
+.ui-panel.panel-primary .ui-panel-titlebar .ui-panel-title {
+    color: #fff;
+}
+
+.ui-panel.panel-danger {
+    border-color: #FAD7DB !important;
+}
+
+.ui-panel.panel-danger .ui-panel-titlebar {
+    background: #FDEFEE !important;
+    border-color: #FAD7DB !important;
+}
+
+.ui-panel.panel-success {
+    border-color: #A9DBC4 !important;
+}
+
+.ui-panel.panel-success .ui-panel-titlebar {
+    background: #C1EADE !important;
+    border-color: #A9DBC4 !important;
+}
+
+.ui-panel.panel-info {
+    border-color: #69C0C0 !important;
+}
+
+.ui-panel.panel-info .ui-panel-titlebar {
+    background: #85DDDD !important;
+    border-color: #69C0C0 !important;
+}
+
+.ui-panel.panel-warning {
+    border-color: #faebcc !important;
+}
+
+.ui-panel.panel-warning .ui-panel-titlebar {
+    background: #faf2cc !important;
+    border-color: #faebcc !important;
+}
+
+
+.ui-inputfield.ui-state-error, .ui-widget-header .ui-inputfield.ui-state-error, .ui-widget-content .ui-inputfield.ui-state-error {
+    border: 1px solid #FFABB8;
+}
+
+.ui-panelgrid .ui-panelgrid-cell {
+    white-space: nowrap;
+}
+
+.ui-outputlabel .ui-outputlabel-rfi {
+    margin-left: 0.4em;
+    font-weight: bold;
+    color: red;
+}
+
+.ui-columntoggler {
+    height: auto !important;
+}
+
+.ui-treenode-icon.ui-icon.ui-icon-folder-open {
+    background-image: url('../images/icon/folder-open.png');
+    background-position: 0 0;
+    background-size: contain;
+    margin-right: 2px;
+}
+
+.ui-treenode-icon.ui-icon.ui-icon-folder-collapsed {
+    background-image: url('../images/icon/folder-close.png');
+    background-position: 0 0;
+    background-size: contain;
+    margin-right: 2px;
+}
+
+.ui-tree-toggler.ui-icon.ui-icon-triangle-1-s {
+    background-image: url('../images/icon/minus-square.png');
+    background-position: 0 0;
+    background-size: contain;
+    margin-right: 2px;
+}
+
+.ui-tree-toggler.ui-icon.ui-icon-triangle-1-e {
+    background-image: url('../images/icon/plus-square.png');
+    background-position: 0 0;
+    background-size: contain;
+    margin-right: 2px;
+}
+
+.ui-state-disabled, .ui-widget-content .ui-state-disabled, .ui-widget-header .ui-state-disabled {
+    opacity: .85;
+    filter: Alpha(Opacity=85);
+    background-image: none;
+}
+
+.ui-datatable .ui-chkbox-icon.ui-icon-check{
+    background-image: url("../images/icon/ui-icons_333333_256x240.png");
+}
+
+.ui-blockui.ui-widget-overlay {
+    opacity: .1;
+    filter: Alpha(Opacity=10);
+}
+
+table.ui-selectoneradio {
+    table-layout: auto;
+}
+
+.ui-selectonemenu-panel .ui-selectonemenu-filter-container .ui-icon {
+    right: 20px;
+}
+
+.ui-selectonemenu-panel .ui-selectonemenu-filter {
+    padding-right: 20px;
+}
+
+.ui-datatable table, .ui-treetable table, .ui-treetable.ui-treetable-resizable table {
+    table-layout: auto;
+}
+
+.ui-widget-content a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #0060B2;
+}
+
+.ui-selectonemenu-panel .ui-selectonemenu-items-wrapper {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.ui-autocomplete-input {
+    background-image: url('data:image/png;base64,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') !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px !important;
+    background-position: calc(100% - 5px) 50% !important;
+    padding-right: 25px;
+}
+
+.ui-fileupload-content {
+    overflow: auto;
+}
+
+.ui-breadcrumb {
+    /*background: #fff;*/
+}
+
+.ui-panelgrid-cell .ui-outputlabel {
+    position: relative;
+    top: 6px;
+}
+
+.ui-dialog .ui-dialog-buttonpane button {
+    margin: 0;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+    padding: 10px;
+}
+
+.ui-chkbox .ui-chkbox-box {
+    /*margin-top: 2px;*/
+}
+
+.ui-treetable .ui-treetable-data td {
+    white-space: normal !important;
+}

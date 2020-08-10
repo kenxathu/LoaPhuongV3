@@ -1,0 +1,1612 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
+    <h:head>
+    </h:head>
+    <h:body>
+        <ui:composition>
+
+            <link rel="stylesheet" href="//cdn.jsdelivr.net/jquery.loading/1.2.0/jquery.loading.min.css"></link>
+            <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.loading/1.2.0/jquery.loading.min.js"></script>
+            <link rel="stylesheet" href="#{request.contextPath}/resources/js/timepicker/css/timepicker.css"/>
+            <script src="#{request.contextPath}/resources/js/timepicker/js/timepicker.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/resources/js/googletimeline.js"></script>
+            <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>
+
+            <style type="text/css">
+                /* Custom styles for the Timeline */
+                div.timeline-frame {
+                    border-color: #5D99C3;
+                    border-radius: 5px;
+                }
+
+                div.timeline-axis {
+                    border-color: #5D99C3;
+                    background-color: #5D99C3;
+                    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5D99C3', endColorstr='#3A6DA0') alpha(opacity = 100);
+                    background: lightslategray;
+                    background: -moz-linear-gradient(top,  #5D99C3,  #3A6DA0);
+                    -khtml-opacity: 1;
+                    -moz-opacity: 1;
+                    opacity: 1;
+                }
+
+                div.timeline-groups-axis {
+                    border-color: #5D99C3;
+                }
+
+                div.timeline-groups-axis-onleft {
+                    border-style: none solid none none;
+                }
+
+                div.timeline-axis-text {
+                    color: white;
+                }
+
+                div.timeline-event {
+                    color: white !important;
+                    border-radius: 5px !important;
+                }
+
+                div.timeline-event-content {
+                    padding: 5px;
+                    text-shadow: none;
+                }
+
+                div.unavailable {
+                    background: orange none !important;  /* red */
+                    border-color: coral !important;     /* red */
+                }
+
+                div.unavailable2 {
+                    background: #F03030 none !important;  /* red */
+                    border-color: #F03030 !important;     /* red */
+                }
+
+                div.available {
+                    background: #1AA11A none !important;  /* green */
+                    border-color: #136e13 !important;     /* green */
+                }
+
+            </style>
+            <style>
+                .menu
+                {
+                    font-weight: bold;
+                }
+
+                #frmDlgSubmission\:dtlist table{
+                    table-layout: fixed;
+                }
+                .ui-selectonemenu-list-item{
+                    white-space: normal!important;
+                }
+                .someClass {
+                    word-wrap: break-word;
+                    white-space: normal!important;
+                }
+                .import-btn{
+                    width: 130px!important;
+                }
+                .panelUploadFile.ui-overlaypanel{
+                    margin-bottom: 50px!important;
+                }
+            </style>
+            <script>
+
+                var player;
+
+                function stopPlayer() {
+                    console.log('function stopPlayer');
+                    if ($('#playback')[0]) {
+                        $('#playback')[0].src = '';
+                        $('#playback').hide();
+                    }
+
+                }
+
+                function showDownloadAudioButton(isShow) {
+                    console.log('showDownloadAudioButton ' + isShow);
+                    if (isShow) {
+                        $('#playback')[0].controlsList = '';
+                    } else {
+                        $('#playback')[0].controlsList = 'nodownload';
+                    }
+                }
+
+                function reloadPlayer() {
+                    console.log('function reloadPlayer');
+
+                    //<![CDATA[
+                    var viewstate = $('#downloadAudio').children('input[name="javax.faces.ViewState"]').val();
+                    var url = 'record-management?downloadAudio=downloadAudio&downloadAudio%3AbtnDownload=&javax.faces.ViewState=' + viewstate;
+                    if ($('#playback')[0]) {
+                        console.log('playback defined');
+                        $('#playback').show();
+                        $('#playback')[0].src = url;
+                    }
+
+                    //]]>
+                }
+
+                function handleSubmitRequestArea(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddArea').hide();
+                    }
+                }
+                function handleSubmitRequestAreaHeader(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddHeader').hide();
+                    }
+                }
+
+                function handleSubmitRequestMCUHeader(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddMCUHeader').hide();
+                    }
+                }
+                function handleSubmitRequestHouse(xhr, status, args, flag) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddHouse').hide();
+                        if (flag != 'UPDATE') {
+                            PF('dtHouseHold').clearFilters();
+                        }
+                    }
+                }
+                function handleSubmitRequestChannel(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddChannel').hide();
+                    }
+                }
+                function handleSubmitRequestMCU(xhr, status, args, flag) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddMCU').hide();
+                        if (flag == 'CREATE' || flag == 'CREATE2') {
+                            PF('dtMCU').clearFilters();
+                        }
+                    }
+                }
+                function handleSubmitRequestCamera(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddCamera').hide();
+                    }
+                }
+
+                if (typeof links === 'undefined') {
+                    links = {};
+                    links.locales = {};
+                } else if (typeof links.locales === 'undefined') {
+                    links.locales = {};
+                }
+
+
+
+                links.locales['vn'] = {
+                    'MONTHS': ["  Tháng 1", "  Tháng 2", "  Tháng 3", "  Tháng 4", "  Tháng 5", "  Tháng 6", "  Tháng 7", "  Tháng 8", "  Tháng 9", "  Tháng 10", "  Tháng 11", "  Tháng 12"],
+                    'MONTHS_SHORT': ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+                    'DAYS': ["Chủ nhật - ", "Thứ 2 - ", "Thứ 3 - ", "Thứ 4 - ", "Thứ 5 - ", "Thứ 6 - ", "Thứ 7 - "],
+                    'DAYS_SHORT': ["CN - ", "Th2 - ", "Th3 - ", "Th4 - ", "Th5 - ", "Th6 - ", "Th7 - "],
+                    'ZOOM_IN': "Phóng to",
+                    'ZOOM_OUT': "Thu nhỏ",
+                    'MOVE_LEFT': "Chuyển sang trái",
+                    'MOVE_RIGHT': "Chuyển sang phải",
+                    'NEW': "Tạo",
+                    'CREATE_NEW_EVENT': "Tạo sự kiện"
+                };
+
+                PrimeFaces.locales['vi'] = {closeText: 'Tắt', prevText: 'Tháng trước', nextText: 'Tháng sau', monthNames: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'], monthNamesShort: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'], dayNames: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'], dayNamesShort: ['CN', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'], dayNamesMin: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'], weekHeader: 'Tuần', firstDay: 1, isRTL: false, showMonthAfterYear: false, yearSuffix: '', timeOnlyTitle: 'Chọn giờ', timeText: 'Giờ', hourText: 'Giờ', minuteText: 'Phút', secondText: 'Giây', currentText: 'Giờ hiện hành', ampm: false, month: 'Tháng', week: 'Tuần', day: 'Ngày', allDayText: 'Cả ngày'};
+
+
+            </script>
+
+            <h:form id="form_main" >
+                <div class="stf-view-header" >
+
+
+                    <p:layout style="height: 800px; " widgetVar="loArea">
+                        <p:layoutUnit position="west" resizable="true" closable="true"  collapsible="true" size="280" minSize="100" maxSize="800" style="background: white;    border: 1px solid #eee; ">
+                            <h:outputText id="lbAreaType" value="Danh mục địa bàn"
+                                          style=" font-size: 17px; padding-left: 20px"/>
+                            <h:form>
+                                <p:commandLink id="toggle" onclick="PF('loArea').toggle('west')" style="float: right" styleClass="btn-margin fa fa-angle-double-left"/>
+                                <p:tooltip for="toggle" value="Ẩn tab" trackMouse="true" />
+                            </h:form>
+
+                            <script>
+                                //<![CDATA[
+                                function clearFilters() {
+                                    PF('dtMCU').clearFilters();
+                                    if ('#{RecordController.allowHouseManagement}' == 'true') {
+                                        PF('dtHouseHold').clearFilters();
+                                    }
+                                }
+                                //]]>
+                            </script>
+                            <p:tree id="docs" style="margin-top: 10px; width: 100%; background: #fff; padding-left: 20px" value="#{AreaController.areaRoot}" var="doc" selectionMode="single"
+                                    selection="#{AreaController.selectedArea}" dynamic="true"  >
+
+
+                                <p:ajax event="select" oncomplete="clearFilters();"
+                                        update="form_main:formAreaDetail:tabArea:formHouseDetail:dtHouseHold form_main:formAreaDetail:tabArea:pnlUserInfo
+                                        form_main:formAreaDetail:lbAreaName form_main:formAreaDetail:lbAreaType form_main:formAreaDetail:tabArea:dtChannel
+                                        form_main:formAreaDetail:tabArea:dtMCU form_main:formAreaDetail:tabArea:dtCamera form_main:formAreaDetail:tabArea:formHouseDetail:pnlHouse " />
+                                <p:ajax event="expand"  listener="#{AreaController.onNodeExpand}" />
+                                <p:ajax event="collapse"  listener="#{AreaController.onNodeCollapse}" />
+
+                                <p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+                                    <h:outputText value="#{doc.areaName}" style="font-weight:bold;"/>
+                                </p:treeNode>
+                                <p:treeNode type="vn" icon="ui-icon-star" >
+                                    <h:outputText value="#{doc.areaName}" style="font-weight:bold; " />
+                                </p:treeNode>
+                                <p:treeNode type="tp" icon="fa fa-university">
+                                    <h:outputText value="#{AreaController.isCityMode? 'TP.' :'T.'} #{doc.areaName}" style="font-weight:bold;" />
+                                </p:treeNode>
+                                <p:treeNode type="q" icon="fa fa-building">
+                                    <h:outputText value="#{AreaController.isCityMode? 'Q.' :'H.'} #{doc.areaName}" style="font-weight:bold;"/>
+                                </p:treeNode>
+                                <p:treeNode type="p" icon="ui-icon-flag">
+                                    <h:outputText value="#{AreaController.isCityMode? 'P.' :'X.'} #{doc.areaName}"/>
+                                </p:treeNode>
+                                <p:treeNode type="t" icon="fa fa-home">
+                                    <h:outputText value="#{AreaController.isCityMode? 'T.' :'T/X.'} #{doc.areaName}"/>
+                                </p:treeNode>
+                                <p:treeNode type="document" icon="ui-icon-flag">
+                                    <h:outputText value="#{doc.areaName}" />
+                                </p:treeNode>
+
+                            </p:tree>
+                            <p:contextMenu id="contextMenu0" nodeType="vn" for="docs" style="width: 22.5em" rendered="#{AreaController.isAllowInsertAREA() or AreaController.isAllowUpdateAREA() or AreaController.isAllowDeleteAREA()}">
+                                <p:menuitem value="Thêm địa bàn" rendered="#{AreaController.isAllowInsertAREA()}" actionListener="#{AreaController.addAreaEvent()}" update="dlgAddArea" oncomplete="PF('dlgAddArea').show();" icon="fa fa-plus-square" >
+                                    <p:resetInput target="formDlgAddArea"/>
+                                </p:menuitem>
+                                <p:menuitem value="Sửa địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editAreaEvent()}" update="dlgAddArea" oncomplete="PF('dlgAddArea').show();"  icon="fa fa-pencil" >
+                                    <p:resetInput target="formDlgAddArea"/>
+                                </p:menuitem>
+                                <p:menuitem value="Xóa địa bàn"  rendered="#{AreaController.isAllowDeleteAREA()}" update="docs" actionListener="#{AreaController.deleteAreaEvent()}" oncomplete="PF('cfmDeleteArea').show();" icon="fa fa-trash"/>
+                                <p:menuitem value="Cài đặt nhạc đầu bản tin cho địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editHeaderEvent()}" update="dlgAddHeader" oncomplete="PF('dlgAddHeader').show();"  icon="fa fa-music" >
+                                    <p:resetInput target="dlgAddHeader"/>
+                                </p:menuitem>
+                            </p:contextMenu>
+                            <p:contextMenu id="contextMenu1" nodeType="tp" for="docs" style="width: 22.5em" rendered="#{AreaController.isAllowInsertAREA() or AreaController.isAllowUpdateAREA() or AreaController.isAllowDeleteAREA()}">
+                                <p:menuitem value="Thêm địa bàn" rendered="#{AreaController.isAllowInsertAREA()}" actionListener="#{AreaController.addAreaEvent()}" update="dlgAddArea" oncomplete="PF('dlgAddArea').show();" icon="fa fa-plus-square" >
+                                    <p:resetInput target="formDlgAddArea"/>
+                                </p:menuitem>
+                                <p:menuitem value="Sửa địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editAreaEvent()}" update="dlgAddArea" oncomplete="PF('dlgAddArea').show();"  icon="fa fa-pencil" >
+                                    <p:resetInput target="formDlgAddArea"/>
+                                </p:menuitem>
+                                <p:menuitem value="Xóa địa bàn"  rendered="#{AreaController.isAllowDeleteAREA()}" update="docs" actionListener="#{AreaController.deleteAreaEvent()}" oncomplete="PF('cfmDeleteArea').show();" icon="fa fa-trash"/>
+                                <p:menuitem value="Cài đặt nhạc đầu bản tin cho địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editHeaderEvent()}" update="dlgAddHeader" oncomplete="PF('dlgAddHeader').show();"  icon="fa fa-music" >
+                                    <p:resetInput target="dlgAddHeader"/>
+                                </p:menuitem>
+                            </p:contextMenu>
+                            <p:contextMenu id="contextMenu2" nodeType="q" for="docs" style="width: 22.5em" rendered="#{AreaController.isAllowInsertAREA() or AreaController.isAllowUpdateAREA() or AreaController.isAllowDeleteAREA()}">
+                                <p:menuitem value="Thêm địa bàn" rendered="#{AreaController.isAllowInsertAREA()}" actionListener="#{AreaController.addAreaEvent()}" update="dlgAddArea" oncomplete="PF('dlgAddArea').show();" icon="fa fa-plus-square" >
+                                    <p:resetInput target="formDlgAddArea"/>
+                                </p:menuitem>
+                                <p:menuitem value="Sửa địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editAreaEvent()}" update="dlgAddArea" oncomplete="PF('dlgAddArea').show();"  icon="fa fa-pencil" >
+                                    <p:resetInput target="formDlgAddArea"/>
+                                </p:menuitem>
+                                <p:menuitem value="Xóa địa bàn"  rendered="#{AreaController.isAllowDeleteAREA()}" update="docs" actionListener="#{AreaController.deleteAreaEvent()}" oncomplete="PF('cfmDeleteArea').show();" icon="fa fa-trash"/>
+                                <p:menuitem value="Cài đặt nhạc đầu bản tin cho địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editHeaderEvent()}" update="dlgAddHeader" oncomplete="PF('dlgAddHeader').show();"  icon="fa fa-music" >
+                                    <p:resetInput target="dlgAddHeader"/>
+                                </p:menuitem>
+                            </p:contextMenu>
+                            <p:contextMenu id="contextMenu3" nodeType="p" for="docs" style="width: 22.5em" rendered="#{AreaController.isAllowInsertAREA() or AreaController.isAllowUpdateAREA() or AreaController.isAllowDeleteAREA()}">
+                                <p:menuitem value="Thêm địa bàn" rendered="#{AreaController.isAllowInsertAREA()}" actionListener="#{AreaController.addAreaEvent()}" update="dlgAddArea" oncomplete="PF('dlgAddArea').show();" icon="fa fa-plus-square" >
+                                    <p:resetInput target="formDlgAddArea"/>
+                                </p:menuitem>
+                                <p:menuitem value="Sửa địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editAreaEvent()}" update="dlgAddArea" oncomplete="PF('dlgAddArea').show();"  icon="fa fa-pencil" >
+                                    <p:resetInput target="formDlgAddArea"/>
+                                </p:menuitem>
+                                <p:menuitem value="Xóa địa bàn"  rendered="#{AreaController.isAllowDeleteAREA()}" update="docs" actionListener="#{AreaController.deleteAreaEvent()}" oncomplete="PF('cfmDeleteArea').show();" icon="fa fa-trash"/>
+                                <p:menuitem value="Cài đặt nhạc đầu bản tin cho địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editHeaderEvent()}" update="dlgAddHeader" oncomplete="PF('dlgAddHeader').show();"  icon="fa fa-music" >
+                                    <p:resetInput target="dlgAddHeader"/>
+                                </p:menuitem>
+                            </p:contextMenu>
+                            <p:contextMenu id="contextMenu4" nodeType="t" for="docs" style="width: 22.5em" rendered="#{AreaController.isAllowInsertAREA() or AreaController.isAllowUpdateAREA() or AreaController.isAllowDeleteAREA()}">
+                                <p:menuitem value="Sửa địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editAreaEvent()}" update="dlgAddArea" oncomplete="PF('dlgAddArea').show();"  icon="fa fa-pencil" >
+                                    <p:resetInput target="formDlgAddArea"/>
+                                </p:menuitem>
+                                <p:menuitem value="Xóa địa bàn"  rendered="#{AreaController.isAllowDeleteAREA()}" update="docs" actionListener="#{AreaController.deleteAreaEvent()}" oncomplete="PF('cfmDeleteArea').show();" icon="fa fa-trash"/>
+                                <p:menuitem value="Cài đặt nhạc đầu bản tin cho địa bàn"  rendered="#{AreaController.isAllowUpdateAREA()}" action="#{AreaController.editHeaderEvent()}" update="dlgAddHeader" oncomplete="PF('dlgAddHeader').show();"  icon="fa fa-music" >
+                                    <p:resetInput target="dlgAddHeader"/>
+                                </p:menuitem>
+                            </p:contextMenu>
+                        </p:layoutUnit>
+
+                        <p:layoutUnit position="center" style="background: white; border: 1px solid #eee;">
+
+                            <h:form id="formAreaDetail">
+                                <h:outputText id="lbAreaType" value="#{AreaController.selectedArea.areaType eq 1?'Tỉnh/TP':AreaController.selectedArea.areaType eq 2?'Quận/huyện':AreaController.selectedArea.areaType eq 3 ?'Phường/xã':'Tổ/xóm'}: "
+                                              style=" font-size: 17px; margin-top: 10px"/>
+                                <h:outputText id="lbAreaName" value=" #{AreaController.selectedArea.areaName}"
+                                              style=" font-size: 17px; margin-top: 10px; color: #005CAC; "/>
+                                <p:tabView id="tabArea" cache="false" activeIndex="#{AreaController.tabSelect}" style="margin-top: 10px">
+                                    <p:ajax event="tabChange" listener="#{centerprocess.onTabChange}" update="breadCrumb" />
+                                    <p:tab  title="Thông tin địa bàn">
+
+
+                                        <p:panelGrid id="pnlUserInfo" columns="2" columnClasses="ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                                            <p:outputLabel value="Tên địa bàn" for="txtParamName"/>
+                                            <p:inputText id="txtParamName" value="#{AreaController.selectedArea.areaName}" disabled="true">
+                                            </p:inputText>
+
+                                            <p:outputLabel value="Mã địa bàn" for="txtParamCode"/>
+                                            <p:inputText id="txtParamCode" disabled="true" value="#{AreaController.selectedArea.areaCode}" >
+                                            </p:inputText>
+
+
+                                            <p:outputLabel value="Số hộ gia đình" for="txtParamValue" rendered="#{AreaController.allowHouseManagement}" />
+                                            <p:inputText id="txtParamValue" value="#{AreaController.listHouse.size()}" disabled="true" rendered="#{AreaController.allowHouseManagement}" >
+                                            </p:inputText>
+
+                                            <p:outputLabel value="Số lượng thiết bị" for="txtPrepaid"/>
+                                            <p:inputText id="txtPrepaid" value="#{AreaController.listMCU.size()}" disabled="true"   >
+                                            </p:inputText>
+
+                                        </p:panelGrid>
+
+                                    </p:tab>
+                                    <p:tab title="Hộ gia đình" rendered="#{AreaController.allowHouseManagement}" >
+                                        <h:form id="formHouseDetail">
+                                            <h:panelGrid id="pnlHouse" columns="1" class="ui-fluid stf-table" width="100%">
+
+                                                <p:commandButton id="cmdAddHouse" process="@this" value="Thêm hộ gia đình" icon="fa fa-plus-square"
+                                                                 rendered="#{AreaController.allowInsertHOUSEHOLD and AreaController.selectedArea.areaType eq 4}"
+                                                                 styleClass=" btn-success btn-auto" actionListener="#{AreaController.addHouseEvent()}" update="dlgAddHouse"
+                                                                 oncomplete="PF('dlgAddHouse').show();" >
+                                                    <p:resetInput target="formDlgAddHouse"/> </p:commandButton>
+
+
+
+                                                <p:dataTable id="dtHouseHold" value="#{AreaController.listHouse}" var="house"
+                                                             rowKey="#{house.id}" selectionMode="single"
+                                                             paginator="true"
+                                                             rows="20"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                                             rowsPerPageTemplate="10,20,30"
+                                                             widgetVar="dtHouseHold"
+                                                             sortBy="#{house.holder_name}"
+                                                             emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+
+
+
+                                                    <p:column headerText="STT" style="width: 5%!important" >
+                                                        #{rownum + 1}
+                                                    </p:column>
+
+                                                    <p:column headerText="Tên chủ hộ" style="width: 15%!important" filterMatchMode="contains" filterBy="#{house.holder_name}" sortBy="#{house.holder_name}">
+                                                        <h:outputText value=" #{house.holder_name}">
+                                                        </h:outputText>
+                                                    </p:column>
+                                                    <p:column headerText="Địa chỉ" style="width: 20%" filterMatchMode="contains" filterBy="#{house.address}" sortBy="#{house.address}">
+                                                        <h:outputText value=" #{house.address}">
+                                                        </h:outputText>
+                                                    </p:column>
+
+
+
+                                                    <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 10%!important;"  rendered="#{!(ProductController.mflag eq 'VIEW')}" >
+                                                        <p:commandLink id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin"
+                                                                       actionListener="#{AreaController.viewHouseEvent(house)}" update="dlgAddHouse" oncomplete="PF('dlgAddHouse').show();">
+                                                        </p:commandLink>
+                                                        <p:commandLink  id="bntEdit" rendered="#{AreaController.allowUpdateHOUSEHOLD}" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil" global="false" process="@this"
+                                                                        actionListener="#{AreaController.editHouseEvent(house)}" update="dlgAddHouse" oncomplete="PF('dlgAddHouse').show();" >
+                                                        </p:commandLink>
+                                                        <p:commandLink rendered="#{AreaController.allowDeleteHOUSEHOLD}"  id="bntDelete" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                                       actionListener="#{AreaController.deleteHouseEvent(house)}" update="cfmDeleteHouse" oncomplete="PF('cfmDeleteHouse').show();" styleClass="btn-margin fa fa-trash" />
+
+                                                        <p:commandLink rendered="#{AreaController.allowInsertMCU}" id="bntAddMCU" resetValues="true" style="margin-left: 5px; color: #005CAC;"  styleClass="btn-margin fa fa-plus" global="false" process="@this"
+                                                                       actionListener="#{AreaController.addMCUEvent(house)}" update="dlgAddMCU" oncomplete="PF('dlgAddMCU').show();" >
+                                                            <p:resetInput target="formDlgAddMCU"/>
+                                                        </p:commandLink>
+
+                                                        <p:tooltip for="bntView" value="#{PP_SHARED.view}" trackMouse="true" />
+                                                        <p:tooltip for="bntEdit" value="#{PP_SHARED.edit}" trackMouse="true" />
+                                                        <p:tooltip for="bntDelete" value="#{PP_SHARED.del}" trackMouse="true" />
+                                                        <p:tooltip for="bntAddMCU" value="Thêm #{PP_SHARED.MCU_name} cho hộ gia đình" trackMouse="true" />
+                                                    </p:column>
+                                                </p:dataTable>
+
+                                            </h:panelGrid>
+                                        </h:form>
+
+                                    </p:tab>
+                                    <p:tab title="Thiết bị">
+
+                                        <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%">
+
+                                            <p:commandButton id="cmdAddPublicMCU" process="@this" value="Thêm MIRA" icon="fa fa-plus-square"
+                                                             rendered="#{AreaController.allowInsertMCU}"
+                                                             styleClass=" btn-success btn-auto" actionListener="#{AreaController.addPublicMCUEvent(evt)}" update="dlgAddMCU"
+                                                             oncomplete="PF('dlgAddMCU').show();" >
+                                                <p:resetInput target="dlgAddMCU"/>
+                                            </p:commandButton>
+                                            <p:tooltip for="cmdAddPublicMCU" value="Thêm MIRA tại địa bàn" trackMouse="true" />
+
+                                            <p:dataTable id="dtMCU" value="#{AreaController.listMCU}" var="mcu"
+                                                         rowKey="#{mcu.mcu_id}"  selectionMode="single"
+                                                         paginator="true"
+                                                         rows="20"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                                         rowsPerPageTemplate="10,20,30"
+                                                         widgetVar="dtMCU"
+                                                         emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+
+
+
+                                                <p:column headerText="STT" style="width: 5%!important" >
+                                                    #{rownum + 1}
+                                                </p:column>
+
+                                                <p:column headerText="Mã thiết bị" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcu.mcu_id}" sortBy="#{mcu.mcu_id}">
+                                                    <h:outputText value=" #{mcu.mcu_id}">
+                                                    </h:outputText>
+                                                </p:column>
+                                                <p:column headerText="Địa chỉ IP" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcu.mcu_ip}" sortBy="#{mcu.mcu_ip}">
+                                                    <h:outputText value=" #{mcu.mcu_ip}">
+                                                    </h:outputText>
+                                                </p:column>
+
+                                                <p:column headerText="Loại" rendered="#{AreaController.allowHouseManagement}" style="width: 7%!important" filterMatchMode="exact" filterBy="#{mcu.mcu_type}" sortBy="#{mcu.mcu_type}" width="7% !important">
+                                                    <f:facet name="filter">
+                                                        <p:selectOneMenu  onchange="PF('dtMCU').filter()">
+                                                            <f:selectItem itemValue="" itemLabel="" />
+                                                            <f:selectItem itemValue="1" itemLabel="mGateway" />
+                                                            <f:selectItem itemValue="2" itemLabel="MIRA" />
+                                                        </p:selectOneMenu>
+                                                    </f:facet>
+                                                    <h:outputText value=" #{mcu.mcu_type eq 1 ? 'mGateway' : 'MIRA'}" >
+                                                    </h:outputText>
+                                                </p:column>
+
+                                                <p:column headerText="#{AreaController.allowHouseManagement?'Hộ gia đình/Tên MIRA':'Tên MIRA'}" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcu.mira_name}" sortBy="#{mcu.mira_name}">
+                                                    <h:outputText value=" #{mcu.mira_name}">
+                                                    </h:outputText>
+                                                </p:column>
+                                                <p:column headerText="Địa chỉ" style="width: 20%!important" filterMatchMode="contains" filterBy="#{mcu.address}" sortBy="#{mcu.address}">
+                                                    <h:outputText value=" #{mcu.address}">
+                                                    </h:outputText>
+                                                </p:column>
+                                                <p:column headerText="Trạng thái" style="width: 10%!important" filterMatchMode="exact" filterBy="#{mcu.mcu_connect_status}" sortBy="#{mcu.mcu_connect_status}" width="7%">
+                                                    <f:facet name="filter">
+                                                        <p:selectOneMenu  onchange="PF('dtMCU').filter()">
+                                                            <f:selectItem itemValue="" itemLabel="" />
+                                                            <f:selectItem itemValue="1" itemLabel="Đang kết nối" />
+                                                            <f:selectItem itemValue="0" itemLabel="Mất kết nối" />
+                                                        </p:selectOneMenu>
+                                                    </f:facet>
+                                                    <h:outputText value=" #{mcu.mcu_connect_status eq 1 ? 'Đang kết nối' : 'Mất kết nối'}"
+                                                                  style="color: #{mcu.mcu_connect_status eq 1 ? 'blue' : 'red' }" >
+                                                    </h:outputText>
+                                                </p:column>
+                                                <p:column headerText="Thao tác" style="width: 7%!important">
+                                                    <p:commandLink id="bntViewMCu" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin"
+                                                                   actionListener="#{AreaController.viewMCUEvent(mcu)}" update="dlgMCUInfo" oncomplete="PF('dlgMCUInfo').show();">
+                                                    </p:commandLink>
+                                                    <p:commandLink  id="bntEditMCU" rendered="#{AreaController.allowUpdateMCU}" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil" global="false" process="@this"
+                                                                    actionListener="#{AreaController.updateMCUEvent(mcu)}" update="dlgAddMCU" oncomplete="PF('dlgAddMCU').show();" >
+                                                    </p:commandLink>
+                                                    <p:commandLink rendered="#{AreaController.allowDeleteMCU}"  id="bntDelete" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                                   actionListener="#{AreaController.deleteMCUEvent(mcu)}" update="cfmDeleteMCU" oncomplete="PF('cfmDeleteMCU').show();" styleClass="btn-margin fa fa-trash" />
+
+
+                                                    <p:commandLink rendered="#{AreaController.allowUpdateMCU}"  disabled="#{mcu.mcu_connect_status eq 1}" id="bntRebootMcu" style="margin-left: 5px; color: #005CAC;"  process="@this"
+                                                                   actionListener="#{AreaController.rebootMCUEvent(mcu)}" update="cfmRebootMcu" oncomplete="PF('cfmRebootMcu').show();" styleClass="btn-margin fa fa-refresh" >
+
+                                                    </p:commandLink>
+
+                                                    <p:commandLink id="bntViewTimeline" process="@this" resetValues="true" styleClass="fa fa-bar-chart btn-margin"
+                                                                   actionListener="#{AreaController.viewMCUTimeline(mcu)}" update="dlgMCUTimeline" oncomplete="PF('dlgMCUTimeline').show();">
+                                                    </p:commandLink>
+
+                                                    <p:commandLink id="bntViewMCULog" process="@this" resetValues="true" styleClass="fa fa-list btn-margin"
+                                                                   actionListener="#{AreaController.viewMCULog(mcu)}" update="dlgMCULog" oncomplete="PF('dlgMCULog').show();">
+                                                    </p:commandLink>
+
+                                                    <p:commandLink  id="bntAddMCUHeader" rendered="#{AreaController.allowUpdateMCU}" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-music" global="false" process="@this"
+                                                                    actionListener="#{AreaController.updateMCUHeaderEvent(mcu)}" update="dlgAddHeader" oncomplete="PF('dlgAddHeader').show();" >
+                                                    </p:commandLink>
+
+
+                                                    <p:tooltip for="bntViewMCu" value="Xem thông tin" trackMouse="true" />
+                                                    <p:tooltip for="bntEditMCU" value="Cập nhật thông tin" trackMouse="true" />
+                                                    <p:tooltip for="bntDelete" value="Xóa #{PP_SHARED.MCU_name}" trackMouse="true" />
+                                                    <p:tooltip for="bntRebootMcu" value="Khởi động lại #{PP_SHARED.MCU_name}" trackMouse="true" />
+                                                    <p:tooltip for="bntViewTimeline" value="Xem biểu đồ trạng thái" trackMouse="true" />
+                                                    <p:tooltip for="bntViewMCULog" value="Xem nhật ký bản tin trên thiết bị" trackMouse="true" />
+                                                    <p:tooltip for="bntAddMCUHeader" value="Cài đặt nhạc đầu bản tin tiếp sóng cho thiết bị" trackMouse="true" />
+
+                                                </p:column>
+
+
+                                            </p:dataTable>
+
+                                        </h:panelGrid>
+                                    </p:tab>
+
+                                    <p:tab title="Kênh đài FM" rendered="#{AreaController.allowRadioAREA}">
+
+                                        <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%">
+
+                                            <p:commandButton id="cmdAddChannel" process="@this" value="Cấu hình kênh" icon="fa fa-plus-square"
+                                                             rendered="#{AreaController.allowInsertMCU}"
+                                                             styleClass="btn-success btn-auto" actionListener="#{AreaController.addChannelForArea(evt)}" update="dlgAddChannel"
+                                                             oncomplete="PF('dlgAddChannel').show();" >
+                                                <p:resetInput target="dlgAddChannel"/>
+                                            </p:commandButton>
+                                            <p:tooltip for="cmdAddChannel" value="Cấu hình kênh đài cho địa bàn" trackMouse="true" />
+
+                                            <p:dataTable id="dtChannel" value="#{AreaController.listChannel}" var="channel"
+                                                         rowKey="#{channel.id}" selectionMode="single"
+                                                         paginator="true"
+                                                         rows="20"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                                         rowsPerPageTemplate="10,20,30"
+                                                         widgetVar="dtChannel"
+                                                         emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+
+                                                <p:column headerText="STT" style="width: 5%!important" >
+                                                    #{rownum + 1}
+                                                </p:column>
+
+                                                <p:column headerText="Tên kênh" id="maincontent" style="width: 20%!important" filterMatchMode="contains" filterBy="#{channel.name}" sortBy="#{channel.name}">
+                                                    <h:outputText value="#{channel.name}">
+                                                    </h:outputText>
+                                                </p:column>
+
+                                                <p:column headerText="Mô tả" style="width: 20%!important" filterMatchMode="contains" filterBy="#{channel.description}" sortBy="#{channel.description}" >
+                                                    <h:outputText value=" #{channel.description}">
+                                                    </h:outputText>
+                                                </p:column>
+
+                                                <p:column headerText="URL kênh" style="width: 20%!important" filterMatchMode="contains" filterBy="#{channel.url}" sortBy="#{channel.url}">
+                                                    <h:outputText value=" #{channel.url}">
+                                                    </h:outputText>
+                                                </p:column>
+
+                                                <p:column headerText="Tần số kênh (mHz)" style="width: 20%!important" filterMatchMode="contains" filterBy="#{channel.frequency}" sortBy="#{channel.frequency}">
+                                                    <h:outputText value=" #{channel.frequency}">
+                                                    </h:outputText>
+                                                </p:column>
+
+
+                                            </p:dataTable>
+
+                                        </h:panelGrid>
+                                    </p:tab>
+
+                                    <p:tab title="Camera" >
+                                        <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%">
+
+                                            <p:commandButton  id="cmdAddCamera" process="@this" value="Thêm Camera" icon="fa fa-plus-square"
+                                                              rendered="#{AreaController.allowInsertAiCamera}"
+                                                              styleClass=" btn-success btn-auto" actionListener="#{AreaController.addCameraEvent()}" update="dlgAddCamera"
+                                                              oncomplete="PF('dlgAddCamera').show();" >
+                                                <p:resetInput target="dlgAddCamera"/>
+                                            </p:commandButton>
+                                            <p:tooltip for="cmdAddCamera" value="Thêm Camera tại địa bàn" trackMouse="true" />
+
+                                            <p:dataTable id="dtCamera" value="#{AreaController.listAiCameraByArea}" var="camera"
+                                                         rowKey="#{camera.id}" selectionMode="single"
+                                                         paginator="true"
+                                                         rows="20"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                                         rowsPerPageTemplate="10,20,30"
+                                                         widgetVar="dtCamera"
+                                                         emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+
+
+                                                <p:column headerText="STT" style="width: 5%!important" >
+                                                    #{rownum + 1}
+                                                </p:column>
+                                                <p:column headerText="Mã Camera" style="width: 20%!important" filterMatchMode="contains" filterBy="#{camera.cam_id}" sortBy="#{camera.cam_id}">
+                                                    <h:outputText value="#{camera.cam_id}">
+                                                    </h:outputText>
+                                                </p:column>
+                                                <p:column headerText="Tên Camera" style="width: 20%!important" filterMatchMode="contains" filterBy="#{camera.cam_name}" sortBy="#{camera.cam_name}">
+                                                    <h:outputText value="#{camera.cam_name}">
+                                                    </h:outputText>
+                                                </p:column>
+                                                <p:column headerText="Vị trí" style="width: 20%!important" filterMatchMode="contains" filterBy="#{camera.cam_position}" sortBy="#{camera.cam_position}">
+                                                    <h:outputText value="#{camera.cam_position}">
+                                                    </h:outputText>
+                                                </p:column>
+                                                <p:column headerText="Kinh độ" style="width: 20%!important" filterMatchMode="contains" filterBy="#{camera.lon}" sortBy="#{camera.lon}">
+                                                    <h:outputText value="#{camera.lon}">
+                                                    </h:outputText>
+                                                </p:column>
+                                                <p:column headerText="Vĩ dộ" style="width: 20%!important" filterMatchMode="contains" filterBy="#{camera.lat}" sortBy="#{camera.lat}">
+                                                    <h:outputText value="#{camera.lat}">
+                                                    </h:outputText>
+                                                </p:column>
+
+                                                <p:column headerText="Thao tác" style="width: 10%!important">
+                                                    <p:commandLink rendered="#{AreaController.allowViewAiCamera}" id="bntViewCamera" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin"
+                                                                   actionListener="#{AreaController.viewCameraEvent(camera)}" update="dlgCameraInfo" oncomplete="PF('dlgCameraInfo').show();">
+                                                    </p:commandLink>
+                                                    <p:commandLink  rendered="#{AreaController.allowUpdateAiCamera}" id="bntEditCamera"  resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil" global="false" process="@this"
+                                                                    actionListener="#{AreaController.updateCameraEvent(camera)}" update="dlgAddCamera" oncomplete="PF('dlgAddCamera').show();" >
+                                                    </p:commandLink>
+                                                    <p:commandLink  rendered="#{AreaController.allowDeleteAiCamera}"  id="bntDeleteCamera" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                                    actionListener="#{AreaController.deleteCameraEvent(camera)}" update="cfmDeleteCamera" oncomplete="PF('cfmDeleteCamera').show();" styleClass="btn-margin fa fa-trash" />
+                                                    <p:commandLink  rendered="#{AreaController.allowViewAiCamera}" id="bntAddMCUCamera" resetValues="true" style="margin-left: 5px;"  styleClass="btn-margin fa fa-cog" global="false" process="@this"
+                                                                    actionListener="#{AreaController.updateMCUCameraEvent(camera)}" update="dlgAddCameraMCU" oncomplete="PF('dlgAddCameraMCU').show();" >
+                                                    </p:commandLink>
+                                                    <p:commandLink  rendered="#{AreaController.allowViewAiCamera}" id="bntUpdateAiCameraSlot" resetValues="true" style="margin-left: 5px;"  styleClass="btn-margin fa fa-clock-o" global="false" process="@this"
+                                                                    actionListener="#{AreaController.updateAiCameraSlotEvent(camera)}" update="dlgUpdateNotifyTime" oncomplete="PF('dlgUpdateNotifyTime').show();" >
+                                                    </p:commandLink>
+
+                                                    <p:tooltip  rendered="#{AreaController.allowViewAiCamera}" for="bntViewCamera" value="Xem thông tin" trackMouse="true" />
+                                                    <p:tooltip  rendered="#{AreaController.allowUpdateAiCamera}" for="bntEditCamera" value="Cập nhật thông tin" trackMouse="true" />
+                                                    <p:tooltip   rendered="#{AreaController.allowDeleteAiCamera}" for="bntDeleteCamera" value="Xóa #{PP_SHARED.MCU_name}" trackMouse="true" />
+                                                    <p:tooltip  rendered="#{AreaController.allowViewAiCamera}" for="bntAddMCUCamera" value="Cài đặt camera cho thiết bị" trackMouse="true" />
+                                                    <p:tooltip  rendered="#{AreaController.allowViewAiCamera}" for="bntUpdateAiCameraSlot" value="Cài đặt thười gian thông báo cho camera" trackMouse="true" />
+
+                                                </p:column>
+
+                                            </p:dataTable>
+
+                                        </h:panelGrid>
+
+                                    </p:tab>
+
+                                </p:tabView>
+
+                            </h:form>
+                        </p:layoutUnit>
+                    </p:layout>
+
+                </div>
+            </h:form>
+
+
+            <p:dialog header="Cài đặt nhạc đầu bản tin tiếp sóng"
+                      id="dlgAddHeader" widgetVar="dlgAddHeader" width="600" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formDlgAddHeader" >
+                    <div>
+
+                        <p:panelGrid id="pnlUserInfo" columns="1" columnClasses="ui-grid-col-6" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:fileUpload  id="txtHeader" value="#{RecordController.audioFile}"
+                                           mode="advanced"
+                                           skinSimple="true" auto="true" fileUploadListener="#{AreaController.uploadAudioHandler}"
+                                           styleClass="fileupload-simple"
+                                           update="fileName :grow_main_dt"
+
+                                           label="Tải lên file âm thanh" uploadLabel="llll"
+                                           required="true" style="width: 20%; float: left"
+                                           onstart="PF('statusDialog').show();" oncomplete="PF('statusDialog').hide();"
+                                           />
+
+                            <p:row>
+                                <p:outputLabel id="fileName" value="#{AreaController.fileName}" style="color: #005CAC; text-align: left; display: table"/>
+                                <audio preload="auto" id="playback" src="" autobuffer ="true" controls="controls" controlsList="nodownload" style="display: none;"></audio>
+                            </p:row>
+
+                        </p:panelGrid>
+
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave"  value="#{PP_SHARED.ok}"  actionListener="#{AreaController.saveHeader()}" icon="fa fa-check-square"
+                                               update="form_main formDlgAddHeader :grow_main_dt"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestAreaHeader(xhr, status, args);" />
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}"
+                                             oncomplete="PF('dlgAddHeader').hide();" styleClass="btn-danger btn-margin btn-width" />
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+
+            <p:dialog header="#{AreaController.acttionFlag eq 'CREATE'?'Thêm ':'Sửa thông tin '}địa bàn"
+                      id="dlgAddArea" widgetVar="dlgAddArea" width="900" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="downloadAudio" style="display:none">
+                    <p:commandButton id ="btnDownload" value="Download" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-arrowthick-1-s">
+                        <p:fileDownload value="#{AreaController.playbackStream}" />
+                    </p:commandButton>
+                </h:form>
+
+                <h:form id="formDlgAddArea" >
+                    <div>
+
+                        <p:panelGrid id="pnlUserInfo" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="#{AreaController.addedArea.areaType eq 1?'Tên tỉnh/TP':AreaController.addedArea.areaType eq 2?'Tên quận/huyện':AreaController.addedArea.areaType eq 3 ?'Tên phường/xã':AreaController.addedArea.areaType eq 4 ?'Tên tổ/xóm':'Tên địa bàn'}"
+                                           for="txtAreaName"/>
+                            <p:inputText id="txtAreaName"   value="#{AreaController.addedArea.areaName}"
+                                         required="true" requiredMessage="Tên địa bàn #{PP_SHARED.can_not_be_empty}"
+                                         >
+                            </p:inputText>
+
+                            <p:outputLabel value="Trực thuộc #{AreaController.addedArea.areaType eq 1?'':AreaController.addedArea.areaType eq 2 ? 'tỉnh/TP' : AreaController.addedArea.areaType eq 3 ? 'quận/huyện':'phường/xã' }" for="txtParentArea"
+                                           rendered="#{AreaController.addedArea.areaType ne 0}"/>
+                            <p:inputText rendered="#{AreaController.acttionFlag eq 'CREATE' and AreaController.addedArea.areaType ne 0}" id="txtParentArea" value="#{AreaController.selectedArea.areaName}" disabled="true" >
+                            </p:inputText>
+
+                            <p:inputText rendered="#{AreaController.acttionFlag eq 'UPDATE' and AreaController.addedArea.areaType ne 0 }" id="txtParentArea2" value="#{AreaController.selectedArea.parent.areaName}" disabled="true" >
+                            </p:inputText>
+
+                            <p:inputText rendered="false" id="txtParentArea3" value="-/-" disabled="true" >
+                            </p:inputText>
+
+                            <p:outputLabel value="Mã địa bàn" for="txtAreaCode"/>
+                            <p:inputText id="txtAreaCode"   value="#{AreaController.addedArea.areaCode}"
+                                         required="true" requiredMessage="Mã địa bàn#{PP_SHARED.can_not_be_empty}"
+                                         >
+
+                            </p:inputText>
+
+
+                            <p:outputLabel rendered="false" value="File âm thanh đầu bản tin" for="txtHeader"/>
+                            <p:fileUpload rendered="false" id="txtHeader" value="#{RecordController.audioFile}"
+                                          mode="advanced"
+                                          skinSimple="true" auto="true" fileUploadListener="#{AreaController.uploadAudioHandler}"
+                                          styleClass="fileupload-simple"
+                                          update="fileName :grow_main_dt"
+
+                                          label="" uploadLabel="llll"
+                                          required="true" style="width: 20%; float: left"
+                                          onstart="PF('statusDialog').show();" oncomplete="PF('statusDialog').hide();"
+                                          />
+                            <p:tooltip for="txtHeader" value="Tải lên file audio" trackMouse="true" />
+
+                            <p:outputLabel value=""  />
+                            <p:row rendered="false" >
+                                <p:outputLabel id="fileName" value="#{AreaController.fileName}" style="color: #005CAC; text-align: left; display: table"/>
+                                <audio preload="auto" id="playback" src="" autobuffer ="true" controls="controls" controlsList="nodownload" style="display: none;"></audio>
+                            </p:row>
+
+                        </p:panelGrid>
+
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave"  value="#{PP_SHARED.ok}"  actionListener="#{AreaController.saveArea()}" icon="fa fa-check-square"
+                                               update="form_main formDlgAddArea :grow_main_dt" resetValues="true"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestArea(xhr, status, args);" />
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}"
+                                             oncomplete="PF('dlgAddArea').hide();" styleClass="btn-danger btn-margin btn-width" />
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+
+            <p:dialog id="dlgAddHouse" widgetVar="dlgAddHouse" width="900" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <f:facet name="header" >
+                    <h:outputText value="Thêm hộ gia đình" rendered="#{AreaController.houseActtionFlag eq 'CREATE'}"/>
+                    <h:outputText value="Sửa hộ gia đình" rendered="#{AreaController.houseActtionFlag eq 'UPDATE'}"/>
+                    <h:outputText value="Xem thông tin hộ gia đình" rendered="#{AreaController.houseActtionFlag eq 'VIEW'}"/>
+                </f:facet>
+                <h:form id="formDlgAddHouse" >
+                    <div>
+
+                        <p:tabView id="tabAddHouse">
+                            <p:tab title="Thông tin chung">
+                                <p:panelGrid id="pnlHouseInfo" columns="4" columnClasses="ui-grid-col-3,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                                    <p:outputLabel value="Tên chủ hộ" for="txtHouseName"/>
+                                    <p:inputText id="txtHouseName" value="#{AreaController.selectedHouse.holder_name}" disabled="#{AreaController.houseActtionFlag eq 'VIEW'}"
+                                                 required="true" requiredMessage="Tên chủ hộ #{PP_SHARED.can_not_be_empty}" >
+
+                                    </p:inputText>
+
+                                    <p:outputLabel value="Trực thuộc địa bàn" for="txtArea"/>
+                                    <p:inputText id="txtArea" disabled="true" value="#{AreaController.selectedHouse.area_name}" >
+                                    </p:inputText>
+
+
+                                    <p:outputLabel value="Địa chỉ" for="txtAddr"  />
+                                    <p:inputTextarea id="txtAddr" disabled="#{AreaController.houseActtionFlag eq 'VIEW'}" value="#{AreaController.selectedHouse.address}"
+                                                     rows="1" cols="3"
+                                                     required="true" requiredMessage="Địa chỉ#{PP_SHARED.can_not_be_empty}" >
+                                    </p:inputTextarea>
+
+                                    <p:outputLabel value=""  />
+                                    <p:outputLabel value=""  />
+
+                                </p:panelGrid>
+                            </p:tab>
+                            <p:tab title="Thiết bị mGateway" disabled="#{AreaController.houseActtionFlag eq 'CREATE'}">
+                                <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%">
+
+                                    <p:commandButton    rendered="false" id="cmdAddMCU" process="@this" value="Thêm #{PP_SHARED.MCU_name}" icon="fa fa-plus-square"
+                                                        styleClass=" btn-success btn-auto " actionListener="#{AreaController.addMCUEvent()}" update="dlgAddMCU"
+                                                        oncomplete="PF('dlgAddMCU').show();" />
+
+
+
+                                    <p:dataTable id="dtHouseMCU" value="#{AreaController.listHouseMCU}" var="mcu"
+                                                 rowKey="#{mcu.mcu_id}"
+                                                 paginator="true"
+                                                 rows="20"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                                 rowsPerPageTemplate="10,20,30" draggableColumns="true"
+                                                 widgetVar="dtService"
+                                                 emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+
+                                        <p:column headerText="STT" style="width: 5%!important" >
+                                            #{rownum + 1}
+                                        </p:column>
+
+                                        <p:column headerText="Mã thiết bị" style="width: 10%!important" >
+                                            <h:outputText value=" #{mcu.mcu_id}">
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column headerText="Địa chỉ IP" style="width: 10%!important">
+                                            <h:outputText value=" #{mcu.mcu_ip}">
+                                            </h:outputText>
+                                        </p:column>
+
+                                        <p:column headerText="Trạng thái" style="width: 10%!important">
+                                            <h:outputText value=" #{mcu.mcu_connect_status eq 1 ? 'Đang kết nối' : 'Mất kết nối'}">
+                                            </h:outputText>
+                                        </p:column>
+
+                                        <p:column headerText="Thao tác" style="width: 10%!important" >
+                                            <p:commandLink id="bntViewMCu" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin"
+                                                           actionListener="#{AreaController.viewMCUEvent(mcu)}" update="dlgMCUInfo" oncomplete="PF('dlgMCUInfo').show();">
+                                            </p:commandLink>
+                                            <p:commandLink  id="bntEditMCU" rendered="#{AreaController.allowUpdateMCU}" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil" global="false" process="@this"
+                                                            actionListener="#{AreaController.updateMCUEvent(mcu)}" update="dlgAddMCU" oncomplete="PF('dlgAddMCU').show();" >
+                                            </p:commandLink>
+                                            <p:commandLink rendered="#{AreaController.allowDeleteMCU}"  id="bntDelete" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                           actionListener="#{AreaController.deleteMCUEvent(mcu)}" update="cfmDeleteMCU" oncomplete="PF('cfmDeleteMCU').show();" styleClass="btn-margin fa fa-trash " />
+
+
+                                            <p:commandLink  id="bntRebootMcu" style="margin-left: 5px; color: #005CAC;" rendered="#{AreaController.allowUpdateMCU}" global="false" process="@this"
+                                                            actionListener="#{AreaController.rebootMCUEvent(mcu)}" update="cfmRebootMcu" oncomplete="PF('cfmRebootMcu').show();" styleClass="btn-margin fa fa-refresh" />
+
+                                            <p:tooltip for="bntViewMCu" value="Xem thông tin" trackMouse="true" />
+                                            <p:tooltip for="bntEditMCU" value="Sửa thông tin" trackMouse="true" />
+                                            <p:tooltip for="bntDelete" value="Xóa #{PP_SHARED.MCU_name}" trackMouse="true" />
+                                            <p:tooltip for="bntRebootMcu" value="Khởi động lại #{PP_SHARED.MCU_name}" trackMouse="true" />
+                                        </p:column>
+
+
+                                    </p:dataTable>
+
+                                </h:panelGrid>
+                            </p:tab>
+                            <p:tab title="Số điện thoại" rendered="false">
+                                <h:panelGrid columns="2" cellpadding="10">
+                                    <p:graphicImage name="demo/images/godfather/godfather3.jpg" />
+                                    <h:outputText value="After a break of more than 15 years..." />
+                                </h:panelGrid>
+                            </p:tab>
+                        </p:tabView>
+
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave" rendered="#{AreaController.houseActtionFlag ne 'VIEW'}" value="#{PP_SHARED.ok}"  actionListener="#{AreaController.saveHouse(evt)}" icon="fa fa-check-square"
+                                               update="form_main:formAreaDetail:tabArea:formHouseDetail:dtHouseHold formDlgAddHouse :grow_main_dt" process="@this formDlgAddHouse "
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestHouse(xhr, status, args, '#{AreaController.houseActtionFlag}');"
+                                               />
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"
+                                             value="#{AreaController.houseActtionFlag ne 'VIEW' ? PP_SHARED.cancel : 'Đóng'}"
+                                             oncomplete="PF('dlgAddHouse').hide();" styleClass="btn-danger btn-margin btn-width" />
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+
+            <p:dialog header="#{AreaController.mcuActtionFlag eq 'UPDATE'? 'Cập nhật thông tin':'Thêm'} #{AreaController.mcuActtionFlag eq 'CREATE2'? 'MIRA':'mGateway'}"  id="dlgAddMCU" widgetVar="dlgAddMCU" width="900" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formDlgAddMCU" >
+                    <div>
+
+                        <p:panelGrid id="pnlMCUInfo" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                            <p:outputLabel value="Hộ gia đình" for="txtMCUhouse" rendered="#{AreaController.mcuActtionFlag eq 'CREATE'}"/>
+                            <p:inputText id="txtMCUhouse" disabled="true"  value="#{AreaController.selectedMCU.holder_name}" rendered="#{AreaController.mcuActtionFlag eq 'CREATE'}"
+                                         required="true" requiredMessage="#{PP_PRODUCT.param_Code}#{PP_SHARED.can_not_be_empty}"
+                                         >
+                            </p:inputText>
+
+                            <p:outputLabel value="Địa bàn" for="txtMCUarea" rendered="#{AreaController.mcuActtionFlag eq 'CREATE2'}"/>
+                            <p:inputText id="txtMCUarea" disabled="true"  value="#{AreaController.selectedArea.areaName}"
+                                         required="true" requiredMessage="#{PP_PRODUCT.param_Code}#{PP_SHARED.can_not_be_empty}"
+                                         rendered="#{AreaController.mcuActtionFlag eq 'CREATE2'}"
+                                         >
+                            </p:inputText>
+
+                            <p:outputLabel for="minMax" value="Âm lượng" rendered="#{AreaController.mcuActtionFlag eq 'UPDATE'}"/>
+                            <p:spinner id="minMax"  min="0" max="100" value="#{AreaController.selectedMCU.volume}" rendered="#{AreaController.mcuActtionFlag eq 'UPDATE'}"
+                                       style="width: 100%; text-align: left!important"/>
+
+                            <p:outputLabel value="" />
+                            <p:outputLabel value="" />
+
+
+                            <p:outputLabel for="minMaxFM" value="Âm lượng FM" rendered="#{AreaController.mcuActtionFlag eq 'UPDATE'}"/>
+                            <p:spinner id="minMaxFM"  min="0" max="100" value="#{AreaController.selectedMCU.mcu_fm_volume}" rendered="#{AreaController.mcuActtionFlag eq 'UPDATE'}"
+                                       style="width: 100%; text-align: left!important"/>
+
+                            <p:outputLabel id="autoFMlb" value="Tự động kiểm tra tín hiệu FM" for="fmAuto" rendered="#{AreaController.mcuActtionFlag eq 'UPDATE'}"/>
+                            <p:selectBooleanCheckbox id="fmAuto" value="#{AreaController.selectedMCU.FM_AutoBoolean}"
+                                                     rendered="#{AreaController.mcuActtionFlag eq 'UPDATE'}"/>
+
+
+                            <p:outputLabel value="Mã thiết bị" for="txtMCUid" rendered="#{AreaController.mcuActtionFlag ne 'UPDATE'}"/>
+                            <p:inputText id="txtMCUid"   value="#{AreaController.selectedMCU.mcu_id}" onfocus="this.select();"
+                                         required="true" requiredMessage="Mã MCU #{PP_SHARED.can_not_be_empty}"
+                                         rendered="#{AreaController.mcuActtionFlag ne 'UPDATE'}" >
+                                <pe:keyFilter regEx="/[0-9]/i" preventPaste="false" />
+                            </p:inputText>
+
+
+                            <p:outputLabel value="Mã xác thực" for="txtMCUverifyCode" rendered="#{AreaController.mcuActtionFlag ne 'UPDATE'}" />
+                            <p:inputText id="txtMCUverifyCode" value="#{AreaController.selectedMCU.vcode}" rendered="#{AreaController.mcuActtionFlag ne 'UPDATE'}"
+                                         required="true" requiredMessage="Mã xác thực #{PP_SHARED.can_not_be_empty}">
+                                <pe:keyFilter regEx="/[0-9]/i" preventPaste="false" />
+                            </p:inputText>
+
+                            <p:outputLabel value="Tên MIRA" for="txtMIRAName" rendered="#{AreaController.mcuActtionFlag eq 'CREATE2' or AreaController.selectedMCU.mcu_type eq 2}"/>
+                            <p:inputText id="txtMIRAName"  value="#{AreaController.selectedMCU.mira_name}"
+                                         rendered="#{AreaController.mcuActtionFlag eq 'CREATE2' or AreaController.selectedMCU.mcu_type eq 2}"
+                                         required="true" requiredMessage="Địa chỉ #{PP_SHARED.can_not_be_empty}"
+                                         >
+                            </p:inputText>
+
+                            <p:outputLabel value="Địa chỉ" for="txtMCUaddr" rendered="#{AreaController.mcuActtionFlag eq 'CREATE2' or AreaController.selectedMCU.mcu_type eq 2}"/>
+                            <p:inputText id="txtMCUaddr"  value="#{AreaController.selectedMCU.address}"
+                                         rendered="#{AreaController.mcuActtionFlag eq 'CREATE2' or AreaController.selectedMCU.mcu_type eq 2}"
+                                         required="true" requiredMessage="Địa chỉ #{PP_SHARED.can_not_be_empty}"
+                                         >
+                            </p:inputText>
+
+                            <p:outputLabel value="Vĩ độ (Latitude)" for="txtLat"/>
+                            <p:inputNumber id="txtLat"   value="#{AreaController.selectedMCU.mcu_lat}"  onfocus="this.select();"
+                                           required="true" requiredMessage="Vĩ độ #{PP_SHARED.can_not_be_empty}"  decimalPlaces="7"
+                                           >
+                            </p:inputNumber>
+
+                            <p:outputLabel value="Kinh độ (Longitude)" for="txtLong"/>
+                            <p:inputNumber id="txtLong"   value="#{AreaController.selectedMCU.mcu_lng}" onfocus="this.select();"
+                                           required="true" requiredMessage="Kinh độ #{PP_SHARED.can_not_be_empty}"   decimalPlaces="7"
+                                           >
+                            </p:inputNumber>
+
+                            <p:outputLabel value="Số thuê bao SIM" for="txtSIMNo"/>
+                            <p:inputText id="txtSIMNo" value="#{AreaController.selectedMCU.mcu_tel}">
+                                <pe:keyFilter regEx="/[0-9.]/i" preventPaste="false" />
+                            </p:inputText>
+
+                            <p:outputLabel value="Số serial SIM" for="SIMSeri"/>
+                            <p:inputText id="SIMSeri" value="#{AreaController.selectedMCU.mcu_sim_serial}" >
+                                <pe:keyFilter regEx="/[0-9.]/i" preventPaste="false" />
+                            </p:inputText>
+
+                            <p:tooltip for="autoFMlb" value="Thiết bị sẽ tự động điều chỉnh âm lượng giữa các kênh FM có âm lượng khác nhau" trackMouse="true" />
+
+                        </p:panelGrid>
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave" value="#{PP_SHARED.ok}" actionListener="#{AreaController.saveMCU(evt)}" icon="fa fa-check-square"
+                                                update="formDlgAddMCU formDlgAddHouse:tabAddHouse formDlgAddHouse:tabAddHouse:dtHouseMCU form_main:formAreaDetail:tabArea:dtMCU :grow_main_dt"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestMCU(xhr, status, args, '#{AreaController.mcuActtionFlag}' );" />
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}"
+                                             oncomplete="PF('dlgAddMCU').hide();" styleClass="btn-danger btn-margin btn-width" />
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+
+
+            <p:dialog header="Thông tin thiết bị #{PP_SHARED.MCU_name}"  id="dlgMCUInfo" widgetVar="dlgMCUInfo" width="1000" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formDlgMCUInfo" >
+                    <div>
+
+                        <p:panelGrid id="pnlMCUInfo" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-3,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Mã thiết bị" for="txtMCUid"/>
+                            <p:inputText id="txtMCUid"   value="#{AreaController.selectedMCU.mcu_id}"
+                                         disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Địa chỉ IP" for="txtMCUip"/>
+                            <p:inputText id="txtMCUip" value="#{AreaController.selectedMCU.mcu_ip eq null? '-/-' : AreaController.selectedMCU.mcu_ip}"
+                                         disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Hộ gia đình" for="txtMCUhouse" rendered="#{AreaController.selectedMCU.mcu_type eq 1}"/>
+                            <p:inputText id="txtMCUhouse" disabled="true"  value="#{AreaController.selectedMCU.holder_name}" rendered="#{AreaController.selectedMCU.mcu_type eq 1}"
+                                         >
+                            </p:inputText>
+                            <p:outputLabel value="Địa bàn" for="txtMCUArea" rendered="#{AreaController.selectedMCU.mcu_type eq 2}"/>
+                            <p:inputText id="txtMCUArea" disabled="true"  value="#{AreaController.selectedMCU.mcu_area_name}" rendered="#{AreaController.selectedMCU.mcu_type eq 2}"
+                                         >
+                            </p:inputText>
+                            <p:outputLabel value="Địa chỉ" for="txtMCUAddr"/>
+                            <p:inputText id="txtMCUAddr"   value="#{AreaController.selectedMCU.address}"
+                                         disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Tọa độ (lat/long)" for="txtMCUpos"/>
+                            <p:inputText id="txtMCUpos"   value="#{AreaController.selectedMCU.mcu_lat},#{AreaController.selectedMCU.mcu_lng}"
+                                         disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Trạng thái" for="txtMCUstatus"/>
+                            <p:inputText id="txtMCUstatus"  value="#{AreaController.selectedMCU.mcu_connect_status eq 1? 'Đang kết nối':'Mất kết nối'}"
+                                         disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Kết nối với server" for="txtMCUconnect" rendered="#{AreaController.selectedMCU.mcu_connect_status eq 1}"/>
+                            <p:inputText id="txtMCUconnect"
+                                         value="#{AreaController.selectedMCU.mcu_tx_type eq 1?'Mạng Wifi':AreaController.selectedMCU.mcu_tx_type eq 2?'Mạng 2G':AreaController.selectedMCU.mcu_tx_type eq 3?'Mạng 3G':AreaController.selectedMCU.mcu_tx_type eq 4?'Mạng 4G':'Mạng Ethernet'}"
+                                         disabled="true" rendered="#{AreaController.selectedMCU.mcu_connect_status eq 1}" >
+                            </p:inputText>
+                            <p:outputLabel value="Mức tín hiệu Wifi" for="txtMCUWifi" rendered="#{AreaController.selectedMCU.mcu_tx_type eq 1 and AreaController.selectedMCU.mcu_connect_status eq 1}"/>
+                            <p:inputText id="txtMCUWifi"   value="#{AreaController.selectedMCU.mcu_wifi_csq}%" rendered="#{AreaController.selectedMCU.mcu_tx_type eq 1 and AreaController.selectedMCU.mcu_connect_status eq 1}"
+                                         disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Mức tín hiệu Mobile" for="txtMCUMobile" rendered="#{AreaController.selectedMCU.mcu_tx_type ne 1 and AreaController.selectedMCU.mcu_tx_type ne 0 and AreaController.selectedMCU.mcu_connect_status eq 1}"/>
+                            <p:inputText id="txtMCUMobile"   value="#{AreaController.selectedMCU.mcu_mobile_csq}%" rendered="#{AreaController.selectedMCU.mcu_tx_type ne 1 and AreaController.selectedMCU.mcu_tx_type ne 0 and AreaController.selectedMCU.mcu_connect_status eq 1}"
+                                         disabled="true" >
+                            </p:inputText>
+
+                            <p:outputLabel value="Số thuê bao SIM" for="txtSIMNo"/>
+                            <p:inputText id="txtSIMNo" value="#{AreaController.selectedMCU.mcu_tel}" disabled="true">
+                            </p:inputText>
+
+                            <p:outputLabel value="Số serial SIM" for="SIMSeri"/>
+                            <p:inputText id="SIMSeri" value="#{AreaController.selectedMCU.mcu_sim_serial}" disabled="true">
+                            </p:inputText>
+
+                            <p:outputLabel id="autoFMlb" value="Tự động kiểm tra tín hiệu FM" for="fmAuto" />
+                            <p:selectBooleanCheckbox disabled="true" id="fmAuto" value="#{AreaController.selectedMCU.FM_AutoBoolean}"/>
+
+                            <p:outputLabel value="Phiên bản Firmware" for="txtMCUversion"/>
+                            <p:inputText id="txtMCUversion" value="#{AreaController.selectedMCU.mcu_version}"
+                                         disabled="true" >
+                            </p:inputText>
+
+
+                        </p:panelGrid>
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="Đóng"
+                                             oncomplete="PF('dlgMCUInfo').hide();" styleClass="btn-danger btn-margin btn-width" />
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+
+
+            <p:dialog header="biểu đồ trạng thái thiết bị #{PP_SHARED.MCU_name}" focus="formDlgMCUTimeline"  id="dlgMCUTimeline" widgetVar="dlgMCUTimeline" width="1200" height="650" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formDlgMCUTimeline" >
+                    <div>
+                        <script type="text/javascript">
+                            //<![CDATA[
+                            function onrangechange1() {
+                                var range = PF('timelineFirstWdgt').getVisibleRange();
+                                PF('timelineSecondWdgt').setVisibleRange(range.start, range.end);
+                            }
+
+                            function onrangechange2() {
+                                var range = PF('timelineSecondWdgt').getVisibleRange();
+                                PF('timelineFirstWdgt').setVisibleRange(range.start, range.end);
+                            }
+                            //]]>
+                        </script>
+
+                        <p:panelGrid id="pnlTimeline" columns="8" columnClasses="ui-grid-col-2,ui-grid-col-3,ui-grid-col-2,ui-grid-col-2,ui-grid-col-2,ui-grid-col-2,ui-grid-col-1,ui-grid-col-1" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                            <p:outputLabel value="Từ ngày" for="txtFrom" style="float: right;margin-right: 10px; color: #0259A4"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtFrom" timeZone="GMT+7"  locale="vi"
+                                        label="Chọn ngày" style="color: #0259A4" value="#{AreaController.fromDateForTimeline}"
+                                        converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                <f:convertDateTime pattern="dd/MM/yyyy" timeZone="GMT+7" />
+                                <p:ajax event="dateSelect" listener="#{AreaController.initTimeline()}" update="timelineFirst timelineSecond :grow_main_dt"></p:ajax>
+                            </p:calendar>
+
+                            <p:outputLabel value="Đến ngày" for="txtTo" style="float: right; margin-right: 10px; color: #0259A4"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtTo" timeZone="GMT+7"  locale="vi"
+                                        label="Chọn ngày" value="#{AreaController.toDateForTimeline}"
+                                        converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                <f:convertDateTime pattern="dd/MM/yyyy" timeZone="GMT+7" />
+                                <p:ajax event="dateSelect" listener="#{AreaController.initTimeline()}" update="timelineFirst timelineSecond :grow_main_dt"></p:ajax>
+                            </p:calendar>
+
+                        </p:panelGrid>
+
+                        <h4 style="margin-top: 0">Bản tin phát đến thiết bị</h4>
+                        <p:timeline id="timelineFirst" value="#{AreaController.modelFirst}" var="task"
+                                    selectable="true" stackEvents="true" zoomable="true" moveable="true"
+                                    height="350px" widgetVar="timelineFirstWdgt" eventStyle="box"
+                                    min="#{AreaController.fromDateForTimeline}"
+                                    max="#{AreaController.toDateForTimeline}"
+                                    locale="vn"
+                                    start="#{AreaController.fromDateForTimeline}"
+                                    end="#{AreaController.toDateForTimeline}"
+                                    >
+                            <p:ajax event="rangechange" oncomplete="onrangechange1()"/>
+                            <p:ajax event="select" listener="#{AreaController.onSelect}"/>
+
+
+                        </p:timeline>
+
+                        <h4>Trạng thái kết nối</h4>
+                        <p:timeline id="timelineSecond" value="#{AreaController.modelSecond}"
+                                    height="150px" widgetVar="timelineSecondWdgt"
+                                    eventMargin="10" eventMarginAxis="0"
+                                    showNavigation="true" showButtonNew="true"
+                                    stackEvents="false" locale="vn"
+                                    min="#{AreaController.fromDateForTimeline}"
+                                    max="#{AreaController.toDateForTimeline}"
+                                    start="#{AreaController.fromDateForTimeline}"
+                                    end="#{AreaController.toDateForTimeline}"
+                                    >
+                            <p:ajax event="rangechange" oncomplete="onrangechange2()"/>
+                        </p:timeline>
+
+                        <p:panelGrid id="pnlNote" columns="9" columnClasses="ui-grid-col-2,ui-grid-col-1,ui-grid-col-2,ui-grid-col-1,ui-grid-col-2,ui-grid-col-1,ui-grid-col-2,ui-grid-col-1,ui-grid-col-2" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Ghi chú:" style="float: left; margin-left: 10px; color: #0259A4"/>
+
+                            <p:inputText disabled="true" style="background-color: #1AA11A !important;" />
+                            <p:outputLabel value="Trạng thái kết nối" styleClass="ui-note-text" style="color: #0259A4; font-weight: 400; font-size: small !important"/>
+
+                            <p:inputText disabled="true" style="background-color: #F03030 !important" />
+                            <p:outputLabel value="Trạng thái mất kết nối" styleClass="ui-note-text" style="color: #0259A4; font-weight: 400; font-size: small !important"/>
+
+                            <p:inputText disabled="true" style="background-color: #336699 !important; font-size: 22px !important;" />
+                            <p:outputLabel value="Bản tin đã phát" styleClass="ui-note-text" style="color: #0259A4; font-weight: 400; font-size: small !important"/>
+
+                            <p:inputText disabled="true" style="background-color: orange !important; font-size: 22px !important;" />
+                            <p:outputLabel value="Bản tin không phát" styleClass="ui-note-text" style="color: #0259A4; font-weight: 400; font-size: small !important"/>
+
+                            <p:outputLabel value="" />
+                        </p:panelGrid>
+
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Nhật ký bản tin trên thiết bị" focus="formDlgMCULog"  id="dlgMCULog" widgetVar="dlgMCULog" width="1200" height="650" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formDlgMCULog" >
+                    <div>
+                        <script type="text/javascript">
+                            //<![CDATA[
+                            function onrangechange1() {
+                                var range = PF('timelineFirstWdgt').getVisibleRange();
+                                PF('timelineSecondWdgt').setVisibleRange(range.start, range.end);
+                            }
+
+                            function onrangechange2() {
+                                var range = PF('timelineSecondWdgt').getVisibleRange();
+                                PF('timelineFirstWdgt').setVisibleRange(range.start, range.end);
+                            }
+                            //]]>
+                        </script>
+
+                        <p:panelGrid id="pnlLog" columns="8" columnClasses="ui-grid-col-2,ui-grid-col-3,ui-grid-col-2,ui-grid-col-2,ui-grid-col-2,ui-grid-col-2,ui-grid-col-1,ui-grid-col-1" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                            <p:outputLabel value="Từ ngày" for="txtFrom" style="float: right;margin-right: 10px; color: #0259A4"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtFrom" timeZone="GMT+7"  locale="vi"
+                                        label="Chọn ngày" style="color: #0259A4" value="#{AreaController.fromDateForLog}"
+                                        converterMessage="Chọn ngày sai định dạng (dd/MM/yyyy)">
+                                <f:convertDateTime pattern="dd/MM/yyyy" timeZone="GMT+7" />
+                                <p:ajax event="dateSelect" listener="#{AreaController.initMCULog()}" update="timelineLog :grow_main_dt"></p:ajax>
+                            </p:calendar>
+
+                            <p:outputLabel value="Đến ngày" for="txtTo" style="float: right; margin-right: 10px; color: #0259A4"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtTo" timeZone="GMT+7"  locale="vi"
+                                        label="Chọn ngày" value="#{AreaController.toDateForTimeline}"
+                                        converterMessage="Chọn ngày sai định dạng (dd/MM/yyyy)">
+                                <f:convertDateTime pattern="dd/MM/yyyy" timeZone="GMT+7" />
+                                <p:ajax event="dateSelect" listener="#{AreaController.initMCULog()}" update="timelineLog :grow_main_dt"></p:ajax>
+                            </p:calendar>
+
+                        </p:panelGrid>
+
+                        <p:timeline id="timelineLog" value="#{AreaController.modelLog}" var="task"
+                                    selectable="true" stackEvents="true" zoomable="true" moveable="true"
+                                    height="550px" widgetVar="timelineFirstWdgt" eventStyle="box"
+                                    min="#{AreaController.fromDateForLog}"
+                                    max="#{AreaController.toDateForTimeline}"
+                                    locale="vn"
+                                    start="#{AreaController.fromDateForLog}"
+                                    end="#{AreaController.toDateForTimeline}"
+                                    >
+                            <p:ajax event="select" listener="#{AreaController.onSelect}" update="dlgMcuRecord" oncomplete="PF('dlgMcuRecord').show();"/>
+
+
+                        </p:timeline>
+
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Danh sách bản tin có tên thiết bị" id="dlgMcuRecord" widgetVar="dlgMcuRecord"  width="1100" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <h:form id="formMCURecord">
+
+                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%" >
+
+                        <p:dataTable id="dtMcuRecord" value="#{AreaController.listMCURecord}" var="mcuhistory"
+                                     rowKey="#{mcuhistory.record_id}"
+                                     rowIndexVar="rownum"
+                                     widgetVar="dtHistoryMCU"
+                                     sortOrder="descending"
+                                     style="margin: 10px; font-size: 85%; "
+                                     emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+
+                            <p:column headerText="STT" style="width: 2%!important" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column headerText="Mã bản tin" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcuhistory.record_id}" sortBy="#{mcuhistory.record_id}">
+                                <h:outputText value=" #{mcuhistory.record_id}">
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Tên bản tin" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcuhistory.rec_summary}" sortBy="#{mcuhistory.rec_summary}">
+                                <h:outputText value=" #{mcuhistory.rec_summary}">
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Ngày tạo" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcuhistory.recCreate}" sortBy="#{mcuhistory.recCreate}">
+                                <h:outputText value=" #{mcuhistory.recCreate}">
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Dung lượng (KB)" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcuhistory.rec_size}" sortBy="#{mcuhistory.rec_size}">
+                                <h:outputText value=" #{mcuhistory.rec_size}">
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Thời lượng (mm:ss)" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcuhistory.durationString}" sortBy="#{mcuhistory.durationString}">
+                                <h:outputText value=" #{mcuhistory.durationString}">
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Ngày bắt đầu" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcuhistory.recStartDate}" sortBy="#{mcuhistory.recStartDate}">
+                                <h:outputText value=" #{mcuhistory.recStartDate}">
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Ngày kết thúc" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcuhistory.recEndDate}" sortBy="#{mcuhistory.recEndDate}">
+                                <h:outputText value=" #{mcuhistory.recEndDate}">
+                                </h:outputText>
+                            </p:column>
+
+                        </p:dataTable>
+
+
+                    </h:panelGrid>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton rendered="true" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="Đóng"
+                                         oncomplete="PF('dlgMcuRecord').hide();" styleClass="btn-danger btn-margin btn-width" />
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Cấu hình kênh đài cho địa bàn"
+                      id="dlgAddChannel" widgetVar="dlgAddChannel" width="700" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formDlgAddChannel" >
+                    <div>
+
+                        <p:panelGrid id="pnlChannelInfo" columns="2" columnClasses="ui-grid-col-3,ui-grid-col-8" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="địa bàn" for="txtAreaName2" />
+                            <p:inputText id="txtAreaName2" value="#{AreaController.selectedArea.areaName}"
+                                         disabled="true"
+                                         >
+                            </p:inputText>
+
+
+
+                            <p:outputLabel value="Kênh đài FM" for="selectHouse2"/>
+                            <p:selectCheckboxMenu id="selectHouse2"  label=" "  value="#{AreaController.listAreaChannelId}"
+                                                  style="width: 100%!important"   multiple="true" required="true" requiredMessage="Danh sách phát #{PP_SHARED.can_not_be_empty}"
+                                                  filter="true" filterMatchMode="contains" >
+                                <f:selectItems value="#{AreaController.listAllChannel}" var="channel" itemLabel="#{channel.name}" itemValue="#{channel.id}" />
+
+                            </p:selectCheckboxMenu>
+
+                        </p:panelGrid>
+
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave"  value="#{PP_SHARED.ok}"  actionListener="#{AreaController.updateRadioArea(evt)}" icon="fa fa-check-square"
+                                               update="form_main formDlgAddChannel form_main:formAreaDetail:tabArea:dtChannel :grow_main_dt"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestChannel(xhr, status, args);" />
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}"
+                                             oncomplete="PF('dlgAddChannel').hide();" styleClass="btn-danger btn-margin btn-width" />
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+
+
+            <p:confirmDialog styleClass="stf-confirm" message="#{PP_SHARED.confirm_delete}" header="#{PP_SHARED.delete_dialog_header}" id="cfmDeleteHouse" severity="alert" widgetVar="cfmDeleteHouse" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{AreaController.saveHouse(evt)}" update="form_main:formAreaDetail:tabArea:formHouseDetail:dtHouseHold :grow_main_dt "
+                                     onclick="PF('cfmDeleteHouse').hide();" icon="fa fa-check-square" styleClass="btn-primary" oncomplete="PF('dtHouseHold').clearFilters();"/>
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}"
+                                     onclick="PF('cfmDeleteHouse').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog>
+
+            <p:confirmDialog styleClass="stf-confirm" message="#{PP_SHARED.confirm_delete}" header="#{PP_SHARED.delete_dialog_header}" id="cfmDeleteArea" severity="alert" widgetVar="cfmDeleteArea" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{AreaController.saveArea()}" update="form_main :grow_main_dt"
+                                     onclick="PF('cfmDeleteArea').hide();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}"
+                                     onclick="PF('cfmDeleteArea').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog>
+
+            <p:confirmDialog styleClass="stf-confirm" message="Bạn có chắc muốn xóa thiết bị #{PP_SHARED.MCU_name}?"
+                             header="#{PP_SHARED.delete_dialog_header}" id="cfmDeleteMCU" severity="alert" widgetVar="cfmDeleteMCU" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{AreaController.deleteMCU(evt)}"
+                                     update="form_main:formAreaDetail:tabArea:dtMCU formDlgAddHouse:tabAddHouse:dtHouseMCU :grow_main_dt"
+                                     onclick="PF('cfmDeleteMCU').hide();" icon="fa fa-check-square" styleClass="btn-primary" oncomplete="PF('dtMCU').clearFilters();"/>
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}"
+                                     onclick="PF('cfmDeleteMCU').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog>
+
+            <p:confirmDialog styleClass="stf-confirm" message="Bạn có chắc muốn khởi động lại thiết bị #{PP_SHARED.MCU_name}" header="Khởi động lại #{PP_SHARED.MCU_name}" id="cfmRebootMcu" severity="alert" widgetVar="cfmRebootMcu" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{AreaController.rebootMCU(evt)}" update=" :grow_main_dt"
+                                     onclick="PF('cfmRebootMcu').hide();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}"
+                                     onclick="PF('cfmRebootMcu').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog>
+
+
+            <p:dialog header="Thông tin Camera"  id="dlgCameraInfo" widgetVar="dlgCameraInfo" width="1000" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formDlgCameraInfo" >
+                    <div>
+                        <p:panelGrid id="pnlCameraInfo" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-3,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Mã Camera" for="txtCameraid"/>
+                            <p:inputText id="txtCameraid"   value="#{AreaController.selectedAiCamera.cam_id}" disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Tên Camera" for="txtCameraName"/>
+                            <p:inputText id="txtCameraName" value="#{AreaController.selectedAiCamera.cam_name}" disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Vị Trí" for="txtCameraPosition"/>
+                            <p:inputText id="txtCameraPosition" disabled="true"  value="#{AreaController.selectedAiCamera.cam_position}" >
+                            </p:inputText>
+                            <p:outputLabel value="Kinh Độ" for="txtCameraLong" />
+                            <p:inputText id="txtCameraLong" disabled="true"  value="#{AreaController.selectedAiCamera.lon}" >
+                            </p:inputText>
+                            <p:outputLabel value="Vĩ Độ" for="txtCameraLat"/>
+                            <p:inputText id="txtCameraLat"   value="#{AreaController.selectedAiCamera.lat}" disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Ngày Tạo" for="txtCameraCreateDate"/>
+                            <p:inputText id="txtCameraCreateDate"   value="#{AreaController.selectedAiCamera.create_date}" disabled="true" >
+                            </p:inputText>
+
+                            <p:outputLabel value="Khu Vực" for="txtCameraArea"/>
+                            <p:inputText id="txtCameraArea"  value="#{AreaController.selectedArea.areaName}" disabled="true" >
+                            </p:inputText>
+                            <p:outputLabel value="Loại Thông Báo" for="txtAnnounceType"/>
+                            <p:inputText id="txtAnnounceType"
+                                         value="#{AreaController.selectedAiCamera.announce_type eq 0 ? 'Phát tại chỗ' :
+                                                  AreaController.selectedAiCamera.announce_type eq 1 ? 'Phát theo hướng di chuyển' :
+                                                  AreaController.selectedAiCamera.announce_type eq 2 ? 'Phát tại chỗ + Phát theo hướng di chuyển' :
+                                                  'Phát toàn bộ các hướng'}" disabled="true" >
+                            </p:inputText>
+
+                            <p:outputLabel value="Giọng nói" for="txtVoice"/>
+                            <p:inputText id="txtVoice"  value="#{AreaController.selectedAiCamera.voice eq 0 ? 'Xuân Tín' :
+                                                                 AreaController.selectedAiCamera.voice eq 1 ? 'Xuân Thu' :
+                                                                 AreaController.selectedAiCamera.voice eq 2 ? 'Thu Trang' :
+                                                                 AreaController.selectedAiCamera.voice eq 3 ? 'Xuân Kiên' : 'Xuân Hồng'}" disabled="true" >
+
+                            </p:inputText>
+
+                        </p:panelGrid>
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton global="false"  id="btnCameraBack" process="@this" icon="fa fa-times-circle"  value="Đóng"
+                                             oncomplete="PF('dlgCameraInfo').hide();" styleClass="btn-danger btn-margin btn-width" />
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="#{AreaController.cameraActtionFlag eq 'UPDATE'? 'Cập nhật thông tin':'Thêm'} Camera"  id="dlgAddCamera" widgetVar="dlgAddCamera" width="900" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <h:form id="formDlgAddCamera" >
+                    <div>
+                        <p:panelGrid id="pnlCameraInfo" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Mã Camera" for="txtCameraid"/>
+                            <p:inputText id="txtCameraid" required="true" value="#{AreaController.selectedAiCamera.cam_id}"
+                                         requiredMessage="Mã Camera #{PP_SHARED.can_not_be_empty}"
+                                         disabled="#{AreaController.cameraActtionFlag eq 'UPDATE'? true: false}" >
+                            </p:inputText>
+                            <p:outputLabel value="Tên Camera" for="txtCameraName"/>
+                            <p:inputText id="txtCameraName" requiredMessage="Tên Camera #{PP_SHARED.can_not_be_empty}"  required="true" value="#{AreaController.selectedAiCamera.cam_name}" >
+                            </p:inputText>
+                            <p:outputLabel value="Vị Trí" for="txtCameraPosition"/>
+                            <p:inputText id="txtCameraPosition" requiredMessage="Vị trí #{PP_SHARED.can_not_be_empty}"  required="true" value="#{AreaController.selectedAiCamera.cam_position}" >
+                            </p:inputText>
+                            <p:outputLabel value="Kinh Độ" for="txtCameraLong" />
+                            <p:inputNumber id="txtCameraLong" requiredMessage="Kinh độ #{PP_SHARED.can_not_be_empty}"  required="true"  value="#{AreaController.selectedAiCamera.lon}" minValue="-180" maxValue="180" decimalPlaces="7">
+                            </p:inputNumber>
+                            <p:outputLabel value="Vĩ Độ" for="txtCameraLat"/>
+                            <p:inputNumber id="txtCameraLat" requiredMessage="Vĩ độ #{PP_SHARED.can_not_be_empty}"  required="true"  value="#{AreaController.selectedAiCamera.lat}" minValue="-90" maxValue="900" decimalPlaces="7">
+                            </p:inputNumber>
+                            <p:outputLabel value="Ngày Tạo" for="txtCameraCreateDate" rendered="#{AreaController.cameraActtionFlag eq 'UPDATE'? true: false}" />
+                            <p:calendar pattern="yyyy-MM-dd" id="txtCameraCreateDate"
+                                        rendered="#{AreaController.cameraActtionFlag eq 'UPDATE'? true: false}"
+                                        value="#{AreaController.selectedAiCamera.create_date}"
+                                        converterMessage="Ngày bắt đầu sai định dạng (yyyy-MM-dd)"
+                                        disabled="true">
+                            </p:calendar>
+
+                            <p:outputLabel value="Khu Vực" for="txtCameraArea"/>
+                            <p:inputText id="txtCameraArea"  value="#{AreaController.selectedArea.areaName}" disabled="true" >
+                            </p:inputText>
+
+                            <p:outputLabel value="Loại Thông Báo" for="txtAnnounceType"/>
+                            <p:selectOneMenu id="txtAnnounceType" value="#{AreaController.selectedAiCamera.announce_type}" >
+                                <f:selectItem itemLabel="Phát tại chỗ" itemValue="0" />
+                                <f:selectItem itemLabel="Phát theo hướng di chuyển" itemValue="1" />
+                                <f:selectItem itemLabel="Phát tại chỗ + Phát theo hướng di chuyển" itemValue="2" />
+                                <f:selectItem itemLabel="Phát toàn bộ các hướng" itemValue="3" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Giọng nói" for="txtVoice"/>
+                            <p:selectOneMenu id="txtVoice" value="#{AreaController.selectedAiCamera.voice}" >
+                                <f:selectItem itemLabel="Xuân Tín" itemValue="0" />
+                                <f:selectItem itemLabel="Xuân Thu" itemValue="1" />
+                                <f:selectItem itemLabel="Thu Trang" itemValue="2" />
+                                <f:selectItem itemLabel="Xuân Kiên" itemValue="3" />
+                                <f:selectItem itemLabel="Xuân Hồng" itemValue="4" />
+                            </p:selectOneMenu>
+                        </p:panelGrid >
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave" value="#{PP_SHARED.ok}" actionListener="#{AreaController.saveCamera(evt)}" icon="fa fa-check-square"
+                                               update="form_main:formAreaDetail:tabArea:dtCamera formDlgAddCamera :grow_main_dt"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestCamera(xhr, status, args);" />
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}"
+                                             oncomplete="PF('dlgAddCamera').hide();" styleClass="btn-danger btn-margin btn-width" />
+                        </div>
+
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Cài đặt Camera" id="dlgAddCameraMCU"  widgetVar="dlgAddCameraMCU" width="1000" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false" >
+
+                <h:form id="formDlgAddCameraMCU" >
+                    <div>
+                        <p:panelGrid id="pnlAiCameraMCUInfo" columns="1" columnClasses="ui-grid-col-12" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:dataTable var="MCUDirection" value="#{AreaController.listMCUForAICameraDirections}" style="width: 98%;">
+                                <p:column headerText="Hướng">
+                                    <p:outputLabel value="Hướng #{MCUDirection.direction}" />
+                                </p:column>
+                                <p:column headerText="MCU">
+                                    <p:selectOneMenu label=" "  value="#{MCUDirection.mcu}"
+                                                     style="width: 100%!important"  required="true" requiredMessage="Danh sách camera #{PP_SHARED.can_not_be_empty}"
+                                                     filter="true" filterMatchMode="contains" >
+                                        <f:selectItem itemLabel="Select One" itemValue="0" />
+                                        <f:selectItems value="#{AreaController.listMCU}" var="mcu" itemLabel="#{mcu.mcu_id} - #{mcu.address}" itemValue="#{mcu.mcu_id}" />
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:dataTable>
+
+                        </p:panelGrid>
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave"  value="#{PP_SHARED.ok}" process="@all" actionListener="#{AreaController.updateCameraMCU()}" icon="fa fa-check-square"
+                                               update="form_main:formAreaDetail:tabArea:dtCamera :grow_main_dt"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestChannel(xhr, status, args); PF('dlgAddCameraMCU').hide();" />
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}"
+                                             oncomplete="PF('dlgAddCameraMCU').hide();" styleClass="btn-danger btn-margin btn-width" />
+                        </div>
+
+                    </div>
+                </h:form>
+
+            </p:dialog>
+
+            <p:confirmDialog styleClass="stf-confirm" message="Bạn có chắc muốn xóa camera #{AreaController.selectedAiCamera.cam_name}?"
+                             header="#{PP_SHARED.delete_dialog_header}" id="cfmDeleteCamera" severity="alert" widgetVar="cfmDeleteCamera" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{AreaController.deleteCamera(evt)}"
+                                     update="form_main:formAreaDetail:tabArea:dtCamera :grow_main_dt"
+                                     onclick="PF('cfmDeleteCamera').hide();" icon="fa fa-check-square" styleClass="btn-primary" oncomplete="PF('dtCamera').clearFilters();"/>
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}"
+                                     onclick="PF('cfmDeleteCamera').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog>
+
+
+            <p:dialog header="Cài đặt thời gian thông báo" id="dlgUpdateNotifyTime"  widgetVar="dlgUpdateNotifyTime" width="1000" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false" >
+
+                <h:form id="formDlgUpdateNotifyTime" >
+
+                    <p:panelGrid id="pnlUpdateNotifyTime" columns="2" style="margin-bottom: 40px" columnClasses="ui-grid-col-3,ui-grid-col-8" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                        <p:outputLabel value="Phát thông báo phạt trực tiếp" for="txtNotifyTimeLive" />
+                        <p:row >
+                            <p:inputText id="showNotifyTimeLive" disabled="true" value=" " style="width: 1%; height: 95%; float: left; " >
+                            </p:inputText>
+                            <p:inputText id="txtNotifyTimeLive" value="#{AreaController.notifyTimeLive}" a:autofocus="true" style="width: 85%;  float: left; " >
+                                <pe:keyFilter regEx="/[0-9,:]/i" preventPaste="true" />
+                            </p:inputText>
+                            <p:tooltip position="top" for="txtNotifyTimeLive" value="Mời nhập vào giờ phát dạng HH:mm:ss-HH:mm:ss cách nhau bởi dấu phẩy. Ví dụ: 08:05:00-10:30:00, 15:30:00-16:00:00"  />
+
+                            <p:commandButton id="cmdUpdateNotifyTimeLive"  icon="fa fa-plus-square" process="@this"
+                                             actionListener="#{AreaController.openDlUpdateSlotAiCameraEvent(1)}"
+                                             oncomplete="PF('olPanelUpdateNotifyTime').show();"
+                                             update="olPanelUpdateNotifyTime :grow_main_dt"
+                                             style="width:0%; height: 87%; float: left; margin-bottom: 0px!important" immediate="true"  >
+                                <p:resetInput target="formSlotTime"/>
+                            </p:commandButton>
+                        </p:row>
+
+                        <p:outputLabel value="Phát thông báo phạt nguội" for="txtNotifyTimeOff" />
+                        <p:row >
+                            <p:inputText id="showNotifyTimeOff" disabled="true" value=" " style="width: 1%; height: 95%; float: left; " >
+                            </p:inputText>
+                            <p:inputText id="txtNotifyTimeOff" value="#{AreaController.notifyTimeOff}" a:autofocus="true" style="width: 85%;  float: left; ">
+                                <pe:keyFilter regEx="/[0-9,:]/i" preventPaste="true" />
+                            </p:inputText>
+                            <p:tooltip position="top"  for="txtNotifyTimeOff" value="Mời nhập vào giờ phát dạng HH:mm:ss-HH:mm:ss cách nhau bởi dấu phẩy. Ví dụ: 08:05:00-10:30:00, 15:30:00-16:00:00"  />
+
+                            <p:commandButton id="cmdUpdateNotifyTimeOff"  icon="fa fa-plus-square" process="@this"
+                                             actionListener="#{AreaController.openDlUpdateSlotAiCameraEvent(2)}"
+                                             oncomplete="PF('olPanelUpdateNotifyTime').show();"
+                                             update="olPanelUpdateNotifyTime :grow_main_dt"
+                                             style="width:0%; height: 87%; float: left; margin-bottom: 0px!important" immediate="true"  >
+                                <p:resetInput target="formSlotTime"/>
+                            </p:commandButton>
+                        </p:row>
+
+                    </p:panelGrid>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton   id="btnSave"  value="#{PP_SHARED.ok}"  actionListener="#{AreaController.updateNotifyTime()}" icon="fa fa-check-square"
+                                           update="olPanelUpdateNotifyTime :grow_main_dt"
+                                           styleClass="btn-primary btn-width" oncomplete="PF('dlgUpdateNotifyTime').hide();" />
+                        <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}"
+                                         oncomplete="PF('dlgUpdateNotifyTime').hide();" styleClass="btn-danger btn-margin btn-width" />
+                    </div>
+
+                </h:form>
+            </p:dialog>
+
+            <p:overlayPanel onShow="$('#formSlotTime\\:txtStartTime').timepicker(); $('#formSlotTime\\:txtStartTime').focus(); $('#formSlotTime\\:txtEndTime').timepicker();"
+                            rendered="true" id="olPanelUpdateNotifyTime" widgetVar="olPanelUpdateNotifyTime"
+                            for="formDlgUpdateNotifyTime:#{AreaController.typeSlot eq 1 ? 'showNotifyTimeLive' : 'showNotifyTimeOff'}"
+                            style="width: 500px; height: 150px" hideEffect="fade" >
+                <h:form id="formSlotTime">
+                    <p:panelGrid columns="4" columnClasses="ui-grid-col-6,ui-grid-col-8,ui-grid-col-6,ui-grid-col-8" styleClass="ui-panelgrid-blank" layout="grid" >
+                        <p:outputLabel value="Giờ bắt đầu" />
+                        <p:inputText id="txtStartTime" value="#{AreaController.startTimeAdded}" a:autofocus="true" style="width: 100px; color: #000">
+                        </p:inputText>
+
+                        <p:outputLabel value="Giờ kết thúc" />
+                        <p:inputText id="txtEndTime" value="#{AreaController.endTimeAdded}" a:autofocus="true" style="width: 100px; color: #000">
+                        </p:inputText>
+
+                        <p:commandButton global="true" value="Thêm" icon="fa fa-plus"  style="float: left"
+                                         update="formDlgUpdateNotifyTime:txtNotifyTimeLive formDlgUpdateNotifyTime:txtNotifyTimeOff :grow_main_dt"
+                                         actionListener="#{AreaController.saveSlotTimeEvent()}"
+                                         styleClass="btn-primary btn-width"  >
+                        </p:commandButton>
+
+                    </p:panelGrid>
+                    <div class="ui-dialog-action" style="position: absolute !important; bottom: 0px !important; right: 0px; left: 0px;">
+                    </div>
+                </h:form>
+
+            </p:overlayPanel>
+
+        </ui:composition>
+    </h:body>
+</html>

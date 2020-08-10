@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <f:view locale="#{MainController.locale}" > 
+        <h:head>
+            <title>Truyền thông cơ sở</title>
+            <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            <link rel="shortcut icon" href="#{request.contextPath}/resources/images/icon/favicon.ico" />
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/style.css" />
+            <!-- stf add customize.css -->
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/customize.css" />
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/primefaces.css" />
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/responsive.css" />
+            <script type="text/javascript" src="#{request.contextPath}/resources/js/script.js" />
+            <script type="text/javascript" src="#{request.contextPath}/resources/js/SmoothScroll.js" />
+
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/custom.css" />
+            <script type="text/javascript" src="#{request.contextPath}/resources/css/custom.js" />
+            
+            
+        </h:head>
+        <h:body>
+            <p:growl id="grow_main_dt" showDetail="true" showSummary="false" sticky="false"/>      
+
+            <p:layout fullPage="true" stateful="true" widgetVar="layout"  onToggle="onToggleLayout();" >
+                                 
+                
+                <p:layoutUnit id="layout_center" position="center" style="width: 100% !important"  gutter="0" >
+                    
+                    <p:breadCrumb id="breadCrumb" rendered="true" model="#{centerprocess.mbreadcrumb}"/>
+                    <ui:insert name="center" />
+                </p:layoutUnit>    
+                
+                <!-- stf add id header -->
+                
+                        <ui:include src="usercontrols/menu.xhtml" />
+                
+                <p:layoutUnit id="header" styleClass="north" position="north"  size="20" gutter="0" collapsible="true" >
+                    <!-- stf change html of logo -->
+                    <a id="logo" href="#{request.contextPath}" >
+                        <!--<img src="#{request.contextPath}/resources/images/quangtri-logo.png" /> -->
+                    </a>
+                    
+
+                    <h5 class="title" style="font-size:20px;"><strong style="font-size: 20px;">Hệ thống </strong>quản lý tin tức </h5>
+                    <div id="user-profile" class="right" >
+                        <div id="hdsd" class="left" >
+                            <h:form>
+                                <p:commandLink global="false" process="@this" id="TL" style="background-image: url('#{request.contextPath}/resources/images/book-icon.png'); color: white; margin-top: 10px " styleClass="fa fa-book fa-10x" ajax="false" immediate="true" onclick="PrimeFaces.monitorDownload(start, stop);">
+                                <p:fileDownload value="#{DashboardController.download()}"/>
+                            </p:commandLink>
+                                <p:tooltip for="TL" value="Tài liệu HDSD" trackMouse="true" />
+                            </h:form>
+                        </div>
+                        <div id="avatar" class="left" style="background-image: url('#{request.contextPath}/resources/images/user-icon.png');"/>
+                        <div id="username2" class="left" style="margin-top: 10px; margin-right: 40px; color: white; text-align: left" >
+                            <h:form>
+                                <a href="#{request.contextPath}/client/user-info" class="small-box-footer" style="color: white; font-weight: 400">#{secuser.getUserLogged().userName} - #{secuser.getUserLogged().name}<i></i>
+                                    </a>
+                                
+                                <br/>
+                                #{secuser.getUserLogged().areaName}
+                            </h:form>    
+                        </div>
+                        
+                        <div id="username" class="left" >   
+                            
+                            <p id="logout">
+                                <p:commandLink global="false" action="#{secuser.logout()}" value="[#{PP_SHARED.logout}]" />
+                            </p>
+                        </div>
+                    </div>
+                </p:layoutUnit>                           
+
+                <p:ajaxStatus onstart="PF('statusDialog').show();" onsuccess="PF('statusDialog').hide();" oncomplete="fixScrollDatatable();"/>
+                <p:dialog id="status_dialog" modal="true" widgetVar="statusDialog" draggable="false" closable="false" resizable="false" >
+                    <p:graphicImage value="/resources/images/gif-load.gif" />
+                </p:dialog>
+            </p:layout>
+        </h:body>
+    </f:view>
+</html>

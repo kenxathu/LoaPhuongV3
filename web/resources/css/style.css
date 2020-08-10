@@ -1,0 +1,294 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 25-Aug-2015, 19:49:04
+    Author     : ChienDX
+// #F1F3FA;
+*/
+
+body{
+    margin: 0px; 
+    height: 100%; 
+    overflow-x: hidden; 
+    overflow-y: auto; 
+    background: #0060AF;   
+    min-width: 400px;
+}
+
+.ui-widget {
+    font-size: 90%;
+}
+
+.ui-layout-unit.ui-widget-content, .ui-layout-resizer.ui-layout-resizer-closed {
+    border: 0;
+    border-radius: 0;
+}
+
+.ui-layout-pane-center, .ui-layout-unit-content  {
+    background: transparent;
+    padding: 0;
+}
+
+.ui-layout-pane-center .ui-layout-unit-content {
+    padding: 0 20px;
+}
+
+.ui-grid {
+    padding: 10px;
+}
+
+.ui-layout-pane-north {
+    border-bottom: 1px solid #E2E2E2 !important;
+    padding: 0  !important;
+}
+
+.ui-layout-pane-north .ui-layout-unit-content {
+/*    //overflow: hidden !important;*/
+    padding: 2px  !important;
+}
+
+.ui-layout-pane-west {
+    background: #0060AF;
+}
+
+.ui-layout-pane-west .ui-layout-unit-header {
+    background: transparent;
+    border: 0;
+}
+
+.ui-layout-resizer.ui-layout-resizer-west.ui-layout-resizer-closed.ui-layout-resizer-west-closed {
+    background: #364150;
+}
+
+.ui-layout-pane-south {
+    background: #333D4A;
+}
+
+/***********************************/
+
+#btn-toggle-menu {
+    background: url('../images/icon/toggle-menu.png');
+    background-size: contain;
+    height: 30px;
+    width: 30px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+#logo {
+    background: url('../images/mobifone-logo2.png') no-repeat left;
+    height: 60px;
+    width: 150px;
+    background-size: contain;
+}
+
+#user-profile {
+    height: 45px;
+    background: #F0F0F0;
+}
+
+#user-profile #avatar {
+    background: url('../images/icon/avatar.png');
+    background-repeat: no-repeat;
+    background-position: left center;
+    height: 45px;
+    width: 45px;
+    background-size: contain;
+}
+
+#username {
+    padding-right: 10px;
+}
+
+#username p {
+    font-size: 90%;
+    color: #515151;
+    line-height: 0.3em;
+}
+
+#left_panel {
+    z-index: 2 !important; 
+}
+
+#left_panel div {
+    overflow: visible;
+}
+
+#left_panel .ui-menu {
+    background: transparent !important;
+    border: 0;
+    border-radius: 0;
+}
+
+#left_panel .ui-menu-list {
+    background: #3D4957;
+    border: 0;
+    border-radius: 0;    
+}
+
+#left_panel .ui-menu-list.ui-menu-child {
+    width: 250px;
+}
+
+#left_panel .ui-menu .ui-menuitem-text {
+    color: #EEEEEE;
+}
+
+#left_panel .ui-icon.fa {
+    color: #FFF;
+}
+
+#left_panel .ui-menu.ui-widget li > .ui-menuitem-link {
+    padding: .6em 0;
+}
+
+#left_panel .ui-menu .ui-menu-list .ui-menuitem {
+    border-top: 1px solid #3D4957;
+}
+
+#left_panel .ui-menu.ui-widget li > .ui-menuitem-link.ui-state-hover .ui-icon, #left_panel .ui-menu .ui-icon-triangle-1-e {
+    background-image: none;
+}
+
+#footer {
+    color: #919FB3;
+    text-align: center;
+}
+
+#status_dialog_modal {
+    opacity: 0.1 !important;
+    filter: Alpha(Opacity = 0.1) !important;   
+}
+
+#status_dialog.ui-corner-all {
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+}
+
+#status_dialog .ui-dialog-titlebar {
+    display: none;
+}
+
+#status_dialog .ui-dialog-content {
+    padding: 3px !important;
+    height: 64px !important;
+    overflow: hidden !important;
+}
+
+/***********************************/
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.clear {
+    clear: both;
+}
+
+.btn-margin {
+    margin-left: 5px !important;
+}
+
+.btn-margin-right {
+    margin-right: 5px !important;
+}
+
+.btn-action {
+    width: 60px !important;
+}
+
+.btn-width {
+    width: 100px !important;
+}
+
+.btn-auto {
+    width: auto !important;
+}
+
+.btn-icon-only {
+    width: 25px !important;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #F6F6F6;
+}
+
+.text-bold {
+    font-weight: bold;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.btn-view-color {
+    color: blue !important;
+}
+
+.btn-edit-color {
+    color: green !important;
+}
+
+.btn-del-color {
+    color: red !important;
+}
+
+.ui-state-highlight .btn-view-color, .ui-state-highlight .btn-edit-color, .ui-state-highlight .btn-del-color {
+    color: white !important;
+}
+
+.icon-completed-color {
+    color: green !important;
+}
+
+.icon-changing-color {
+    color: orange !important;
+}
+
+.ui-state-highlight .icon-completed-color, .ui-state-highlight .icon-changing-color {
+    color: white !important;
+}
+
+.text-green {
+    color: green !important;
+}
+
+.text-red {
+    color: red !important;
+}
+
+.text-right {
+    float: right;
+}
+
+.ui-state-highlight .text-green, .ui-state-highlight .text-red {
+    color: white !important;
+}
+
+.row-task-owner {
+    background-color: #F86F65;
+}
+
+.icon-work {
+    background: url('../images/icon/task.png') transparent no-repeat center left;
+    background-size: 16px 16px;
+    padding-left: 20px;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+.hide {
+    display: none;
+}

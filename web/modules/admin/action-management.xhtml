@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+    <h:head>
+    </h:head>
+    <h:body>
+        <script>
+            function onSubmit(xhr, status, args) {
+                if (!args.validationFailed) {
+                    PF('ActionDialog').hide();
+//                    clearFilter();
+                }
+            }
+        </script>
+        <ui:composition>
+            <style type="text/css" >
+                #form_main\:pTree\:txtSearchTree_input {
+                    width: 525px;
+                }
+                .ui-treetable .ui-treetable-header, .ui-treetable .ui-treetable-footer {padding: 4px 0px;}
+            </style>
+            <script type="text/javascript" >
+                function scrollToSelectedTreeNode() {
+                    scrollTo("[id='form_main:pTree'] .ui-selected.ui-treetable-selectable-node");
+                }
+            </script>
+            <p:growl id="growl" />
+            <h:form id="form_main">
+                <p:panel>
+                    <div class="stf-view-header">
+                        <p:commandButton value="#{PP_SHARED.add} chức năng" styleClass="" process="@this" update="dialogAction" actionListener="#{actionController.beforeAdd}" oncomplete="PF('ActionDialog').show();" icon="fa fa-plus-square" >
+                            <p:resetInput target="dialogAction"/>
+                        </p:commandButton>
+                    </div>
+                    <div class="stf-table">
+                        <p:treeTable id="pTree" selectionMode="single"  value="#{actionController.mtreeActionValues}" var="action" selection="#{actionController.nodeActionSelect}">
+
+                            <p:column headerText="Tên chức năng">
+                                <h:outputText value="#{action.actionName}" />
+                            </p:column>
+                            <p:column headerText="#{PP_MODULE.label_Type}">
+                                <h:outputText value="#{action.typeView}" />
+                            </p:column>
+                            <p:column headerText="#{PP_MODULE.label_ParentId}">
+                                <h:outputText value="#{action.parentName}" />
+                            </p:column>
+                            <p:column headerText="#{PP_MODULE.label_ActionUrl}">
+                                <h:outputText value="#{action.actionUrl}" />
+                            </p:column>
+
+                            <p:column headerText="Hiệu lực" style="text-align: center">
+                                <p:selectBooleanCheckbox value="#{action.status eq '1'}" disabled="true"/>
+                            </p:column>
+                            <p:column style="width:24px; white-space: nowrap !important;" headerText="#{PP_SHARED.manipulate}">
+                                <p:commandButton  value="#{PP_SHARED.edit}" oncomplete="PF('ActionDialog').show();" icon="fa fa-pencil-square" styleClass="btn-xs btn-info" process="@this" update="dialogAction" actionListener="#{actionController.edit(action)}">
+                                    <p:resetInput target="dialogAction"/>
+                                </p:commandButton>
+                                <p:commandButton  value="#{PP_SHARED.del}" oncomplete="PF('cfmDeleteN').show();"  icon="fa fa-trash-o" styleClass="btn-xs btn-danger btn-margin" process="@this"  actionListener="#{actionController.beforeDelete(action)}" />
+
+                            </p:column>
+                        </p:treeTable>
+                    </div>
+                    <p:contextMenu id="context_menu" for="pTree">
+                        <p:menuitem icon="fa fa-expand" value="#{PP_SHARED.expand_all}" global="false" process="@this" actionListener="#{actionController.expandTree(true)}" update="pTree" />
+                        <p:menuitem icon="fa fa-compress" value="#{PP_SHARED.collapse_all}" global="false" process="@this" actionListener="#{actionController.expandTree(false)}" update="pTree" />
+                    </p:contextMenu>
+                </p:panel>
+            </h:form>
+
+            <p:dialog id="dialogAction" width="500" header="#{actionController.checkAction==1 ?'Cập nhập chức năng':'Thêm chức năng'}" showEffect="fade" widgetVar="ActionDialog" appendTo="@(body)" modal="true" resizable="false" >
+                <h:form id="fDialog" styleClass="stf-dialog-edit">
+                    <p:panel id="ActionPanel">
+                        <div class="ui-fluid stf-view">
+                            <p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank" layout="grid">
+                                <p:outputLabel for="actionName" value="Tên chức năng " />
+                                <p:inputText id="actionName" value="#{actionController.ett_selected.actionName}" maxlength="100" required="true" requiredMessage="#{PP_MODULE.require_msg_ActionName}" />
+                                <p:outputLabel for="Type" value="#{PP_MODULE.label_Type}"/>
+                                <p:selectOneMenu id="Type" value="#{actionController.ett_selected.type}" required="true" requiredMessage="#{PP_MODULE.require_msg_Type}" disabled="#{actionController.enableType}">
+                                    <f:selectItem itemValue="" itemLabel="" />
+                                    <f:selectItem itemValue="0" itemLabel="Nhóm chức năng"/>
+                                    <f:selectItem itemValue="1" itemLabel="Chức năng"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel for="parentID" value="#{PP_MODULE.label_ParentId}"/>
+                                <p:selectOneMenu id="parentID" required="true" value="#{actionController.ett_selected.parentId}" requiredMessage="#{PP_MODULE.require_msg_ParentId}">
+                                    <f:selectItem itemLabel="" itemValue="1"/>
+                                    <f:selectItems value="#{actionController.cboParent}"/>
+                                </p:selectOneMenu>
+                                <p:outputLabel for="actionURL" value="#{PP_MODULE.label_ActionUrl} " />
+                                <p:inputText maxlength="255" value="#{actionController.ett_selected.actionUrl}" id="actionURL" required="true" requiredMessage="#{PP_MODULE.require_msg_ActionUrl}" />
+
+                                <p:outputLabel for="Status" value="Hiệu lực"/>
+                                <p:selectBooleanCheckbox  id="Status" value="#{actionController.ett_selected.isCheckValid}" />
+                            </p:panelGrid>
+
+                            <p:dataTable id="cars2" var="permit" value="#{actionController.ett_selected.listPermit}" editable="true" editMode="cell" widgetVar="cellPermits" style="color: black!important;margin:0 10%; ">
+                                <f:facet name="header">
+                                    Hành động
+                                </f:facet>
+
+                                <p:ajax event="cellEdit" listener="#{dtEditView.onCellEdit}" update=":grow_main_dt" />
+                                <p:column headerText="Tên">
+                                    <p:cellEditor>
+                                        <f:facet name="output"><h:outputText value="#{permit.permitName}" /></f:facet>
+                                        <f:facet name="input"><p:inputText value="#{permit.permitName}"  label="Tên"/></f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Mã" rendered="false">
+                                    <p:cellEditor>
+                                        <f:facet name="output"><h:outputText value="#{permit.permitCode}" /></f:facet>
+                                        <f:facet name="input"><p:inputText value="#{permit.permitCode}"  label="Mã"/></f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="">
+                                    <p:selectBooleanCheckbox  id="Status" value="#{permit.check}" />
+                                </p:column>
+
+                            </p:dataTable>
+
+                        </div>
+                        <div class="ui-dialog-action">
+                            <p:commandButton value="#{PP_ROLE.save}" styleClass="btn-primary" icon="fa fa-check" update="form_main:pTree ActionPanel grow_main_dt"  process="@this ActionPanel"  actionListener="#{actionController.submitOk}"/>
+                            <p:commandButton value="#{PP_ROLE.cancel}" icon="fa fa-trash-o" styleClass="btn-danger" onclick="PF('ActionDialog').hide();" type="button"/>
+                        </div>
+                    </p:panel>
+                </h:form>
+            </p:dialog>
+
+            <p:confirmDialog message="#{PP_SHARED.confirm_delete}" styleClass="stf-confirm" header="#{PP_SHARED.delete_dialog_header}" appendTo="@(body)" id="cfmDeleteN"
+                             severity="alert"
+                             widgetVar="cfmDeleteN">
+                <h:form id="cfmDialog">
+                    <div class="ui-dialog-action">
+                        <p:commandButton value="#{PP_SHARED.yes}" process="@this" styleClass="btn-primary" icon="fa fa-check" actionListener="#{actionController.submitDelete}"
+                                         update="form_main:pTree grow_main_dt"
+                                         oncomplete="PF('cfmDeleteN').hide();" />
+                        <p:commandButton value="#{PP_SHARED.no}" icon="fa fa-trash-o" styleClass="btn-danger" onclick="PF('cfmDeleteN').hide();" type="button" />
+                    </div>
+                </h:form>
+            </p:confirmDialog>
+        </ui:composition>
+    </h:body>
+</html>

@@ -1,0 +1,2318 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:mce="http://java.sun.com/jsf/composite/editor"
+      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
+    <h:body>
+
+        <ui:composition>
+            <link href="#{request.contextPath}/resources/js/video-js.min.css" rel="stylesheet"/>
+            <link href="#{request.contextPath}/resources/assets/css/videojs.record.css" rel="stylesheet"/>
+            <link href="#{request.contextPath}/resources/assets/css/style.css" rel="stylesheet"/>
+
+            <script src="#{request.contextPath}/resources/js/video.min.js"></script>
+            <script src="#{request.contextPath}/resources/js/recorder.js"></script>
+            <script src="#{request.contextPath}/resources/js/wavesurfer.min.js"></script>
+            <script src="#{request.contextPath}/resources/js/wavesurfer.microphone.min.js"></script>
+            <script src="#{request.contextPath}/resources/js/videojs.wavesurfer.min.js"></script>
+
+            <script src="#{request.contextPath}/resources/js/videojs.record.min.js"></script>
+            <script src="#{request.contextPath}/resources/js/videojs.record.recorderjs.min.js"></script>    
+            <link rel="stylesheet" href="#{request.contextPath}/resources/css/jquery.css"></link>
+
+
+<!--            <script src="https://cdn.alloyui.com/3.0.1/aui/aui-min.js"></script>
+            <link href="https://cdn.alloyui.com/3.0.1/aui-css/css/bootstrap.min.css" rel="stylesheet"></link>-->
+
+            <link rel="stylesheet" href="#{request.contextPath}/resources/js/timepicker/css/timepicker.css"/>
+            <script src="#{request.contextPath}/resources/js/timepicker/js/timepicker.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/resources/js/googletimeline.js"></script>
+            <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>
+           
+            
+             <h:form >
+                        <p:remoteCommand name="setDuration" actionListener="#{RecordController.setDuration(evt)}"/>
+             </h:form>
+            <script type="text/javascript">
+
+                var player;
+                var player2;
+                var fileRecorded;
+                var audioFile;
+
+                /*$(document).ready(function () {
+                        
+
+                });*/
+
+
+                function uploadFile() {
+                    var fd = new FormData();
+                    var viewstate = $('#recorderForm').children('input[name="javax.faces.ViewState"]').val();
+                    var f = new File([player.recordedData], 'File_Ghi_Am.wav');
+                    console.log(viewstate);
+                    fd.append('recorderForm', 'recorderForm');
+                    fd.append('javax.faces.ViewState', viewstate);
+                    fd.append('javax.faces.partial.ajax', true);
+                    fd.append('javax.faces.partial.execute', 'recorderForm:uploadAudio');
+                    fd.append('javax.faces.source', 'recorderForm:uploadAudio');
+                    fd.append('recorderForm:uploadAudio', f);
+                    if (audioFile) {
+                        $.ajax({
+                            url: 'record-management',
+                            type: 'POST',
+                            data: fd,
+                            processData: false,
+                            contentType: false,
+                            success: function (e) {
+                                console.log('success');
+                                audioFile = null;
+                                reloadPlayer();
+                                // some code here
+                            }
+                        });
+                    }
+
+                }
+
+                function stopPlayer() {
+                    console.log('function stopPlayer');
+                    if ($('#playback')[0]) {
+                        $('#playback')[0].src = '';
+                        $('#playback').hide();
+                    }
+                    
+                }
+
+
+
+                function showDownloadAudioButton(isShow) {
+                    console.log('showDownloadAudioButton ' + isShow);
+                    if (isShow) {
+                        $('#playback')[0].controlsList = '';
+                    } else {
+                        $('#playback')[0].controlsList = 'nodownload';
+                    }
+                }
+
+                function stopRecorder() {
+                    if (player) {
+                        player.recorder.destroy();
+                    }
+                    reloadPlayer();
+
+                }
+                
+                function getDuration() {
+                    var duration = document.getElementById("playback").duration;
+                    setDuration([{name:'duration', value:duration}]);
+                }
+
+
+                function reloadPlayer() {
+                    console.log('function reloadPlayer');
+
+                    //<![CDATA[
+                    var viewstate = $('#downloadAudio').children('input[name="javax.faces.ViewState"]').val();
+                    var url = 'record-management?downloadAudio=downloadAudio&downloadAudio%3AbtnDownload=&javax.faces.ViewState=' + viewstate;
+                    if ($('#playback')[0]) {
+                        console.log('playback defined');
+                        $('#playback').show();
+                       
+                        $('#playback')[0].src = url;
+                        var x = document.getElementById("playback");
+                        
+                    }
+                    
+                    //]]>
+                }
+                
+                function reloadPlayerT2T() {
+                    console.log('function reloadPlayerT2T');
+
+                    //<![CDATA[
+                    var viewstate = $('#downloadAudioT2T').children('input[name="javax.faces.ViewState"]').val();
+                    var url = 'record-management?downloadAudioT2T=downloadAudioT2T&downloadAudioT2T%3AbtnDownloadT2T=&javax.faces.ViewState=' + viewstate;
+                    if ($('#playbackT2T')[0]) {
+                        console.log('playback defined');
+                        $('#playbackT2T').show();
+                        $('#playbackT2T')[0].src = url;
+                    }
+                    
+                    //]]>
+                }
+                function stopPlayerT2T() {
+                    console.log('function stopPlayerT2T');
+                    if ($('#playbackT2T')[0]) {
+                        $('#playbackT2T')[0].src = '';
+                        $('#playbackT2T').hide();
+                    }
+                    
+                }
+
+
+
+                function showRecorder() {
+
+                    stopPlayer();
+                    console.log('init recorder');
+                    player = videojs("myAudio",
+                            {
+                                controls: true,
+                                width: 780,
+                                height: 300,
+                                plugins: {
+                                    wavesurfer: {
+                                        src: "live",
+                                        waveColor: "black",
+                                        progressColor: "#2E732D",
+                                        debug: true,
+                                        cursorWidth: 1,
+                                        msDisplayMax: 20,
+                                        hideScrollbar: true
+                                    },
+                                    record: {
+                                        audio: true,
+                                        video: false,
+                                        maxLength: 12000,
+                                        debug: true,
+                                        audioEngine: "recorder.js"
+                                    }
+                                }
+                            });
+
+
+                    // error handling
+                    player.on('deviceError', function ()
+                    {
+                        console.log('device error:', player.deviceErrorCode);
+                    });
+                    player.on('error', function (error)
+                    {
+                        console.log('error:', error);
+                    });
+
+                    // user clicked the record button and started recording
+                    player.on('startRecord', function ()
+                    {
+                        console.log('started recording!');
+                    });
+
+                    // user completed recording and stream is available
+                    player.on('finishRecord', function ()
+                    {
+                        audioFile = player.recordedData;
+                    });
+                }
+
+                if (typeof links === 'undefined') {
+                    links = {};
+                    links.locales = {};
+                } else if (typeof links.locales === 'undefined') {
+                    links.locales = {};
+                }
+
+
+                links.locales['vn'] = {
+                    'MONTHS': ["  Tháng 1", "  Tháng 2", "  Tháng 3", "  Tháng 4", "  Tháng 5", "  Tháng 6", "  Tháng 7", "  Tháng 8", "  Tháng 9", "  Tháng 10", "  Tháng 11", "  Tháng 12"],
+                    'MONTHS_SHORT': ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+                    'DAYS': ["Chủ nhật - ", "Thứ 2 - ", "Thứ 3 - ", "Thứ 4 - ", "Thứ 5 - ", "Thứ 6 - ", "Thứ 7 - "],
+                    'DAYS_SHORT': ["CN - ", "Th2 - ", "Th3 - ", "Th4 - ", "Th5 - ", "Th6 - ", "Th7 - "],
+                    'ZOOM_IN': "Phóng to",
+                    'ZOOM_OUT': "Thu nhỏ",
+                    'MOVE_LEFT': "Chuyển sang trái",
+                    'MOVE_RIGHT': "Chuyển sang phải",
+                    'NEW': "Tạo",
+                    'CREATE_NEW_EVENT': "Tạo sự kiện"
+                };
+                
+                PrimeFaces.locales['vi'] = {     closeText: 'Tắt', prevText: 'Tháng trước', nextText: 'Tháng sau', monthNames: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'], monthNamesShort: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12' ], dayNames: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'], dayNamesShort: ['CN', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'], dayNamesMin: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'], weekHeader: 'Tuần', firstDay: 1, isRTL: false, showMonthAfterYear: false, yearSuffix:'', timeOnlyTitle: 'Chọn giờ', timeText: 'Giờ', hourText: 'Giờ', minuteText: 'Phút', secondText: 'Giây', currentText: 'Giờ hiện hành', ampm: false, month: 'Tháng', week: 'Tuần', day: 'Ngày', allDayText: 'Cả ngày' };
+
+
+
+
+                
+
+            </script>
+
+     <!--<script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/tinymce.min.js"> </script>
+     <script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/jquery.tinymce.min.js"></script>-->
+
+
+
+
+            <style>
+
+                .menu
+                {
+                    font-weight: bold;
+                }
+
+                #frmDlgSubmission\:dtlist table{
+                    table-layout: fixed;
+                }
+                .ui-selectonemenu-list-item{
+                    white-space: normal!important;
+                }
+                .someClass {
+                    word-wrap: break-word;
+                    white-space: normal!important;
+                }
+                .import-btn{
+                    width: 130px!important;
+                }
+                .panelUploadFile.ui-overlaypanel{
+                    margin-bottom: 50px!important;
+                }
+                
+                
+                .google-visualization-tooltip {
+                    opacity: 0 !important;
+                    max-width: 200px !important;
+                  }
+                  .google-visualization-tooltip[clone] {
+                    opacity: 1 !important;
+                    pointer-events: auto !important;
+                  }
+                  html,
+                  body,
+                  timeline {
+                    width: 100%;
+                    height: 100%;
+                    margin: 0;
+                    padding: 0;
+                  }
+                  
+                .styled:hover {
+                      background-color: steelblue;
+                  }
+
+               
+            </style>
+
+            <script>
+                function handleSubmitRequestArea(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddArea').hide();
+                    }
+                }
+
+                function handleSubmitRequestHouse(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddHouse').hide();
+                    }
+                }
+//                function handleSubmitRequestRecord(xhr, status, args) {
+//                    if (!args.validationFailed) {
+//                        PF('dlgAddRecord').hide();
+//                        //PF('dtRecord').clearFilters();
+//                        
+//                    }
+//                }
+                function handleSubmitRequestNews(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddNews').hide();
+                    }
+                }
+                function handleAddPlayTime(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddTime').hide();
+                    }
+                }
+                function handleMixFile(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgmixaudio').hide();
+                    }
+                }
+                function handleT2TFile(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgT2T').hide();
+                    }
+                }
+                
+                
+//                YUI().use(
+//                    'aui-datepicker',
+//                    function(Y) {
+//                      new Y.DatePicker(
+//                        {
+//                          trigger: 'text',
+//                          popover: {
+//                            zIndex: 1
+//                          },
+//                          on: {
+//                            selectionChange: function(event) {
+//                              console.log(event.newSelection)
+//                            }
+//                          }
+//                        }
+//                      );
+//                    }
+//                  );
+
+         
+
+
+            </script>
+
+            <h:form id="form_main" onkeypress="if (event.keyCode == 13) {
+                
+                        return false;
+                    }" >
+                
+
+                <p:panel id="pnl_main">  
+
+
+                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%" >
+
+                        <p:dataTable id="dtRecord" value="#{RecordController.listRecord}" var="record"
+                                     rowKey="#{record.rec_id}" selectionMode="single"
+                                     paginator="true" 
+                                     rows="30"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                     rowsPerPageTemplate="10,20,30,50"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     currentPageReportTemplate="{startRecord} - {endRecord} / {totalRecords} thông báo"
+                                     widgetVar="dtRecord"
+                                     sortBy="#{record.createDate}" 
+                                     sortOrder="descending"
+                                     filterBy="#{record.status}"
+                                     emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+                            
+                             
+
+                            <f:facet name="header">
+                                <div class="stf-table-label">
+                                    <p:panelGrid columns="7" columnClasses="ui-grid-col-4,ui-grid-col-1,ui-grid-col-2,ui-grid-col-1,ui-grid-col-2,ui-grid-col-2" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                                        <h4 style="color: #0259A4; margin-top: 38px; position: absolute; left: 0px;">
+                                            Danh sách Thông báo
+                                        </h4>
+                                        <p:outputLabel value="Từ ngày" for="txtFrom" style="float: right; color: #0259A4"/>
+                                        <p:calendar pattern="dd/MM/yyyy" id="txtFrom" locale="vi"
+                                                            label="Chọn ngày" style="color: #0259A4" value="#{RecordController.fromDate}"
+                                                            converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy" />
+                                                    <p:ajax event="dateSelect" listener="#{RecordController.changeFilterTimeEvent(evt)}" update="form_main:dtRecord :grow_main_dt"></p:ajax>
+                                                </p:calendar>
+
+                                        <p:outputLabel value="Đến ngày" for="txtTo" style="float: right; color: #0259A4"/>
+                                                <p:calendar pattern="dd/MM/yyyy" id="txtTo" locale="vi"
+                                                            label="Chọn ngày" value="#{RecordController.toDate}"
+                                                            converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                                    <f:convertDateTime pattern="dd/MM/yyyy" />
+                                                    <p:ajax event="dateSelect" listener="#{RecordController.changeFilterTimeEvent(evt)}" update="form_main:dtRecord :grow_main_dt"></p:ajax>
+                                                </p:calendar>
+                                        <p:commandButton id="cmdViewTimeLine" process="@this" value="Biểu đồ lịch phát" icon="fa fa-calendar" style="font-weight: 400; float: right"
+                                                         styleClass=" btn-success btn-auto" actionListener="#{RecordController.viewTimelineEvent()}" update="dlgTimeline"
+                                                         oncomplete="PF('dlgTimeline').show();" >
+                                            <p:resetInput target="dlgTimeline "/> </p:commandButton>
+                                        
+                                        <p:commandButton id="cmdAddRecord" process="@this" value="Thêm thông báo" icon="fa fa-plus-square" style="font-weight: 400; float: right"
+                                                         styleClass=" btn-success btn-auto" actionListener="#{RecordController.addRecordEvent(evt)}" update="dlgAddRecord"
+                                                         oncomplete="PF('dlgAddRecord').show();" rendered="#{RecordController.isAllowInsertRECORD()}">
+                                            <p:resetInput target="formAddRecord formPlayListConf"/> </p:commandButton>
+                                    </p:panelGrid>
+                                    
+                          
+                                </div>
+                                <p:commandLink id="toggler" style="margin-left: 5px; color: black; float: right"  global="false" process="@this"
+                                                styleClass="btn-margin fa fa-wrench" />
+                                <p:tooltip for="toggler" value="#{PP_SHARED.view}" trackMouse="true" />
+                                <p:columnToggler datasource="dtRecord" trigger="toggler" />
+                               
+
+                                <!--                                <div class="clear" />-->
+                            </f:facet>
+
+
+
+                            <p:column headerText="STT" style="width: 2%!important" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column headerText="Nội dung thông báo" id="maincontent" style="width: 20%!important" filterMatchMode="contains" filterBy="#{record.rec_summary}" sortBy="#{record.rec_summary}">  
+                                <h:outputText value="#{record.rec_summary}">
+                                </h:outputText>
+                            </p:column> 
+                            
+                            <p:column headerText="Loại" priority="7" style="width: 8%!important" filterMatchMode="exact" filterBy="#{record.rec_type}" sortBy="#{record.rec_type}" width="7%">  
+                                <f:facet name="filter" >
+                                    <p:selectOneMenu  onchange="PF('dtRecord').filter()">
+                                        <f:selectItem itemValue="" itemLabel="Tất cả" />
+                                        <f:selectItem itemLabel="Tin thường" itemValue="0"/>
+                                        <f:selectItem itemLabel="Tin tiếp sóng" itemValue="2"/>
+                                        <f:selectItem itemLabel="Tin thu phát FM" itemValue="3"/>
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText value="Tin thường" rendered="#{record.rec_type eq 0}"/>
+                                <h:outputText value="Tin tiếp sóng" rendered="#{record.rec_type eq 2}"/>
+                                <h:outputText value="Tin thu phát FM" rendered="#{record.rec_type eq 3}"/>
+                            </p:column> 
+
+                            <p:column headerText="Danh mục" priority="1" rendered="false" style="width: 10%" filterMatchMode="exact" width="7%" filterBy="#{record.categoryName}" sortBy="#{record.categoryName}">  
+                                <f:facet name="filter">
+                                    <p:selectOneMenu  onchange="PF('dtRecord').filter()">
+                                        <f:selectItem itemValue="" itemLabel="Tất cả" />
+                                        <f:selectItems value="#{RecordController.listRecordcategory}" var="cate" itemValue="#{cate.name}" itemLabel="#{cate.name}" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText  value="#{record.categoryName}">
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Nơi tạo" priority="2" style="width: 7%!important" rendered="#{RecordController.selectedArea.areaType ne 4}" filterMatchMode="contains" filterBy="#{record.area_name}" sortBy="#{record.area_name}" >  
+                                                <h:outputText value=" #{record.area_name}">
+                                                 </h:outputText>
+                            </p:column>
+                            <p:column headerText="Người tạo" priority="3" style="width: 7%!important" rendered="#{RecordController.selectedArea.areaType ne 4}" filterMatchMode="contains" filterBy="#{record.create_username}" sortBy="#{record.create_username}" >  
+                                <h:outputText value=" #{record.create_username}">
+                                                 </h:outputText>
+                            </p:column>
+                            <p:column headerText="Người duyệt" priority="4" style="width: 7%!important" rendered="#{RecordController.selectedArea.areaType ne 4}" filterMatchMode="contains" filterBy="#{record.approve_username}" sortBy="#{record.approve_username}" >  
+                                <h:outputText value=" #{record.approve_username}">
+                                                 </h:outputText>
+                            </p:column>
+                            <p:column headerText="Ngày tạo" priority="5" style="width: 5%!important" filterMatchMode="contains" filterBy="#{record.create_date}" sortBy="#{record.create_date}">  
+                                <h:outputText value=" #{record.create_date}">
+                                </h:outputText>
+                            </p:column> 
+                            
+                            <p:column headerText="Ngày phê duyệt" priority="6" visible="false" style="width: 8%!important" filterMatchMode="contains" filterBy="#{record.approve_date}" sortBy="#{record.approve_date}">  
+                                <h:outputText value=" #{record.approve_date}">
+                                </h:outputText>
+                            </p:column> 
+
+                            <p:column headerText="Chế độ phát" priority="7" style="width: 8%!important" filterMatchMode="exact" filterBy="#{record.rec_play_mode}" sortBy="#{record.rec_play_mode}" width="7%">  
+                                <f:facet name="filter" >
+                                    <p:selectOneMenu  onchange="PF('dtRecord').filter()">
+                                        <f:selectItem itemValue="" itemLabel="" />
+                                        <f:selectItem itemValue="1" itemLabel="Phát theo lịch" />
+                                        <f:selectItem itemValue="2" itemLabel="Phát khẩn cấp" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText value=" #{record.rec_play_mode eq 1 ? 'Phát theo lịch' : record.rec_play_mode eq 2 ? 'Phát khẩn cấp' : 'Phát ngay lập tức và theo lịch'}">
+                                </h:outputText>
+                            </p:column> 
+
+                            <p:column headerText="Thời gian phát"  style="width: 5%!important" filterMatchMode="contains" filterBy="#{record.rec_play_timeString}" sortBy="#{record.rec_play_timeString}">  
+                                <h:outputText value=" #{record.rec_play_timeString}">
+                                </h:outputText>
+                            </p:column> 
+                            <p:column headerText="Thời lượng (phút)" style="width: 7%!important" filterMatchMode="contains" filterBy="#{record.durationString}" sortBy="#{record.durationString}">  
+                                <h:outputText value="#{record.durationString}">
+                                </h:outputText>
+                            </p:column>
+                            <p:column rendered="false" headerText="Ngày bắt đầu"  style="width: 8%!important" filterMatchMode="contains" filterBy="#{record.rec_play_start}" sortBy="#{record.rec_play_start}">  
+                                <h:outputText value=" #{record.rec_play_start}">
+                                </h:outputText>
+                            </p:column> 
+                            <p:column rendered="false" headerText="Kiểu phát" style="width: 8%!important" filterMatchMode="exact" filterBy="#{record.rec_receipt_type}" sortBy="#{record.rec_receipt_type}" width="7%">  
+                                <f:facet name="filter">
+                                    <p:selectOneMenu  onchange="PF('dtRecord').filter()">
+                                        <f:selectItem itemValue="" itemLabel="" />
+                                        <f:selectItem itemValue="1" itemLabel="Danh sách địa bàn" />
+                                        <f:selectItem itemValue="2" itemLabel="Danh sách hộ gia đình" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText value=" #{record.rec_receipt_type eq 1 ? 'Danh sách địa bàn' : record.rec_receipt_type eq 2 ? 'Danh sách hộ gia đình' : ''}">
+                                </h:outputText>
+                            </p:column> 
+                            <p:column headerText="Địa bàn cần phát" priority="10" style="width:10%!important" filterMatchMode="contains" filterBy="#{record.rec_receipt_name}" sortBy="#{record.rec_receipt_name}">  
+                                <h:outputText value=" #{record.rec_receipt_name}">
+                                </h:outputText>
+                            </p:column> 
+                            <p:column headerText="Lặp lại" rendered="false" style="width: 8%!important" filterMatchMode="exact" filterBy="#{record.rec_play_repeat_type}" sortBy="#{record.rec_play_repeat_type}" width="7%">  
+                                <f:facet name="filter">
+                                    <p:selectOneMenu  onchange="PF('dtRecord').filter()">
+                                        <f:selectItem itemValue="" itemLabel="" />
+                                        <f:selectItem itemValue="0" itemLabel="Theo tuần" />
+                                        <f:selectItem itemValue="1" itemLabel="Theo tháng" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText rendered="#{record.rec_play_mode ne 2}" value="#{record.rec_play_repeat_type eq 0 ? 'Theo tuần' : 'Theo tháng'}">
+                                </h:outputText>
+                            </p:column> 
+                            <p:column headerText="Trạng thái" id="status" style="width: 7%!important" filterMatchMode="exact" filterBy="#{record.status}" sortBy="#{record.status}" width="7%">  
+                                <f:facet name="filter">
+                                    <p:selectOneMenu  onchange="PF('dtRecord').filter()" >
+                                        <f:selectItem itemValue="" itemLabel="Tất cả" />
+                                        <f:selectItem itemValue="0" itemLabel="Chờ duyệt" />
+                                        <f:selectItem itemValue="1" itemLabel="Đã duyệt" />
+                                        <f:selectItem itemValue="-1" itemLabel="Đã hủy" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText value=" #{record.status eq 0 ? 'Chờ duyệt' : record.status eq 1 ? 'Đã duyệt' : record.status eq -1 ? 'Đã hủy' : 'Đã xóa'}"
+                                              style="color: #{record.status eq 1 ? 'blue' : record.status eq -1 ? 'red' : 'black'}" >
+                                </h:outputText>
+                            </p:column> 
+                            
+                            <p:column headerText="Trạng thái phát" id="playstatus" style="width: 7%!important" filterMatchMode="exact" filterBy="#{record.playStatus}" sortBy="#{record.playStatus}" width="7%">  
+                                <f:facet name="filter">
+                                    <p:selectOneMenu  onchange="PF('dtRecord').filter()" >
+                                        <f:selectItem itemValue="" itemLabel="Tất cả" />
+                                        <f:selectItem itemValue="-1" itemLabel="Đã hủy" />
+                                        <f:selectItem itemValue="0" itemLabel="Sắp tới lịch phát" />
+                                        <f:selectItem itemValue="3" itemLabel="Chưa tới lịch phát" />
+                                        <f:selectItem itemValue="1" itemLabel="Đang phát" />
+                                        <f:selectItem itemValue="2" itemLabel="Đã kết thúc" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText value=" #{record.playStatus eq 2 ? 'Đã kết thúc' :  (record.playStatus eq -1 ?'Đã hủy':(record.playStatus eq 0 ?'Sắp tới lịch':( record.playStatus eq 1 ?'Đang phát':record.playStatus eq 3 ?'Chưa tới lịch':'')))}"
+                                              style="color: #{record.playStatus eq 2 or record.playStatus eq -1 ? 'black' :  'blue'}" >
+                                </h:outputText>
+                            </p:column>
+
+
+                            <p:column headerText="#{PP_SHARED.manipulate}" style="text-align: center; width: 7%!important;" >
+                                <p:commandLink id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin" 
+                                               actionListener="#{RecordController.viewRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();">
+                                </p:commandLink>
+                                
+                                <p:commandLink rendered="#{record.status eq 0 and RecordController.isIsAllowView(permitCode) and RecordController.isAllowUpdateRECORD() and ((record.area_type_id eq RecordController.selectedArea.areaType) or RecordController.adminUser)}" 
+                                               id="bntEdit" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil" global="false" process="@this" 
+                                               actionListener="#{RecordController.editRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();" >
+                                    <p:resetInput target="formAddRecord formPlayListConf"/>
+                                </p:commandLink>
+                                
+                                
+                                <p:commandLink rendered="#{record.status eq 1 and record.rec_play_mode eq 1 and RecordController.isIsAllowView(permitCode) and RecordController.isAllowUpdateRECORD() and ((record.area_type_id eq RecordController.selectedArea.areaType) or RecordController.adminUser)}" 
+                                               id="bntEditAfterApl" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil" global="false" process="@this" 
+                                               actionListener="#{RecordController.editRecordAfterApproval(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();" >
+                                    <p:resetInput target="formAddRecord formPlayListConf"/>
+                                </p:commandLink>
+                                
+                                <p:commandLink rendered="#{RecordController.isAllowDeleteRECORD() and (record.status eq 0 ) and ((record.area_type_id eq RecordController.selectedArea.areaType) or RecordController.adminUser)}"  id="bntDelete" style="margin-left: 5px; color: red!important;"  global="false" process="@this"
+                                               actionListener="#{RecordController.deleteRecordEvent(record)}" update="cfmDeleteRecord" oncomplete="PF('cfmDeleteRecord').show();" styleClass="btn-margin fa fa-trash" />
+                                
+                                <p:commandLink rendered="#{record.status eq 0 and RecordController.isAllowApprovalRECORD()}" id="bntApprove" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-check" global="false" process="@this" 
+                                               actionListener="#{RecordController.approveRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();" >
+                                </p:commandLink>
+                                <p:commandLink rendered="#{RecordController.isAllowApprovalRECORD() and record.status eq 1 }"  id="bntCancel" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                               actionListener="#{RecordController.deleteRecordEvent(record)}" update="cfmDeleteRecord" oncomplete="PF('cfmDeleteRecord').show();" styleClass="btn-margin fa fa-times" />
+                                
+                                <p:commandLink rendered="#{(record.playStatus eq 0 or record.playStatus eq 1 or record.playStatus eq 3 or record.playStatus eq -2) and record.rec_play_mode ne 2 and RecordController.isIsAllowView(permitCode) and RecordController.isAllowUpdateRECORD()}" 
+                                               id="bntAddCountinue" resetValues="true" style="margin-left: 5px; color: steelblue;"  styleClass="btn-margin fa fa-link" global="false" process="@this" 
+                                               actionListener="#{RecordController.addContinueRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();" >
+                                    <p:resetInput target="formAddRecord formPlayListConf"/>
+                                </p:commandLink>
+                                
+                                <p:commandLink rendered="#{RecordController.isIsAllowView(permitCode) and RecordController.isAllowUpdateRECORD()}" 
+                                               id="bntClone" resetValues="true" style="margin-left: 5px; color: steelblue;"  styleClass="btn-margin fa fa-plus-square" global="false" process="@this" 
+                                               actionListener="#{RecordController.cloneRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();" >
+                                    <p:resetInput target="formAddRecord formPlayListConf"/>
+                                </p:commandLink>
+
+                                <p:tooltip for="bntView" value="#{PP_SHARED.view}" trackMouse="true" />
+                                <p:tooltip for="bntEdit" value="#{PP_SHARED.edit}" trackMouse="true" />
+                                <p:tooltip for="bntEditAfterApl" value="Sửa lịch phát" trackMouse="true" />
+                                <p:tooltip for="bntAddCountinue" value="Tạo bản tin phát nối tiếp" trackMouse="true" />
+                                <p:tooltip for="bntClone" value="Tạo lại bản tin" trackMouse="true" />
+                                <p:tooltip for="bntDelete" value="Xóa" trackMouse="true" />
+                                <p:tooltip for="bntCancel" value="Hủy" trackMouse="true" />
+                                <p:tooltip for="bntApprove" value="Phê duyệt" trackMouse="true" />
+                            </p:column>
+                            
+                            
+                        </p:dataTable>
+
+                    </h:panelGrid>
+
+
+
+                </p:panel>
+            </h:form>   
+
+
+            <p:dialog id="dlgAddRecord" onShow="onShowAddRecordPopup(); " focus="formAddRecord:txtRecSummary" onHide="onHideAddRecordPopup(); PF('olPanel').hide(); PF('olPanelRadio').hide();" widgetVar="dlgAddRecord" width="1200" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+    
+                <f:facet name="header" >
+                    <h:outputText value="Thêm thông báo" rendered="#{RecordController.recordActtionFlag eq 'CREATE' and RecordController.selectedRecord.rec_play_time.size() eq null}"/>
+                    <h:outputText value="Sửa thông báo" rendered="#{RecordController.recordActtionFlag eq 'UPDATE'}"/>
+                    <h:outputText value="Xem thông báo" rendered="#{RecordController.recordActtionFlag eq 'VIEW'}"/>
+                    <h:outputText value="Phê duyệt thông báo" rendered="#{RecordController.recordActtionFlag eq 'APPROVE'}"/>
+                    <h:outputText value="Sửa lịch phát" rendered="#{RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}"/>
+                    <h:outputText value="Tạo bản tin phát nối tiếp" rendered="#{RecordController.recordActtionFlag eq 'CREATE' and RecordController.selectedRecord.rec_play_time.size() ne null}"/>
+                </f:facet>
+                <h:form id="eventForm">
+                    <p:remoteCommand name="onShowAddRecordPopup"  actionListener="#{RecordController.onShowAddRecordPopup}" />
+                    <p:remoteCommand name="onHideAddRecordPopup"  actionListener="#{RecordController.onHideAddRecordPopup}" />
+                    <p:remoteCommand name="duration" global="true" actionListener="#{RecordController.setDuration(evt)}"/>
+                </h:form>
+
+                
+
+
+                <h:form id="downloadAudio" style="display:none">
+                    <p:commandButton id ="btnDownload" value="Download" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-arrowthick-1-s">
+                        <p:fileDownload value="#{RecordController.playbackStream}" />
+                    </p:commandButton>
+
+                </h:form>
+
+                <h:form id="formAddRecord" enctype="multipart/form-data">
+                    <div>
+
+                        <p:panelGrid columns="2" columnClasses="ui-grid-col-2,ui-grid-col-10" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Nội dung thông báo" for="txtRecSummary"/>
+                            <p:inputText id="txtRecSummary"   value="#{RecordController.selectedRecord.rec_summary}"  style="width: 100%!important"
+                                         disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}"
+                                         required="true" requiredMessage="Nội dung chính #{PP_SHARED.can_not_be_empty}" maxlength="500"
+                                         >
+                            </p:inputText>
+                            
+                        </p:panelGrid>
+
+                        <p:panelGrid id="pnlRecType" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Loại thông báo" for="recType" rendered="#{RecordController.allowSTREAMING}"/>
+                            <p:selectOneMenu   rendered="#{RecordController.allowSTREAMING}" id="recType"  value="#{RecordController.selectedRecord.rec_type}" required="true" onchange="PF('olPanel').hide();" 
+                                              effect="fade" disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}">       
+                                <f:selectItem itemLabel="Tin thường" itemValue="0"/>
+                                <f:selectItem itemLabel="Tin tiếp sóng" itemValue="2"/>
+                                <f:selectItem itemLabel="Tin thu   phát FM" itemValue="3"/>
+                                <p:ajax update="formAddRecord:pnlRecType formAddRecord:pnlScheduleConfig" listener="#{RecordController.eventChangeRecType(evt)}" />
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel value=""  rendered="#{!RecordController.allowSTREAMING}"/>
+                            <p:outputLabel value=""  rendered="#{!RecordController.allowSTREAMING}"/>
+                            
+                            <p:outputLabel value=""  rendered="#{RecordController.selectedRecord.rec_type eq 0}"/>
+                            <p:outputLabel value=""  rendered="#{RecordController.selectedRecord.rec_type eq 0}"/>
+                            
+                            <p:outputLabel for="channel" value="#{RecordController.selectedRecord.rec_type eq 2?'Kênh tiếp sóng':'Kênh FM'}" rendered="#{RecordController.selectedRecord.rec_type ne 0}"/>
+                            <p:selectOneMenu id="channel" effect="fade" rendered="#{RecordController.selectedRecord.rec_type ne 0}"
+                                             value="#{RecordController.selectedRecord.rec_url}"  required="true" requiredMessage="Kênh đài FM #{PP_SHARED.can_not_be_empty}"
+                                             disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}"> 
+                                <f:selectItem itemValue="" itemLabel="" />
+                                <f:selectItems value="#{RecordController.listChannel}" var="channel" itemLabel="#{channel.name}" itemValue="#{channel.id}"/>
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel value="File thông báo" for="slCategory"  rendered="#{RecordController.selectedRecord.rec_type eq 0}"/>
+                            <p:row rendered="#{(!(RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE')) and RecordController.selectedRecord.rec_type eq 0}">
+                                <p:column colspan="8">
+                                    <p:fileUpload id="uploadFile" value="#{RecordController.audioFile}" 
+                                                  mode="advanced" 
+                                                  skinSimple="true" auto="true" fileUploadListener="#{RecordController.uploadAudioHandler}"
+                                                  styleClass="fileupload-simple"
+                                                  update="fileName :grow_main_dt"
+                                                  label="" uploadLabel="llll"
+                                                  required="true" style="width: 20%; float: left"
+                                                  onstart="PF('statusDialog').show();" oncomplete="PF('statusDialog').hide(); "
+                                                  />
+                                     <p:tooltip for="uploadFile" value="Tải lên" trackMouse="true" />
+                                </p:column>
+                                <p:column colspan="1" >
+                                    <p:commandButton id="cmdAddRecord2" process="@this" value="" label="Ghi âm"
+                                                     update="dlgRec" style="width: 20%; height: 37px; float: left; "
+                                                     oncomplete="PF('dlgRec').show();" />
+                                    <p:tooltip for="cmdAddRecord2" value="Ghi âm" trackMouse="true" />
+                                </p:column>
+                                <p:column colspan="1">
+                                    <p:commandButton id="cmdMixFile" process="@this" value="" actionListener="#{RecordController.mixMultiFileEvent(evt)}"
+                                                     update="dlgmixaudio" style="width: 20%; height: 37px; float: left; padding-right: 17px !important"
+                                                     oncomplete="PF('dlgmixaudio').show();" >
+                                        <p:tooltip for="cmdMixFile" value="Nối nhiều file âm thanh" trackMouse="true" />
+                                        <p:resetInput target="formMixAudio"/>
+                                    </p:commandButton>
+                                    <p:commandButton  id="cmdT2T" process="@this" value="" 
+                                                      update="dlgT2T" style="width: 20%; height: 36px; float: left; padding-right: 17px !important"
+                                                      oncomplete="PF('dlgT2T').show(); reloadPlayerT2T();" actionListener="#{RecordController.T2TEvent(evt)}" >
+                                        <p:tooltip for="cmdT2T" value="Chuyển đổi văn bản thành giọng nói" trackMouse="true" />
+                                        <p:resetInput target="formT2T"/>
+                                    </p:commandButton>
+                                </p:column>
+
+                            </p:row>
+                            <p:outputLabel value="" rendered="#{(!(RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE')) and RecordController.selectedRecord.rec_type eq 0}"/>
+                            <p:row rendered="#{RecordController.selectedRecord.rec_type eq 0}" >
+                                <p:outputLabel id="fileName" value="#{RecordController.selectedRecord.recFileName}" style="color: #005CAC; text-align: left; display: table"/>
+                                <audio preload="auto" id="playback" src=""  autobuffer ="true" controls="controls" controlsList="nodownload" style="display: none;"></audio>
+                            </p:row>
+                            <p:outputLabel value="" rendered="#{(RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE') and RecordController.selectedRecord.rec_type eq 0}"/>
+
+                            <p:outputLabel value="" rendered="#{(RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE') and RecordController.selectedRecord.rec_type eq 0}"/>
+
+                            <p:outputLabel for="slCategory" value="Danh mục" rendered="#{RecordController.selectedRecord.rec_type eq 0}"/>
+                            <p:selectOneMenu id="slCategory" effect="fade" rendered="#{RecordController.selectedRecord.rec_type eq 0}"
+                                             value="#{RecordController.selectedRecord.category_id}"  required="true"
+                                             disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}">       
+                                <f:selectItems value="#{RecordController.listRecordcategory}" var="recordCat" itemLabel="#{recordCat.name}" itemValue="#{recordCat.id}"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Mức độ ưu tiên" for="txtPriority" rendered="false"/>
+                            <p:selectOneMenu rendered="false" id="txtPriority"  value="#{RecordController.selectedRecord.rec_priority}"
+                                             effect="fade"  disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}">       
+                                <f:selectItem itemLabel="Bình thường" itemValue="1"/>
+                                <f:selectItem itemLabel="Quan trọng" itemValue="4"/>
+                                
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel value="Chế độ phát" for="recMode"/>
+                            <p:selectOneMenu  rendered="true" id="recMode"  value="#{RecordController.selectedRecord.rec_play_mode}" required="true" onchange="PF('olPanel').hide();" 
+                                              effect="fade" disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}">       
+                                <f:selectItem itemLabel="Phát theo lịch" itemValue="1"/>
+                                <f:selectItem itemLabel="Phát trong ngày" itemValue="3"/>
+                                <f:selectItem itemLabel="#{RecordController.selectedRecord.rec_type eq 0 ? 'Phát khẩn cấp' : 'Phát trực tiếp'}" itemValue="2"/>
+                                <p:ajax update="formAddRecord:pnlScheduleConfig" listener="#{RecordController.eventChangePlayMode(evt)}" />
+                            </p:selectOneMenu>
+                            
+
+                            <p:outputLabel for="playMode" value="Kiểu phát" rendered="#{RecordController.allowHouseManagement  and RecordController.selectedRecord.rec_type eq 0}"/>
+                            <p:selectOneMenu id="playMode" required="true"  value="#{RecordController.selectedRecord.rec_receipt_type}" rendered="#{RecordController.allowHouseManagement and RecordController.selectedRecord.rec_type eq 0}"
+                                             effect="fade" disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}">       
+                                <f:selectItem itemLabel="Phát đến danh sách địa bàn" itemValue="1" />
+                                <f:selectItem itemLabel="Phát đến danh sách hộ gia đình" itemValue="2" />
+                                <p:ajax update="formPlayListConf txtRecListPlay pnlPlayList " listener="#{RecordController.eventChangeReceiptType(evt)}" />
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel for="playMode2" value="Kiểu phát"  rendered="#{!RecordController.allowHouseManagement and RecordController.selectedRecord.rec_type eq 0}"/>
+                            <p:selectOneMenu id="playMode2" required="true"  value="#{RecordController.selectedRecord.rec_receipt_type}" rendered="#{!RecordController.allowHouseManagement  and RecordController.selectedRecord.rec_type eq 0}"
+                                             effect="fade" disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}">       
+                                <f:selectItem itemLabel="Phát đến danh sách địa bàn" itemValue="1" />
+                                <p:ajax update="formPlayListConf txtRecListPlay pnlPlayList lbPlayList" listener="#{RecordController.eventChangeReceiptType(evt)}" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="#{RecordController.selectedRecord.rec_receipt_type eq 1? 'Địa bàn cần phát':'Hộ gđ cần phát'}" id="lbPlayList" for="txtRecListPlay"/>
+                            <p:panelGrid id="pnlPlayList" columns="1" columnClasses="ui-grid-col-12" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            
+                                <p:inputTextarea rendered="#{RecordController.selectedRecord.rec_receipt_type eq 1}" id="txtRecListPlay" value="#{RecordController.selectedRecord.rec_receipt_name}" rows="1" cols="5"
+                                                 required="true" requiredMessage="Địa bàn cần phát #{PP_SHARED.can_not_be_empty}" 
+                                                 >
+                                    <pe:keyFilter regEx="/[]/i" preventPaste="false" />
+                                    <p:ajax event="click"  update="formPlayListConf" oncomplete="PF('dlgPlayListConfig').show();" listener="#{RecordController.showAreaSelectEvent(evt)}">
+                                        <p:resetInput target=" formPlayListConf"/>
+                                    </p:ajax>
+                                </p:inputTextarea>
+                                
+                                <p:selectCheckboxMenu id="selectHouse2" value="#{RecordController.listReceiptMCU}" label=" " 
+                                              style="width: 100%!important"   multiple="true" required="true" requiredMessage="Danh sách phát #{PP_SHARED.can_not_be_empty}"
+                                              filter="true" filterMatchMode="contains" rendered="#{RecordController.selectedRecord.rec_receipt_type eq 2}"
+                                              disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}"> 
+                                    <f:selectItems value="#{RecordController.listMCUHouse}" var="house" itemLabel="#{house.holder_name}" itemDescription="#{house.address}" itemValue="#{house.mcu_id}" />
+
+                                </p:selectCheckboxMenu>
+                            </p:panelGrid>
+
+                            <p:outputLabel value="Gửi thông báo" for="txtNotifyFlag"/>
+                            <p:selectBooleanCheckbox id="txtNotifyFlag" value="#{RecordController.selectedRecord.notify_flagBoolean}"
+                                                     disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE'}"/>
+                        </p:panelGrid>    
+
+                        <p:panelGrid id="pnlScheduleConfig" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >    
+                            
+                            <p:outputLabel value="Giờ phát" for="txtPlayTime" rendered="#{RecordController.selectedRecord.rec_play_mode ne 2 and RecordController.selectedRecord.rec_type eq 0}"/>
+                            <p:row rendered="#{RecordController.selectedRecord.rec_type eq 0 and RecordController.selectedRecord.rec_play_mode ne 2}">
+                                <p:inputText id="txtPlayTime" value="#{RecordController.recPlayTimeString}" a:autofocus="true" immediate="true"
+                                             style="width: 85%;  float: left; " rendered="#{RecordController.selectedRecord.rec_play_mode ne 2}"       
+                                             required="true"
+                                             requiredMessage="Giờ phát #{PP_SHARED.can_not_be_empty}"
+                                             disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">
+                                    <pe:keyFilter regEx="/[0-9,:]/i" preventPaste="false" />
+                                    <p:ajax event="change"  update="txtPlayTime"/>
+                                </p:inputText>
+                                
+                                <p:tooltip position="top" for="txtPlayTime" value="Mời nhập vào giờ phát dạng HH:mm:ss cách nhau bởi dấu phẩy. Ví dụ: 08:05:00, 11:30:00"  />
+
+                                <p:commandButton id="cmdAddTimePlay"  icon="fa fa-plus-square" process="@this" 
+                                                 rendered="#{(RecordController.recordActtionFlag eq 'CREATE' or RecordController.recordActtionFlag eq 'UPDATE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE') and RecordController.selectedRecord.rec_play_mode ne 2}" 
+                                                 style="width: 15%; height: 84%; float: left; margin-bottom: 0px!important" immediate="true" onclick="getDuration(); PF('olPanel').show();"
+                                                 update="txtPlayTime">
+                                    
+                                    <p:resetInput target="formPlayTimeConf2" />
+                                    </p:commandButton>
+
+                            </p:row>
+     
+                            <p:outputLabel value="Khung giờ phát" for="txtPlayTimeRadio" rendered="#{RecordController.selectedRecord.rec_play_mode ne 2 and RecordController.selectedRecord.rec_type eq 2}"/>
+                            <p:row rendered="#{RecordController.selectedRecord.rec_type eq 2 and RecordController.selectedRecord.rec_play_mode ne 2}">
+                                <p:inputText id="txtPlayTimeRadio" value="#{RecordController.recPlayTimeStringForRadio}" a:autofocus="true"
+                                             style="width: 85%;  float: left; " rendered="#{RecordController.selectedRecord.rec_play_mode ne 2}"       
+                                             required="true"
+                                             requiredMessage="Giờ phát #{PP_SHARED.can_not_be_empty}"
+                                             disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">
+                                    <pe:keyFilter regEx="/[0-9,:]/i" preventPaste="false" />
+                                    <p:ajax event="change"  />
+                                </p:inputText>
+                                <p:tooltip position="top"  for="txtPlayTimeRadio" value="Mời nhập vào giờ phát dạng HH:mm:ss-HH:mm:ss cách nhau bởi dấu phẩy. Ví dụ: 08:05:00-10:30:00, 15:30:00-16:00:00"  />
+
+                                <p:commandButton id="cmdAddTimePlayRadio"  icon="fa fa-plus-square" process="@this formAddRecord:pnlScheduleConfig" 
+                                                 rendered="#{(RecordController.recordActtionFlag eq 'CREATE' or RecordController.recordActtionFlag eq 'UPDATE' or RecordController.recordActtionFlag eq 'UPDATE_AFTER_APPROVE') and RecordController.selectedRecord.rec_play_mode ne 2}" 
+                                                 style="width: 15%; height: 84%; float: left; margin-bottom: 0px!important" immediate="true" onclick="PF('olPanelRadio').show();">
+                                    <p:resetInput target="formPlayTimeConfRadio"/> 
+                                    </p:commandButton>
+
+                            </p:row>
+                            
+                            <p:outputLabel value="Thời gian phát" for="txtEndTime" rendered="#{RecordController.selectedRecord.rec_play_mode ne 2 and RecordController.selectedRecord.rec_type eq 3}"/>
+                            <p:row rendered="#{RecordController.selectedRecord.rec_type eq 3 and RecordController.selectedRecord.rec_play_mode ne 2}" >
+                                
+                                <p:inputText id="txtStartTime" onfocus="$('#formAddRecord\\:txtStartTime').timepicker(); " value="#{RecordController.recPlayTimeString}" style="width: 40%; float: left ; color: #000"
+                                             disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">
+                                </p:inputText> 
+
+                                <p:outputLabel value="-" style="width: 20%; float: left; text-align: center;"/>
+                                
+                                <p:inputText id="txtEndTime" onfocus="$('#formAddRecord\\:txtEndTime').timepicker();" value="#{RecordController.endTimeForRadio}" style="width: 40%; float: left ; color: #000"
+                                             required="true" requiredMessage="Thời gian phát #{PP_SHARED.can_not_be_empty}"
+                                             disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">
+                                </p:inputText> 
+                                
+                            </p:row>
+                            
+                            <p:outputLabel for="txtEndTime2" value="Thời gian kết thúc" rendered="#{RecordController.selectedRecord.rec_play_mode eq 2 and RecordController.selectedRecord.rec_type ne 0}"/>
+                            <p:inputText id="txtEndTime2" onfocus="$('#formAddRecord\\:txtEndTime2').timepicker();" value="#{RecordController.endTimeForRadio}" style="margin-bottom: 40px; color: #000"
+                                         disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"
+                                         required="true" requiredMessage="Thời gian kết thúc #{PP_SHARED.can_not_be_empty}"
+                                         rendered="#{RecordController.selectedRecord.rec_play_mode eq 2 and RecordController.selectedRecord.rec_type ne 0}">
+                            </p:inputText> 
+                               
+                         
+                            
+                            
+                            <p:outputLabel for="repeatType" value="Kiểu lặp lại" rendered="#{RecordController.selectedRecord.rec_play_mode eq 1}"/>
+                            <p:selectOneMenu id="repeatType"  value="#{RecordController.selectedRecord.rec_play_repeat_type}"
+                                             rendered="#{RecordController.selectedRecord.rec_play_mode eq 1}"
+                                             required="true" effect="fade" 
+                                             disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}">       
+                                <f:selectItem itemLabel="Theo tuần" itemValue="0" />
+                                <f:selectItem itemLabel="Theo tháng" itemValue="1" />
+                                <p:ajax update="selectDaysInWeek" listener="#{RecordController.eventChangeRepeatType(evt)}"/>
+                            </p:selectOneMenu>
+
+                            
+
+                            <p:commandButton rendered="false" id="cmdAPlayListConfig" process="@this" value="Cấu hình danh sách phát" icon="fa fa-plus-square"  
+                                             styleClass=" btn-success btn-auto" onclick="PF('dlgPlayListConfig').show();" 
+                                             />
+
+
+                            <p:outputLabel value="#{RecordController.selectedRecord.rec_play_mode eq 3?'Ngày phát' : 'Ngày bắt đầu' }" for="txtStartDate" 
+                                           rendered="#{RecordController.selectedRecord.rec_play_mode ne 2}"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtStartDate" value="#{RecordController.selectedRecord.rec_playStartDate}" 
+                                        rendered="#{RecordController.selectedRecord.rec_play_mode ne 2}"  locale="vi"
+                                        required="true" requiredMessage="#{RecordController.selectedRecord.rec_play_mode eq 3?'Ngày phát ' : 'Ngày bắt đầu ' } #{PP_SHARED.can_not_be_empty}" mindate="#{RecordController.today}" label="Chọn ngày"
+                                        disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or !RecordController.startDateEditable}" converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>
+                            </p:calendar>
+                            
+                        
+
+                            <p:outputLabel value="Ngày lặp lại" for="selectDaysInWeek" rendered="#{RecordController.selectedRecord.rec_play_mode eq 1}"/>
+                            <p:selectCheckboxMenu id="selectDaysInWeek" value="#{RecordController.listDaysSelected2}" required="true" requiredMessage="Ngày lặp lại #{PP_SHARED.can_not_be_empty}"
+                                                  style="width: 100%!important"   multiple="true" label="Chọn ngày"
+                                                  rendered="#{RecordController.selectedRecord.rec_play_mode eq 1}"
+                                                  disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"> 
+                                <f:selectItems value="#{RecordController.selectedRecord.rec_play_repeat_type eq 0 ? RecordController.listDaysWeek : RecordController.listDaysMounth}" var="dayweek" itemLabel="#{dayweek.name}" itemValue="#{dayweek.value}" />
+                            </p:selectCheckboxMenu>
+
+                            <p:outputLabel value="Ngày kết thúc" for="txtEndDate" rendered="#{RecordController.selectedRecord.rec_play_mode eq 1}"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtEndDate"  locale="vi"
+                                        value="#{RecordController.selectedRecord.rec_playExpireDate}" 
+                                        required="true" requiredMessage="Ngày kết thúc #{PP_SHARED.can_not_be_empty}" mindate="#{RecordController.today}" maxdate="#{RecordController.dayNextYear}"
+                                        disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}" 
+                                        rendered="#{RecordController.selectedRecord.rec_play_mode eq 1}"
+                                        converterMessage="Ngày kết thúc sai định dạng (dd/MM/yyyy)">
+                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                            </p:calendar>
+
+                            <p:outputLabel value="Lịch sử phát tin" for="btnHistory" rendered="#{RecordController.recordActtionFlag eq 'VIEW' and RecordController.selectedRecord.status ne 0}"/>
+                            <p:commandButton id="btnHistory" rendered="#{RecordController.recordActtionFlag eq 'VIEW' and RecordController.selectedRecord.status ne 0}" value="Xem chi tiết" styleClass="btn-primary "
+                                             oncomplete="PF('dlghistory').show();" update="dlghistory" actionListener="#{RecordController.viewHistoryEvent(evt)}"
+                                             style="border-radius: 20px !important;"/>
+
+                            <p:outputLabel value="" style="margin-bottom: 10px;" rendered="#{RecordController.selectedRecord.rec_play_mode eq 3 and RecordController.selectedRecord.rec_type ne 0}"/>
+                            <p:commandButton rendered="false" value="Submit" ajax="false" actionListener="#{RecordController.upload}"  />
+                            
+                            
+                            
+                            <script>
+                            //<![CDATA[
+//                                function getDuration() {
+//                                    var file = document.getElementById("playback");
+//                                    var duration = document.getElementById("duration")[0].duration;
+//                                    duration([{name:'rec_id', value:'111'}]);
+//                                }
+//                            
+                                function handleOverlapTS() {
+                                    if ('#{RecordController.noticeTS}' != '0') {
+                                        PF('dlgoverlapTS').show();
+                                    }
+                                }
+                                function handleOverlap() {
+                                    if ('#{RecordController.overlap}' != '0') {
+                                        PF('dlgoverlap').show();
+                                    }
+                                }
+                                function handleNotice() {
+                                    if ('#{RecordController.notice}' == '1') {
+                                        PF('dlgnotice').show();
+                                    }
+                                }
+                                
+                                function handleSubmitRequestRecord(xhr, status, args) {
+                                    if (!args.validationFailed) {
+                                       if ('#{RecordController.overlap}' == '0' && '#{RecordController.notice}' != '1' && '#{RecordController.noticeTS}' != '1'){
+                                           PF('dlgAddRecord').hide();
+                                        //PF('dtRecord').clearFilters();
+                                        }
+                                    }
+                                }
+                                function handleSubmitRequestApproveRecord(xhr, status, args) {
+                                    if (!args.validationFailed) {
+                                       if ('#{RecordController.overlap}' == '0'){
+                                           PF('dlgAddRecord').hide();
+                                        //PF('dtRecord').clearFilters();
+                                        }
+                                    }
+                                }
+                            //]]>
+                            </script>
+
+                        </p:panelGrid>
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave" value="#{RecordController.recordActtionFlag eq 'APPROVE' ? 'Phê duyệt' : 'Đồng ý'}"  actionListener="#{RecordController.saveRecord(evt)}" icon="fa fa-check-square" 
+                                               update="formAddRecord form_main:dtRecord :grow_main_dt dlgoverlap dlgnotice dlgoverlapTS formOverlap:dtOverlapRecord formOverlapTS:dtOverlapRecordTS" rendered="#{RecordController.recordActtionFlag ne 'VIEW'}"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestRecord(xhr, status, args); handleOverlap(); handleNotice(); handleOverlapTS();"/> 
+                            <p:commandButton global="false"  id="btnReject" process="@this" icon="fa fa-times-circle"  value="Hủy" actionListener="#{RecordController.cancelRecord(evt)}"
+                                             oncomplete="handleSubmitRequestApproveRecord(xhr, status, args);" styleClass="btn-danger btn-margin btn-width" rendered="#{RecordController.recordActtionFlag eq 'APPROVE'}"
+                                             update="form_main:dtRecord formAddRecord :grow_main_dt "/>                     
+
+                            <p:commandButton global="true"  id="btnBack"  process="@this" update="form_main:dtRecord :grow_main_dt"
+                                             value="#{RecordController.recordActtionFlag ne 'VIEW' ? PP_SHARED.cancel : 'Đóng'}" 
+                                             oncomplete="PF('dlgAddRecord').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                    </div>
+                </h:form>
+
+                <p:overlayPanel onShow="$('#formPlayTimeConf2\\:txtPlayTime3').timepicker(); $('#formPlayTimeConf2\\:txtPlayTime3').focus();" rendered="true" id="olPanel" widgetVar="olPanel" dismissable="false" appendToBody="true"
+                                for="formAddRecord:txtPlayTime" style="width: 370px; height: 150px" hideEffect="fade" >
+                    <h:form id="formPlayTimeConf2">
+                        <p:panelGrid columns="3" columnClasses="ui-grid-col-4,ui-grid-col-8,ui-grid-col-4" styleClass="ui-panelgrid-blank" layout="grid" >
+                            <p:outputLabel value="Chọn giờ" />
+                            <p:inputText id="txtPlayTime3" value="#{RecordController.hourAdded}" a:autofocus="true" style="width: 100px; color: #000">
+                            </p:inputText> 
+                   
+                            <p:commandButton global="true"  id="btnSave" value="Thêm" icon="fa fa-plus"  style="float: left" 
+                                           update="formAddRecord:txtPlayTime :grow_main_dt" actionListener="#{RecordController.saveTimeEvent(evt)}"
+                                           styleClass="btn-primary btn-width"  /> 
+                            
+                           
+                        </p:panelGrid>  
+                        <div class="ui-dialog-action" style="position: absolute !important; bottom: 0px !important; right: 0px; left: 0px;">
+                            
+
+                        </div>
+                    </h:form>
+
+                </p:overlayPanel>
+                
+                <p:overlayPanel onShow="$('#formPlayTimeConfRadio\\:txtPlayTime3').timepicker(); $('#formPlayTimeConfRadio\\:txtPlayTime3').focus(); $('#formPlayTimeConfRadio\\:txtPlayTime4').timepicker();" 
+                                rendered="true" id="olPanelRadio" widgetVar="olPanelRadio" dismissable="false" appendToBody="true"
+                                for="formAddRecord:txtPlayTimeRadio" style="width: 500px; height: 150px" hideEffect="fade" >
+                    <h:form id="formPlayTimeConfRadio">
+                        <p:panelGrid columns="4" columnClasses="ui-grid-col-6,ui-grid-col-8,ui-grid-col-6,ui-grid-col-8" styleClass="ui-panelgrid-blank" layout="grid" >
+                            <p:outputLabel value="Giờ bắt đầu" />
+                            <p:inputText id="txtPlayTime3" value="#{RecordController.startTimeAdded}" a:autofocus="true" style="width: 100px; color: #000">
+                            </p:inputText> 
+                            
+                            <p:outputLabel value="Giờ kết thúc" />
+                            <p:inputText id="txtPlayTime4" value="#{RecordController.endTimeAdded}" a:autofocus="true" style="width: 100px; color: #000">
+                            </p:inputText> 
+                   
+                            <p:commandButton global="true"  id="btnSave" value="Thêm" icon="fa fa-plus"  style="float: left" 
+                                           update="formAddRecord:txtPlayTimeRadio :grow_main_dt" actionListener="#{RecordController.saveRadioTimeEvent(evt)}"
+                                           styleClass="btn-primary btn-width"  /> 
+                            
+                           
+                        </p:panelGrid>  
+                        <div class="ui-dialog-action" style="position: absolute !important; bottom: 0px !important; right: 0px; left: 0px;">
+                            
+
+                        </div>
+                    </h:form>
+
+                </p:overlayPanel>
+
+
+            </p:dialog>
+
+
+            <p:dialog header="Thêm giờ phát" position="570,490" onShow="$('#formPlayTimeConf\\:txtPlayTime3').timepicker();" id="dlgAddPlayTime" widgetVar="dlgAddPlayTime" height="200" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formPlayTimeConf">
+                    <div>
+                        <p:panelGrid columns="2" columnClasses="ui-grid-col-4,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="TTThọn giờ" />
+                            <p:inputText id="txtPlayTime3" value="#{RecordController.hourAdded}" style="display: inline">
+                            </p:inputText> 
+                        </p:panelGrid>  
+
+
+                        <div class="ui-dialog-action" style="position: absolute !important; bottom: 0px !important; right: 0px; left: 0px;">
+
+                            <p:commandButton   id="btnSave" value="Thêm" icon="fa fa-plus" 
+                                               update="formAddRecord:txtPlayTime :grow_main_dt" actionListener="#{RecordController.saveTimeEvent(evt)}"
+                                               styleClass="btn-primary btn-width"  />                         
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+
+            <p:dialog header="Cấu hình danh sách phát" id="dlgPlayListConfig" widgetVar="dlgPlayListConfig" height="420px" width="700" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formPlayListConf">
+                    <p:layout style="height: 340px;" rendered="#{RecordController.selectedRecord.rec_receipt_type eq 1}">
+                        <p:layoutUnit position="west" resizable="true" size="300"  minSize="100" maxSize="400" style="background: white; margin-left: 20px">
+                            <div style="margin-left: 10px">
+                                <p:outputLabel value="Chọn địa bàn " style="font-weight: bold"/>
+
+                                <p:tree  id="areaTree" style="width: 250px; height: 290px" value="#{RecordController.areaRoot}" var="doc" 
+                                         selectionMode="checkbox"  selection="#{RecordController.listSelectedArea2}"
+                                         
+                                         >           
+
+                                    <p:ajax event="select"  listener="#{RecordController.saveListArea(evt)}" update="formPlayListConf:txtPlayList"/>
+                                    <p:ajax event="unselect" listener="#{RecordController.saveListArea(evt)}" update="formPlayListConf:txtPlayList" />
+
+                                    <p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed" styleClass="">
+
+                                        <h:outputText value="#{doc.areaName}" style="font-weight:bold;"/>
+                                    </p:treeNode>
+                                    <p:treeNode type="vn" >
+                                    <h:outputText value="#{doc.areaName}" style="font-weight:bold; " />
+                                    </p:treeNode>
+                                    <p:treeNode type="tp">
+                                        <h:outputText value="#{RecordController.isCityMode? 'TP.' :'T.'} #{doc.areaName}" style="font-weight:bold;" />
+                                    </p:treeNode>
+                                    <p:treeNode type="q">
+                                        <h:outputText value="#{RecordController.isCityMode? 'Q.' :'H.'} #{doc.areaName}" style="font-weight:bold;"/>
+                                    </p:treeNode>
+                                    <p:treeNode type="p" >
+                                        <h:outputText value="#{RecordController.isCityMode? 'P.' :'X.'} #{doc.areaName}"/>
+                                    </p:treeNode>
+                                    <p:treeNode type="t" >
+                                        <h:outputText value="#{RecordController.isCityMode? 'T.' :'T/X.'} #{doc.areaName}"/>
+                                    </p:treeNode>
+                                    <p:treeNode type="document" >
+                                        <h:outputText value="#{doc.areaName}" />
+                                    </p:treeNode>
+                                    
+                                </p:tree>
+                            </div>
+                        </p:layoutUnit>
+
+                        <p:layoutUnit position="center" style="background: white;">
+                            <div style="margin-top: 5px">
+                                <p:outputLabel id="text" value="Phát đến địa bàn: " for="txtPlayList" style="font-weight: bold"/>
+                            </div>
+
+                            <p:outputLabel id="txtPlayList"  value="#{RecordController.listSelectedAreaName}" style="color: #005CAC;" >
+                            </p:outputLabel>       
+
+                        </p:layoutUnit>
+                    </p:layout>
+
+
+                    <p:outputLabel rendered="#{RecordController.selectedRecord.rec_receipt_type eq 2}" value="Xin mời chọn hộ gia đình:"  style="margin-left: 30px" />
+
+                    <p:panelGrid rendered="#{RecordController.selectedRecord.rec_receipt_type eq 2}" columns="1" columnClasses="ui-grid-col-12" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                        <p:selectCheckboxMenu id="selectHouse" value="#{RecordController.listSelectedMCUHouse}" label=" "  
+                                              style="width: 100%!important"   multiple="true" 
+                                              filter="true" filterMatchMode="contains" 
+                                              disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"> 
+                            <f:selectItems value="#{RecordController.listMCUHouse}" var="house" itemLabel="#{house.holder_name} - #{house.address}" itemDescription="#{house.address}" itemValue="#{house}" />
+
+                        </p:selectCheckboxMenu>
+
+
+
+                    </p:panelGrid>
+
+
+
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton   id="btnSave" value="#{PP_SHARED.ok}" icon="fa fa-check-square" rendered="#{RecordController.recordActtionFlag eq 'CREATE' or RecordController.recordActtionFlag eq 'UPDATE'}"
+                                           update="formAddRecord:txtRecListPlay :grow_main_dt" actionListener="#{RecordController.saveAreaEvent(evt)}"
+                                           styleClass="btn-primary btn-width" oncomplete="PF('dlgPlayListConfig').hide();"
+
+                                           />   
+                        <p:commandButton rendered="true" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}" 
+                                         oncomplete="PF('dlgPlayListConfig').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            
+            
+            
+            
+            <p:dialog header="Biều đồ lịch phát" id="dlgTimeline" widgetVar="dlgTimeline" width="1300" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+               
+                
+                
+                <h:form id="formTimeline">
+                     <script type="text/javascript">
+                     $(document).ready(function() {
+                    google.charts.load("current", {packages:["timeline"]});
+                    google.charts.setOnLoadCallback(drawChart);
+                    function drawChart() {
+
+                      var container = document.getElementById('example');
+                      if (container == null)
+                          return;
+                      var chart = new google.visualization.Timeline(container);
+                      var dataTable = new google.visualization.DataTable();
+                      var events = #{RecordController.eventsAsJson==null?"null":RecordController.eventsAsJson};
+                      if (events == null)
+                          return;
+
+                       
+
+                      dataTable.addColumn({ type: 'string', id: 'Room' });
+                      dataTable.addColumn({ type: 'string', id: 'Name' });
+                      dataTable.addColumn({ type: 'string', role: 'style' });
+                      dataTable.addColumn({ type: 'date', id: 'Start' });
+                      dataTable.addColumn({ type: 'date', id: 'End' });
+                      dataTable.addColumn({ type: 'number', role: 'tooltip' }); //private int playMode; 5
+                      dataTable.addColumn({ type: 'string', role: 'tooltip' }); //private String playTime; 6
+                      dataTable.addColumn({ type: 'string', role: 'tooltip' }); //private String repeatDays; 7
+                      dataTable.addColumn({ type: 'number', role: 'tooltip' }); //private int repeatType; 8 
+                      dataTable.addColumn({ type: 'string', role: 'tooltip' }); //private String createdArea; 9
+                      dataTable.addColumn({ type: 'number', role: 'tooltip' }); //private int type; 10
+                      dataTable.addColumn({ type: 'number', role: 'tooltip' }); // 11: rec_id
+                  
+                      
+  
+                      var eventsCount = #{RecordController.events==null?"0":RecordController.events.size()};
+                      var dataRows = [];
+                      for (var i = 0; i &lt;  eventsCount ; i++) {
+                          var event = events[i];
+                          var color = 'opacity: 0.0;';
+                            if (event.type == 2) {
+                                color = event.playMode==1?'#336699':'#cccc00';
+                            } else if(event.type == 1){
+                                color = event.playMode==1?'#1AA11A':'#F03030';
+                            }
+                          //dataTable.addRow();
+                          var end = null;
+                          if (event.fromH +":"+event.fromM+":"+event.fromS != event.toH +":"+event.toM+":"+event.toS){
+                              dataRows.push([ event.date, event.summary=null?"":event.summary, color, new Date(0,0,0,event.fromH,event.fromM,event.fromS), new Date(0,0,0,event.toH,event.toM,event.toS) , event.playMode, event.playTime, event.repeatDays, event.repeatType, event.createdArea, event.type, event.rec_id]);
+                          }else{
+                              dataRows.push([ event.date, event.summary=null?"":event.summary, color, new Date(0,0,0,event.fromH,event.fromM,event.fromS), new Date(0,0,0,event.toH+23,event.toM+59,event.toS+59), event.playMode, event.playTime, event.repeatDays, event.repeatType, event.createdArea, event.type, event.rec_id]);
+                          }
+                       }
+                        dataTable.addRows(dataRows);
+                       
+                      var dateFormat = new google.visualization.DateFormat({
+                        pattern: 'HH:mm:ss'
+                      });
+                      
+                      dataTable.insertColumn(2, {type: 'string', role: 'tooltip', p: {html: true}});
+                      for (var i = 0; i &lt; dataTable.getNumberOfRows(); i++) {
+                        var type = '';
+                        if (dataTable.getValue(i, 11) == 2) {
+                            type = dataTable.getValue(i, 6)==1?'Tin tiếp sóng FM theo lịch':'Tin tiếp sóng FM trực tiếp';
+                        } else {
+                            type = dataTable.getValue(i, 6)==1?'Thông báo theo lịch':'Thông báo khẩn cấp';
+                        }
+                        var endTime = dataTable.getValue(i, 5)== null? null: dataTable.getValue(i, 5).getTime();
+                    
+                        var duration = Math.abs(endTime - dataTable.getValue(i, 4).getTime())/1000;
+                        var rec_id = dataTable.getValue(i, 12);
+                        var hh = Math.floor(duration/3600);
+                        var mm = Math.floor(duration/60);
+                        var ss = Math.floor(duration%60);
+                        var mmm = mm &lt; 10 ? '0':'';
+                        var sss = ss &lt; 10 ? '0':'';
+                        
+                        var tooltip = '<div class="ggl-tooltip"><span>' +
+                          dataTable.getValue(i, 1) + '</span>' 
+                          + '<br/>' +dateFormat.formatValue(dataTable.getValue(i, 4)) + ' - ' + dateFormat.formatValue(dataTable.getValue(i, 5)) +
+                          '</div><div class="ggl-tooltip">' +
+                          '<span>' + type +  '</span><br/>' +
+                          '<span>' + 'Thời lượng</span>: ' + mmm  + mm + ':' + sss + + ss + '<br/>';
+                  
+                          if(dataTable.getValue(i, 6)==1){
+                            tooltip += '<span>' + 'Thời gian phát</span>: ' + dataTable.getValue(i, 7) +  '<br/>' + 
+                            '<span>' + 'Lặp lại</span>: ' + dataTable.getValue(i, 8) + '<br/>';
+                            
+                            }
+                            
+                          
+                         
+                          tooltip +='<span>' + 'Nơi tạo</span>: ' + dataTable.getValue(i, 10) +  '</div>' ;
+                          
+                          
+                          if(dataTable.getValue(i, 6)==1){
+                              tooltip += '<button type="button" style="width: inherit" onclick="updateBtn(' + rec_id + ');" class="styled" >Sửa lịch phát</button>' ;
+                              tooltip += '<button type="button" style="width: inherit" onclick="addContinueBtn(' + rec_id + ');" class="styled" >Tạo bản tin nối tiếp</button>' ;
+                          }else if (dataTable.getValue(i, 6)==0)
+                              tooltip += "";
+                        dataTable.setValue(i, 2, tooltip);
+                      }
+                      //oncontextmenu="alert('hello');";
+                      
+                      var observer = new MutationObserver(setBorderRadius);
+                        google.visualization.events.addListener(chart, 'ready', function () {
+                          setBorderRadius();
+                          observer.observe(container, {
+                            childList: true,
+                            subtree: true
+                          });
+                        });
+
+                        function setBorderRadius() {
+                          Array.prototype.forEach.call(container.getElementsByTagName('rect'), function (rect) {
+                            if (parseFloat(rect.getAttribute('width')) == 3) {
+                                rect.setAttribute('width', 0);
+                            } else {
+                                
+                            }
+                          });
+                        }
+                        
+                        var colors = [];
+                        var colorMap = {
+                            // should contain a map of category -> color for every category
+                            CategoryA: '#e63b6f',
+                            CategoryB: '#19c362',
+                            CategoryC: '#592df7'
+                        }
+//                        for (var i = 0; i &lt; dataTable.getNumberOfRows(); i++) {
+//                            if (dataTable.getValue(i, 10) == 2) {
+//                                colors[i] = dataTable.getValue(i, 5)==1?'#00acc1':'#c27ace';
+//                                console.log(i +"-" + dataTable.getValue(i, 2) + "---" + colors[i]);
+//                            } else {
+//                                colors[i] = dataTable.getValue(i, 5)==1?'#0f9d58':'#f06292';
+//                                console.log(i +"-" + dataTable.getValue(i, 2) + "---" + colors[i]);
+//                            }
+//                        }
+//
+//                        var rowHeight = 41;
+//                        var chartHeight = (dataTable.getNumberOfRows() + 1) * rowHeight;
+
+                        var options = {
+                            timeline: { 
+                                groupByRowLabel: true,
+                            },                          
+                            avoidOverlappingGridLines: true,
+                            tooltip: {
+                                            isHtml: true,
+                                            trigger: 'focus'
+                                      }, 
+                            width: '100%',
+                        };
+                        
+                        chart.draw(dataTable, options);
+                        
+                        google.visualization.events.addListener(chart, 'select', function(e) {
+                            //the built-in tooltip
+                            var tooltip = document.querySelector('.google-visualization-tooltip:not([clone])');
+                            //remove previous clone when there is any
+                            if (chart.ttclone) {
+                              chart.ttclone.parentNode.removeChild(chart.ttclone)
+                            }
+                            //create a clone of the built-in tooltip
+                            chart.ttclone = tooltip.cloneNode(true);
+                            //create a custom attribute to be able to distinguish
+                            //built-in tooltip and clone
+                            chart.ttclone.setAttribute('clone', true);
+                            //inject clone into document
+                            tooltip.parentNode.insertBefore(chart.ttclone, chart.tooltip);
+                          });
+
+
+
+                          
+                          
+                            
+                        }
+                        
+                        
+
+
+
+                        function updateBtn(id) {
+                            editrecord([{name:'rec_id', value:id}]);
+                            
+                        }
+                        
+                        function addContinueBtn(id){
+                            addContinue([{name:'rec_id', value:id}]);
+                        }
+});
+                        
+                </script>
+                    
+                    <p:remoteCommand name="editrecord" actionListener="#{RecordController.editRecordFromTimeline()}" 
+                                     oncomplete="PF('dlgAddRecord').show();" update="dlgAddRecord" >
+                        
+                        <p:resetInput target="formAddRecord formPlayListConf"/>
+                    </p:remoteCommand>
+                    
+                    <p:remoteCommand name="addContinue" actionListener="#{RecordController.addContinueRecordFromTimeline()}" 
+                                     oncomplete="PF('dlgAddRecord').show();" update="dlgAddRecord" >
+                        
+                        <p:resetInput target="formAddRecord formPlayListConf"/>
+                    </p:remoteCommand>
+
+                    
+                 <p:panelGrid id="pnlTimeline" columns="8" columnClasses="ui-grid-col-2,ui-grid-col-3,ui-grid-col-2,ui-grid-col-2,ui-grid-col-2,ui-grid-col-2,ui-grid-col-1,ui-grid-col-1" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+
+                    <p:outputLabel value="Địa bàn" style="float: right; margin-right: 10px; color: #0259A4" for="txtarea2"/>
+
+                    <p:inputText id="txtarea2" value="#{RecordController.selectedAreaForTimeline.areaName}" readonly="true"
+                                     onclick="PF('olPanel').loadContents();" />
+                    
+                    <p:outputLabel value="Từ ngày" for="txtFrom" style="float: right;margin-right: 10px; color: #0259A4"/>
+                    <p:calendar pattern="dd/MM/yyyy" id="txtFrom"  locale="vi"
+                                label="Chọn ngày" style="color: #0259A4" value="#{RecordController.fromDateForTimeline}"
+                                        converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                <p:ajax event="dateSelect" listener="#{RecordController.viewTimelineEvent()}" update="form_main:dtRecord formTimeline :grow_main_dt"></p:ajax>
+                            </p:calendar>
+
+                    <p:outputLabel value="Đến ngày" for="txtTo" style="float: right; margin-right: 10px; color: #0259A4"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtTo" locale="vi"
+                                        label="Chọn ngày" value="#{RecordController.toDateForTimeline}"
+                                        converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
+                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                <p:ajax event="dateSelect" listener="#{RecordController.viewTimelineEvent()}" update="form_main:dtRecord formTimeline :grow_main_dt"></p:ajax>
+                            </p:calendar>
+                    
+                    <p:outputLabel value=""/>
+                    
+                    <p:row>
+                        <p:commandLink global="false"  id="cmdCalendarView" process="@this"  title="Xem dạng lịch"
+                                       actionListener="#{RecordController.showCalendarEvent(evt)}" update="formTimeline"
+                                       style="width: 50%; color: royalblue!important; float: right" styleClass="fa fa-calendar"  >  
+                        </p:commandLink>
+                        <p:commandLink global="false"  id="cmdTimelineView" process="@this"  title="Xem dạng dòng thời gian" 
+                                       update="formTimeline" actionListener="#{RecordController.showTimelineEvent(evt)}"
+                                       style="width: 50%; color: royalblue!important; float: right" styleClass="fa fa-bar-chart"  >  
+                        </p:commandLink>
+                    </p:row>
+                    
+                    
+                    <p:outputLabel value="" />
+                    
+                </p:panelGrid> 
+                    <p:row rendered="#{RecordController.calendarMode}">
+                        <div id="example" style="height: 400px; margin: 10px"></div>
+                    </p:row>
+                    <pe:timeline id="timeline" value="#{RecordController.model}" 
+                        eventMargin="10" eventMarginAxis="0" 
+                        start="#{RecordController.start}" 
+                        end="#{RecordController.end}" 
+                        style="margin: 10px"
+                        locale="vn"
+                        rendered="#{!RecordController.calendarMode}"
+                        responsive="false"
+                        groupsChangeable="false"
+                        min="#{RecordController.fromDateForTimeline}"
+                        max="#{RecordController.toDateForTimeline}"
+                        showCurrentTime="false"
+                        showButtonNew="false"
+                        
+                        var="milestone2" varGroup="group2"  widgetVar="timelineInvoicingWdgt2"
+                        
+                        showNavigation="true" 
+                        axisOnTop="true" stackEvents="false">
+                        
+                        <f:facet name="group2" >
+                                        <h:outputText value="#{group2}" style="font-weight:bold;" />  
+                        </f:facet>
+
+                        <h:panelGrid columns="1" class="invoicingMilestonesModelClass4Id_#{milestone2.rec_id}" >
+                                        <h:outputText value="#{milestone2.rec_summary}">
+                                                        
+                                        </h:outputText>  
+                        </h:panelGrid>
+                        <p:ajax event="rangechanged" update="tooltipsPanel"/>
+                    </pe:timeline>
+                    <p:panel id="tooltipsPanel" >
+                        <ui:repeat value="#{RecordController.model.events}" var="varTooltip" >
+                        <p:tooltip for="@(.invoicingMilestonesModelClass4Id_#{varTooltip.data.rec_id})" showDelay="3000">
+                        <h:outputText value="#{varTooltip.data.rec_type eq 0? 'Tin Thường - ':varTooltip.data.rec_type eq 2?'Tin tiếp sóng - ':'Tin thu phát FM - '}"/>
+                        <h:outputText value="#{varTooltip.data.rec_summary}"/>
+                        </p:tooltip>
+                        </ui:repeat>
+                     </p:panel>
+                    
+                    <pe:timeline rendered="false" id="timelineInvoicing" value="#{RecordController.model}" var="milestone" varGroup="group"  widgetVar="timelineInvoicingWdgt">
+                        <f:facet name="group" >
+                                        <h:outputText value="#{group}" style="font-weight:bold;" />  
+                        </f:facet>
+
+                        <h:panelGrid columns="1" class="invoicingMilestonesModelClass4Id_#{milestone.rec_id}" >
+                                        <h:outputText value="#{milestone.rec_summary}">
+                                                        
+                                        </h:outputText>  
+                        </h:panelGrid>
+
+                        <p:ajax event="rangechanged" global="false" update="tooltips4TimelineInvoicing"/>
+                    </pe:timeline>
+
+                    <p:panel id="tooltips4TimelineInvoicing" style="display: none">
+                                    <ui:repeat value="#{phaseController.invoicingMilestonesModel.events}" var="milestone4Tooltip" >
+                                                    <p:tooltip for="@(.invoicingMilestonesModelClass4Id_#{milestone4Tooltip.data.rec_id})">
+                                                                    <h:outputText value="#{milestone4Tooltip.data.rec_summary}" >
+                                                                                    <f:convertDateTime pattern="dd.MM.yyyy" />
+                                                                    </h:outputText>  
+                                                    </p:tooltip>
+                                    </ui:repeat>
+                    </p:panel>
+
+                    <p:panelGrid id="pnlNote" columns="9" columnClasses="ui-grid-col-2,ui-grid-col-1,ui-grid-col-2,ui-grid-col-1,ui-grid-col-2,ui-grid-col-1,ui-grid-col-2,ui-grid-col-1,ui-grid-col-2" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                        <p:outputLabel value="Ghi chú:" style="float: left; margin-left: 10px; color: #0259A4"/>
+                        
+                        <p:inputText disabled="true" style="background-color: #1AA11A !important;" />    
+                        <p:outputLabel value="Tin thường theo lịch" styleClass="ui-note-text" style="color: #0259A4; font-weight: 400; font-size: small !important"/>
+                        
+                        <p:inputText disabled="true" style="background-color: #F03030 !important" />    
+                        <p:outputLabel value="Tin khẩn cấp" styleClass="ui-note-text" style="color: #0259A4; font-weight: 400; font-size: small !important"/>
+                        
+                        <p:inputText disabled="true" style="background-color: #336699 !important" />    
+                        <p:outputLabel value="Tin tiếp sóng theo lịch" styleClass="ui-note-text" style="color: #0259A4; font-weight: 400; font-size: small !important"/>
+                        
+                        <p:inputText disabled="true" style="background-color: #cccc00 !important" />    
+                        <p:outputLabel value="Tin tiếp sóng trực tiếp" styleClass="ui-note-text" style="color: #0259A4; font-weight: 400; font-size: small !important"/>
+                        
+                        <p:outputLabel value="" />
+                    </p:panelGrid>
+
+
+                    <div class="ui-dialog-action">
+                       
+                        <p:commandButton rendered="true" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="Đóng" 
+                                         oncomplete="PF('dlgTimeline').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                    </div>
+                </h:form>
+                 <p:overlayPanel id="timelinePanel" widgetVar="olPanel" 
+                                for="formTimeline:txtarea2" style="height: fit-content; width: 240px;" hideEffect="fade" >
+                                <h:form id="formTimeline2">
+                                    <p:tree id="docs" style="margin-top: 10px; width: 210px;" value="#{RecordController.areaRoot}" var="doc" selectionMode="single" 
+                                            selection="#{RecordController.selectedAreaForTimeline}" dynamic="true">                    
+                                        <p:ajax event="select" listener="#{RecordController.viewTimelineEvent()}" 
+                                                update=" formTimeline:txtarea2 formTimeline :grow_main_dt" />
+
+                                            <p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+                                                <h:outputText value="#{doc.areaName}" style="font-weight:bold;"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="vn" icon="ui-icon-document">
+                                                <h:outputText value="#{doc.areaName}" style="font-weight:bold;" /> 
+                                            </p:treeNode>
+                                            <p:treeNode type="tp">
+                                            <h:outputText value="#{adminController.isCityMode? 'TP.' :'T.'} #{doc.areaName}" style="font-weight:bold;" />
+                                            </p:treeNode>
+                                            <p:treeNode type="q">
+                                                <h:outputText value="#{adminController.isCityMode? 'Q.' :'H.'} #{doc.areaName}" style="font-weight:bold;"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="p" >
+                                                <h:outputText value="#{adminController.isCityMode? 'P.' :'X.'} #{doc.areaName}"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="t" >
+                                                <h:outputText value="#{adminController.isCityMode? 'T.' :'T/X.'} #{doc.areaName}"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="document" >
+                                                <h:outputText value="#{doc.areaName}" />
+                                            </p:treeNode>
+
+                                        </p:tree>
+                                </h:form>
+
+                </p:overlayPanel>
+            </p:dialog>
+            
+            
+            <p:dialog header="Cảnh báo trùng lịch phát" id="dlgoverlap" widgetVar="dlgoverlap"  width="1000" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <h:form id="formOverlap">
+                    <p:outputLabel rendered="#{RecordController.overlap eq 1}" value="Vui lòng chọn lại khung giờ phát. Bản tin bạn đang tạo có khung giờ phát trùng với các bản tin sau:" style="font-weight: 400; margin-left: 10px; color: red"/>
+                    <p:outputLabel rendered="#{RecordController.overlap eq 2}" value="Chú ý: Bản tin bạn đang tạo có khung giờ phát trùng với các bản tin dưới đây." style="font-weight: 400; margin-left: 10px; color: red"/>
+                    <p:outputLabel rendered="#{RecordController.overlap eq 2}" value="Nếu bản tin được phê duyệt, sẽ phát đè lên các bản tin trùng khung giờ phát. Chọn phát đè để tiếp tục tạo bản tin." style="font-weight: 400; margin-left: 10px; color: red"/>
+   
+                    <h5 style="margin: 10px; color: red" ></h5>
+
+                    
+                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%" >
+
+                        <p:dataTable id="dtOverlapRecord" value="#{RecordController.listOverlapRecord}" var="rec"
+                                     rowKey="#{rec.rec_id}" 
+                                     rowIndexVar="rownum"
+                                     widgetVar="dtOverlapRecord"
+                                     sortOrder="descending"
+                                     style="margin: 10px; font-size: 90%"
+                                     emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+  
+                            <p:column headerText="STT" style="width: 5%!important" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column headerText="Nội dung chính" id="maincontent" style="width: 25%!important" >  
+                                <h:outputText value="#{rec.rec_summary}">
+                                </h:outputText>
+                            </p:column> 
+
+
+                            <p:column headerText="Nơi tạo" style="width: 7%!important" rendered="#{RecordController.selectedArea.areaType ne 4}"  >  
+                                <h:outputText value=" #{rec.area_name}">
+                                 </h:outputText>
+                            </p:column>
+                            <p:column headerText="Ngày tạo" style="width: 8%!important">  
+                                <h:outputText value=" #{rec.create_date}">
+                                </h:outputText>
+                            </p:column> 
+
+
+                            <p:column headerText="Thời gian phát" style="width: 10%!important" >  
+                                <h:outputText value=" #{rec.rec_play_timeString}">
+                                </h:outputText>
+                            </p:column> 
+                            
+                            <p:column headerText="Thời lượng" style="width: 10%!important" >  
+                                <h:outputText value=" #{rec.durationString}">
+                                </h:outputText>
+                            </p:column> 
+
+                            <p:column headerText="Trạng thái" id="status" style="width: 7%!important" width="7%">  
+                                <f:facet name="filter">
+                                    <p:selectOneMenu  onchange="PF('dtRecord').filter()" >
+                                        <f:selectItem itemValue="" itemLabel="Tất cả" />
+                                        <f:selectItem itemValue="0" itemLabel="Chờ duyệt" />
+                                        <f:selectItem itemValue="1" itemLabel="Đã duyệt" />
+                                        <f:selectItem itemValue="-1" itemLabel="Đã hủy" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText value=" #{rec.status eq 0 ? 'Chờ duyệt' : rec.status eq 1 ? 'Đã duyệt' : rec.status eq -1 ? 'Đã hủy' : 'Đã xóa'}"
+                                              style="color: #{rec.status eq 1 ? 'blue' : rec.status eq -1 ? 'red' : 'black'}" >
+                                </h:outputText>
+                            </p:column> 
+
+
+                            <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 5%!important;" >
+                                <p:commandLink id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin" 
+                                               actionListener="#{RecordController.viewRecordEventForOverlap(rec)}" update="dlgRecordInfo" oncomplete="PF('dlgRecordInfo').show();">
+                                </p:commandLink>
+
+                                <p:tooltip for="bntView" value="Xem chi tiết" trackMouse="true" />
+                            </p:column>
+                                                        
+                        </p:dataTable>
+                        
+                        <script>
+                        //<![CDATA[
+                                function handleSubmitRequestRecord2(xhr, status, args) {
+                                    if (!args.validationFailed) {
+                                       
+                                        PF('dlgAddRecord').hide();
+                                        //PF('dtRecord').clearFilters();
+                                        
+                                    }
+                                }
+                        //]]>
+                        </script>
+                    </h:panelGrid>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton   value="Phát đè" icon="fa fa-check-square" rendered="#{RecordController.overlap eq 2}"
+                                           update="form_main:dtRecord :grow_main_dt" actionListener="#{RecordController.forceOverlapEvent(evt)}"
+                                           styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestRecord2(xhr, status, args); PF('dlgoverlap').hide();" />
+                        <p:commandButton rendered="true" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="Đóng" actionListener="#{RecordController.closeOverlapEvent(evt)}"
+                                         oncomplete="PF('dlgoverlap').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            
+            
+            <p:dialog header="Cảnh báo thiết bị đang phát bản tin tiếp sóng" id="dlgoverlapTS" widgetVar="dlgoverlapTS"  width="1000" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <h:form id="formOverlapTS">
+                    <p:outputLabel  value="Hiện tại đang phát bản tin tiếp sóng tại địa bàn." style="font-weight: 400; margin-left: 10px; color: red"/>
+                    <p:outputLabel  value="Nếu thực hiện phê duyệt tại thời điểm này có thể làm gián đoạn nội dung tiếp sóng. Bạn có muốn tiếp tục?." style="font-weight: 400; margin-left: 10px; color: red"/>
+   
+                    <h5 style="margin: 10px; color: red" ></h5>
+
+                    
+                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%" >
+
+                        <p:dataTable id="dtOverlapRecordTS" value="#{RecordController.listTSPlaying}" var="rec"
+                                     rowKey="#{rec.rec_id}" 
+                                     rowIndexVar="rownum"
+                                     widgetVar="dtOverlapRecord"
+                                     sortOrder="descending"
+                                     style="margin: 10px; font-size: 90%"
+                                     emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+  
+                            <p:column headerText="STT" style="width: 5%!important" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column headerText="Nội dung chính" id="maincontent" style="width: 25%!important" >  
+                                <h:outputText value="#{rec.rec_summary}">
+                                </h:outputText>
+                            </p:column> 
+
+
+                            <p:column headerText="Nơi tạo" style="width: 7%!important" rendered="#{RecordController.selectedArea.areaType ne 4}"  >  
+                                <h:outputText value=" #{rec.area_name}">
+                                 </h:outputText>
+                            </p:column>
+                            <p:column headerText="Ngày tạo" style="width: 8%!important">  
+                                <h:outputText value=" #{rec.create_date}">
+                                </h:outputText>
+                            </p:column> 
+
+
+                            <p:column headerText="Thời gian phát" style="width: 10%!important" >  
+                                <h:outputText value=" #{rec.rec_play_timeString}">
+                                </h:outputText>
+                            </p:column> 
+                            
+                            <p:column headerText="Thời lượng" style="width: 10%!important" >  
+                                <h:outputText value=" #{rec.durationString}">
+                                </h:outputText>
+                            </p:column> 
+
+                            <p:column headerText="Trạng thái" id="status" style="width: 7%!important" width="7%">  
+                                <f:facet name="filter">
+                                    <p:selectOneMenu  onchange="PF('dtRecord').filter()" >
+                                        <f:selectItem itemValue="" itemLabel="Tất cả" />
+                                        <f:selectItem itemValue="0" itemLabel="Chờ duyệt" />
+                                        <f:selectItem itemValue="1" itemLabel="Đã duyệt" />
+                                        <f:selectItem itemValue="-1" itemLabel="Đã hủy" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText value=" #{rec.status eq 0 ? 'Chờ duyệt' : rec.status eq 1 ? 'Đã duyệt' : rec.status eq -1 ? 'Đã hủy' : 'Đã xóa'}"
+                                              style="color: #{rec.status eq 1 ? 'blue' : rec.status eq -1 ? 'red' : 'black'}" >
+                                </h:outputText>
+                            </p:column> 
+
+
+                            <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 5%!important;" >
+                                <p:commandLink id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin" 
+                                               actionListener="#{RecordController.viewRecordEventForOverlap(rec)}" update="dlgRecordInfo" oncomplete="PF('dlgRecordInfo').show();">
+                                </p:commandLink>
+
+                                <p:tooltip for="bntView" value="Xem chi tiết" trackMouse="true" />
+                            </p:column>
+                                                        
+                        </p:dataTable>
+                        
+                        <script>
+                        //<![CDATA[
+                                function handleSubmitRequestRecordTS2(xhr, status, args) {
+                                    if (!args.validationFailed) {
+                                         if ('#{RecordController.overlap}' != '0') {
+                                             PF('dlgoverlap').show();
+                                         } else if ('#{RecordController.notice}' == '1') {
+                                             PF('dlgnotice').show();
+                                         }else {
+                                             PF('dlgAddRecord').hide();
+                                             //PF('dtRecord').clearFilters();
+                                         }
+
+
+                                     }
+                                }
+                        //]]>
+                        </script>
+                    </h:panelGrid>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton   value="Tiếp tục" icon="fa fa-check-square" 
+                                           update="form_main:dtRecord dlgoverlapTS :grow_main_dt" actionListener="#{RecordController.forceNoticeTSEvent(evt)}"
+                                           styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestRecordTS2(xhr, status, args); PF('dlgoverlapTS').hide();" />
+                        <p:commandButton rendered="true" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="Đóng" actionListener="#{RecordController.closeOverlapEvent(evt)}"
+                                         oncomplete="PF('dlgoverlapTS').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            
+            <p:confirmDialog styleClass="stf-confirm" header="Cảnh báo" width="600"
+                             id="dlgnotice" severity="alert" widgetVar="dlgnotice" appendTo="@(body)">
+                <f:facet name="message" >
+                    <h:outputText value="Thông báo có thể không phát do không đủ thời gian đẩy dữ liệu về thiết bị. Bạn có muốn chọn lại giờ phát?" rendered="#{RecordController.recordActtionFlag ne 'APPROVE'}"/>
+                    <h:outputText value="Thông báo có thể không phát do không đủ thời gian đẩy dữ liệu về thiết bị. Chọn tiếp tục để phê duyệt" rendered="#{RecordController.recordActtionFlag eq 'APPROVE'}"/>
+                </f:facet>
+                <h:form id="formNotice">
+                    <script>
+                    //<![CDATA[
+                 
+                            function handleSubmitRequestRecord3(xhr, status, args) {
+                                if (!args.validationFailed) {
+                                    if ('#{RecordController.overlap}' != '0') {
+                                        PF('dlgoverlap').show();
+                                    } else {
+                                        PF('dlgAddRecord').hide();
+                                        //PF('dtRecord').clearFilters();
+                                    }
+                                    
+
+                                }
+                            }
+                    //]]>
+                    </script>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton   value="Tiếp tục" icon="fa fa-check-square" 
+                                           update="form_main:dtRecord dlgnotice :grow_main_dt dlgoverlap formOverlap:dtOverlapRecord" actionListener="#{RecordController.forceNoticeEvent(evt)}"
+                                           styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestRecord3(xhr, status, args);  PF('dlgnotice').hide();" />
+                        <p:commandButton rendered="#{RecordController.recordActtionFlag ne 'APPROVE'}" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle" style="width: 160px !important" value="Chọn lại giờ phát" 
+                                         oncomplete="PF('dlgnotice').hide();" styleClass="btn-danger btn-margin btn-width" />            
+                        <p:commandButton rendered="#{RecordController.recordActtionFlag eq 'APPROVE'}" global="false"  id="btnBack2" process="@this" icon="fa fa-times-circle" value="Đóng" 
+                                         oncomplete="PF('dlgnotice').hide();" styleClass="btn-danger btn-margin btn-width" />     
+                    </div>
+                </h:form>
+            </p:confirmDialog>
+            
+            
+             <p:confirmDialog styleClass="stf-confirm" header="Cảnh báo" width="600"
+                             id="dlgnoticeTS" severity="alert" widgetVar="dlgnoticeTS" appendTo="@(body)">
+                <f:facet name="message" >
+                    <h:outputText value="Thông báo có thể không phát do không đủ thời gian đẩy dữ liệu về thiết bị. Bạn có muốn chọn lại giờ phát?" rendered="#{RecordController.recordActtionFlag ne 'APPROVE'}"/>
+                    <h:outputText value="Thông báo có thể không phát do không đủ thời gian đẩy dữ liệu về thiết bị. Chọn tiếp tục để phê duyệt" rendered="#{RecordController.recordActtionFlag eq 'APPROVE'}"/>
+                </f:facet>
+                <h:form id="formNoticeTS">
+                    <script>
+                    //<![CDATA[
+                 
+                            function handleSubmitRequestRecordTS(xhr, status, args) {
+                                if (!args.validationFailed) {
+                                    if ('#{RecordController.overlap}' != '0') {
+                                        PF('dlgoverlap').show();
+                                    } else {
+                                        PF('dlgAddRecord').hide();
+                                        //PF('dtRecord').clearFilters();
+                                    }
+                                    
+
+                                }
+                            }
+                    //]]>
+                    </script>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton   value="Tiếp tục" icon="fa fa-check-square" 
+                                           update="form_main:dtRecord dlgnoticeTS :grow_main_dt dlgoverlap formOverlap:dtOverlapRecord" actionListener="#{RecordController.forceNoticeTSEvent(evt)}"
+                                           styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestRecordTS(xhr, status, args);  PF('dlgnoticeTS').hide();" />
+                                 
+                        <p:commandButton global="false"  id="btnBack2" process="@this" icon="fa fa-times-circle" value="Đóng" 
+                                         oncomplete="PF('dlgnoticeTS').hide();" styleClass="btn-danger btn-margin btn-width" />     
+                    </div>
+                </h:form>
+            </p:confirmDialog>
+            
+            
+            <p:dialog id="dlgRecordInfo" widgetVar="dlgRecordInfo" header="Xem chi tiết thông báo" width="1000" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formRecordInfo" enctype="multipart/form-data">
+                    <div>
+
+                        <p:panelGrid columns="2" columnClasses="ui-grid-col-2,ui-grid-col-10" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Nội dung chính" for="txtRecSummary"/>
+                            <p:inputText id="txtRecSummary" value="#{RecordController.overlapRecord.rec_summary}"  style="width: 100%!important"
+                                         disabled="true" >
+                            </p:inputText>
+                            
+                        </p:panelGrid>
+
+                        <p:panelGrid id="pnlRecType" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Loại thông báo" for="recType"/>
+                            <p:inputText id="recType" value="#{RecordController.overlapRecord.rec_type eq 0? 'Tin Thường':RecordController.overlapRecord.rec_type eq 2?'Tin tiếp sóng':'Tin thu phát FM'}"
+                                         disabled="true" />
+                            
+                            <p:outputLabel for="channel" value="Kênh đài FM" rendered="#{RecordController.overlapRecord.rec_type ne 0}"/>
+                            <p:selectOneMenu id="channel" effect="fade" rendered="#{RecordController.overlapRecord.rec_type ne 0}"
+                                             value="#{RecordController.overlapRecord.rec_url}"  required="true" requiredMessage="Kênh đài FM #{PP_SHARED.can_not_be_empty}"
+                                             disabled="true"> 
+                                <f:selectItem itemValue="" itemLabel="" />
+                                <f:selectItems value="#{RecordController.listChannel}" var="channel" itemLabel="#{channel.name}" itemValue="#{channel.id}"/>
+                            </p:selectOneMenu>
+
+                       
+                            
+                            <p:outputLabel value="Chế độ phát" for="recMode"/>
+                            <p:selectOneMenu  rendered="true" id="recMode"  value="#{RecordController.overlapRecord.rec_play_mode}" 
+                                              effect="fade" disabled="true">       
+                                <f:selectItem itemLabel="Phát theo lịch" itemValue="1"/>
+                                <f:selectItem itemLabel="#{RecordController.overlapRecord.rec_type eq 0 ? 'Phát khẩn cấp' : 'Phát trực tiếp'}" itemValue="2"/>
+                            </p:selectOneMenu>
+                            
+
+                            <p:outputLabel for="playMode" value="Kiểu phát" rendered="#{RecordController.allowHouseManagement  and RecordController.overlapRecord.rec_type eq 0}"/>
+                            <p:selectOneMenu id="playMode"  value="#{RecordController.overlapRecord.rec_receipt_type}" rendered="#{RecordController.allowHouseManagement and RecordController.overlapRecord.rec_type eq 0}"
+                                             effect="fade" disabled="true">       
+                                <f:selectItem itemLabel="Phát đến danh sách địa bàn" itemValue="1" />
+                                <f:selectItem itemLabel="Phát đến danh sách hộ gia đình" itemValue="2" />
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel for="playMode2" value="Kiểu phát"  rendered="#{!RecordController.allowHouseManagement and RecordController.overlapRecord.rec_type eq 0}"/>
+                            <p:selectOneMenu id="playMode2" value="#{RecordController.overlapRecord.rec_receipt_type}" rendered="#{!RecordController.allowHouseManagement  and RecordController.overlapRecord.rec_type eq 0}"
+                                             effect="fade" disabled="true">       
+                                <f:selectItem itemLabel="Phát đến danh sách địa bàn" itemValue="1" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Danh sách phát" for="txtRecListPlay"/>
+                            <p:panelGrid id="pnlPlayList" columns="1" columnClasses="ui-grid-col-12" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            
+                                <p:inputTextarea rendered="#{RecordController.overlapRecord.rec_receipt_type eq 1}" id="txtRecListPlay" value="#{RecordController.overlapRecord.rec_receipt_name}" rows="1" cols="5"
+                                                 disabled="true">
+                                    <p:ajax event="click"  update="formPlayListConf" oncomplete="PF('dlgPlayListConfig').show();" listener="#{RecordController.showAreaSelectEvent(evt)}">
+                                        <p:resetInput target=" formPlayListConf"/>
+                                    </p:ajax>
+                                </p:inputTextarea>
+                                
+                                <p:selectCheckboxMenu id="selectHouse2" value="#{RecordController.listReceiptMCU}" label=" "  
+                                              style="width: 100%!important"   multiple="true" 
+                                              filter="true" filterMatchMode="contains" rendered="#{RecordController.overlapRecord.rec_receipt_type eq 2}"
+                                              disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"> 
+                                    <f:selectItems value="#{RecordController.listMCUHouse}" var="house" itemLabel="#{house.holder_name}" itemDescription="#{house.address}" itemValue="#{house.mcu_id}" />
+
+                                </p:selectCheckboxMenu>
+                            </p:panelGrid>
+
+                           
+                        </p:panelGrid>    
+
+                        <p:panelGrid id="pnlScheduleConfig" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >    
+                            
+                            <p:outputLabel value="Giờ phát" for="recMode" rendered="#{RecordController.overlapRecord.rec_play_mode ne 2 and RecordController.overlapRecord.rec_type eq 0}"/>
+                                <p:inputText id="txtPlayTime" value="#{RecordController.overlapRecord.rec_play_timeString}" 
+                                             rendered="#{RecordController.overlapRecord.rec_play_mode ne 2 and RecordController.overlapRecord.rec_type eq 0}"       
+                                             disabled="true">
+                                </p:inputText>
+                            
+                            <p:outputLabel value="Khung giờ phát" for="txtPlayTimeRadio" rendered="#{RecordController.overlapRecord.rec_play_mode ne 2 and RecordController.overlapRecord.rec_type eq 2}"/>
+                            <p:inputText id="txtPlayTimeRadio" value="#{RecordController.overlapRecord.rec_play_timeStringRadio}" 
+                                             rendered="#{RecordController.overlapRecord.rec_play_mode ne 2 and RecordController.overlapRecord.rec_type eq 2}"       
+                                             disabled="true">
+                                </p:inputText>
+
+                            <p:outputLabel value="Thời gian phát" for="txtEndTime" rendered="#{RecordController.overlapRecord.rec_play_mode ne 2 and RecordController.overlapRecord.rec_type eq 3}"/>
+                            <p:row rendered="#{RecordController.overlapRecord.rec_type eq 3 and RecordController.overlapRecord.rec_play_mode ne 2}" >
+                                
+                                <p:inputText id="txtStartTime"  value="#{RecordController.overlapRecord.rec_play_timeString}" style="width: 40%; float: left ; color: #000"
+                                             disabled="true">
+                                </p:inputText> 
+
+                                <p:outputLabel value="-" style="width: 20%; float: left; text-align: center;"/>
+                                
+                                <p:inputText id="txtEndTime"  value="#{RecordController.endTimeForRadioOverlap}" style="width: 40%; float: left ; color: #000"
+                                             disabled="true">
+                                </p:inputText> 
+                                
+                            </p:row>
+                            
+                            <p:outputLabel for="txtEndTime2" value="Thời gian kết thúc" rendered="#{RecordController.overlapRecord.rec_play_mode eq 2 and RecordController.overlapRecord.rec_type ne 0}"/>
+                            <p:inputText id="txtEndTime2" value="#{RecordController.endTimeForRadioOverlap}" style=" color: #000"
+                                         disabled="true"
+                                         rendered="#{RecordController.selectedRecord.rec_play_mode eq 2 and RecordController.selectedRecord.rec_type ne 0}">
+                            </p:inputText> 
+
+                            <p:outputLabel for="repeatType" value="Kiểu lặp lại" rendered="#{RecordController.overlapRecord.rec_play_mode ne 2}"/>
+                            <p:selectOneMenu id="repeatType"  value="#{RecordController.overlapRecord.rec_play_repeat_type}"
+                                             rendered="#{RecordController.overlapRecord.rec_play_mode ne 2}"
+                                             effect="fade" disabled="true">       
+                                <f:selectItem itemLabel="Theo tuần" itemValue="0" />
+                                <f:selectItem itemLabel="Theo tháng" itemValue="1" />
+                            </p:selectOneMenu>
+
+                    
+                            <p:outputLabel value="Ngày bắt đầu" for="txtStartDate" rendered="#{RecordController.overlapRecord.rec_play_mode ne 2}"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtStartDate" value="#{RecordController.overlapRecord.rec_playStartDate}" 
+                                        rendered="#{RecordController.overlapRecord.rec_play_mode ne 2}" disabled="true" locale="vi" >
+                            </p:calendar>
+
+                            <p:outputLabel value="Ngày lặp lại" for="selectDaysInWeek" rendered="#{RecordController.overlapRecord.rec_play_mode ne 2}"/>
+                            <p:selectCheckboxMenu id="selectDaysInWeek" value="#{RecordController.listDaysSelectedOverlap}"
+                                                  style="width: 100%!important"   multiple="true" label="Chọn ngày"
+                                                  rendered="#{RecordController.overlapRecord.rec_play_mode ne 2}" disabled="true"> 
+                                <f:selectItems value="#{RecordController.overlapRecord.rec_play_repeat_type eq 0 ? RecordController.listDaysWeek : RecordController.listDaysMounth}" var="dayweek" itemLabel="#{dayweek.name}" itemValue="#{dayweek.value}" />
+                            </p:selectCheckboxMenu>
+
+                            <p:outputLabel value="Ngày kết thúc" for="txtEndDate" rendered="#{RecordController.overlapRecord.rec_play_mode ne 2}"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtEndDate" value="#{RecordController.overlapRecord.rec_playExpireDate}" 
+                                        disabled="true" rendered="#{RecordController.overlapRecord.rec_play_mode ne 2}" locale="vi" >
+                            </p:calendar>
+                           
+
+                        </p:panelGrid>
+
+                        <div class="ui-dialog-action">
+                            <p:commandButton global="true"  id="btnBack"  process="@this" update="form_main:dtRecord :grow_main_dt"
+                                             value="Đóng" oncomplete="PF('dlgRecordInfo').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+             <p:dialog header="Ghép nối nhiều file âm thanh" id="dlgmixaudio" widgetVar="dlgmixaudio"  width="1000" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <h:form id="formMixAudio">
+                    <p:panelGrid id="pnlScheduleConfig" columns="2" columnClasses="ui-grid-col-8,ui-grid-col-8" styleClass="ui-panelgrid-blank stf-view" layout="grid" > 
+                        <p:outputLabel value="Vui lòng chọn các file âm thanh theo thứ tự cần phát" style="font-weight: 400; "/>
+                        <p:fileUpload id="uploadFileForMix" value="#{RecordController.audioFile}" 
+                                                  mode="advanced" 
+                                                  skinSimple="true" auto="true" fileUploadListener="#{RecordController.uploadAudioHandlerForMix}"
+                                                  styleClass="fileupload-simple"
+                                                  update="dtOverlapRecord :grow_main_dt"
+                                                  label="Thêm file"
+                                                  required="true" style=" float: right"
+                                                  onstart="PF('statusDialog').show();" oncomplete="PF('statusDialog').hide();"
+                                                  />
+                    </p:panelGrid>
+                    
+                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%" >
+
+                        <p:dataTable id="dtOverlapRecord" value="#{RecordController.listAudioFile}" var="file"
+                                     rowKey="#{file.uploadedFile.fileName}"
+                                     rowIndexVar="rownum"
+                                     widgetVar="dtOverlapRecord"
+                                     sortOrder="descending"
+                                     style="margin: 10px; font-size: 90%"
+                                     emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+  
+                            <p:column headerText="STT" style="width: 2%!important" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column headerText="Tên file" id="maincontent" style="width: 20%!important" >  
+                                <h:outputText value="#{file.uploadedFile.fileName}">
+                                </h:outputText>
+                            </p:column> 
+
+
+                            <p:column headerText="Dung lượng (KB)" style="width: 7%!important"  >  
+                                <h:outputText value=" #{(file.uploadedFile.size-file.uploadedFile.size%1024)/1024}">
+                                 </h:outputText>
+                            </p:column>
+       
+                            <p:column headerText="Thời lượng (phút)" style="width: 10%!important" >  
+                                <h:outputText value=" #{file.duration}">
+                                </h:outputText>
+                            </p:column> 
+
+                            <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 5%!important;" >
+                                <p:commandLink rendered="false" id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin" 
+                                               actionListener="#{RecordController.viewRecordEventForOverlap(rec)}" update="dlgRecordInfo" oncomplete="PF('dlgRecordInfo').show();">
+                                </p:commandLink>
+                                
+                                <p:commandLink id="bntEdit" rendered="false" process="@this" resetValues="true" styleClass="fa fa-pencil btn-margin" 
+                                               actionListener="#{RecordController.viewRecordEventForOverlap(rec)}" update="dlgRecordInfo" oncomplete="PF('dlgRecordInfo').show();">
+                                </p:commandLink>
+                                
+                                <p:commandLink id="bntDelFile" process="@this" resetValues="true" styleClass="fa fa-trash btn-margin" style="color: red"
+                                               actionListener="#{RecordController.removeFileEvent(file)}" update="dtOverlapRecord" >
+                                </p:commandLink>
+
+                                <p:tooltip for="bntView" value="Xem chi tiết" trackMouse="true" />
+                                <p:tooltip for="bntEdit" value="Sửa" trackMouse="true" />
+                                <p:tooltip for="bntDelFile" value="Xóa" trackMouse="true" />
+                            </p:column>
+                                                        
+                        </p:dataTable>
+                        
+                        <script>
+                        //<![CDATA[
+                                function handleSubmitRequestRecord2(xhr, status, args) {
+                                    if (!args.validationFailed) {
+                                       
+                                        PF('dlgAddRecord').hide();
+                                        //PF('dtRecord').clearFilters();
+                                        
+                                    }
+                                }
+                        //]]>
+                        </script>
+                    </h:panelGrid>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton   value="Đồng ý" icon="fa fa-check-square" 
+                                           update="formAddRecord:fileName :grow_main_dt" actionListener="#{RecordController.handleMixFileEvent(evt)}"
+                                           styleClass="btn-primary btn-width" oncomplete="handleMixFile(xhr, status, args); " />
+                        <p:commandButton rendered="true" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="Đóng" actionListener="#{RecordController.closeOverlapEvent(evt)}"
+                                         oncomplete="PF('dlgmixaudio').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            
+            <p:dialog header="Chuyển văn bản thành giọng nói" id="dlgT2T" onHide="stopPlayerT2T();" widgetVar="dlgT2T"  width="800" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <h:form id="downloadAudioT2T" style="display:none;">
+                        <p:commandButton id ="btnDownloadT2T" value="DownloadT2T" ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-arrowthick-1-s">
+                            <p:fileDownload value="#{RecordController.playbackStreamForT2T}" />
+                        </p:commandButton>
+                </h:form>
+                
+                <h:form id="formT2T">
+                    <p:panelGrid id="pnlScheduleConfig" columns="1" columnClasses="ui-grid-col-12" styleClass="ui-panelgrid-blank stf-view" layout="grid" > 
+                        <p:inputTextarea id ="textarea" value="#{RecordController.textForConvert}" rows="20" cols="8" autoResize="false"
+                                         maxlength="50000" onfocus="updateCount()" onkeyup="updateCount()">
+                        
+                        </p:inputTextarea>
+                        <div id="counter" style="float: right"/>
+                    </p:panelGrid>    
+                    <script>
+                        function updateCount() {
+                            $("[id$='counter']").html($("[id$='textarea']").val().length + "/" + $("[id$='textarea']").attr('maxlength'));
+                        }
+                    </script>
+<!--                    <p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >     
+                        <p:outputLabel value="Giọng đọc" for="voice"/>
+                        <p:selectOneMenu  rendered="true" id="voice"  value="#{RecordController.voice}" effect="fade" >     
+                                <f:selectItem itemLabel="Miền Bắc (nữ)" itemValue="4"/>
+                                <f:selectItem itemLabel="Miền Bắc (nam)" itemValue="1"/>
+                                <f:selectItem itemLabel="Miền Trung (nữ)" itemValue="2"/>
+                                <f:selectItem itemLabel="Miền Nam (nữ)" itemValue="3"/>
+                            </p:selectOneMenu>
+                        <p:outputLabel value="Tốc độ đọc" for="speed"/>
+                        <p:selectOneMenu  rendered="true" id="speed"  value="#{RecordController.speed}" effect="fade" >    
+                                <f:selectItem itemLabel="-3" itemValue="1"/>
+                                <f:selectItem itemLabel="-2" itemValue="2"/>
+                                <f:selectItem itemLabel="-1" itemValue="3"/>
+                                <f:selectItem itemLabel="0" itemValue="0"/>
+                                <f:selectItem itemLabel="+1" itemValue="5"/>
+                                <f:selectItem itemLabel="+2" itemValue="6"/>
+                                <f:selectItem itemLabel="+3" itemValue="7"/>
+                            </p:selectOneMenu>
+                        
+                    </p:panelGrid>
+                    -->
+                    
+                    <p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >     
+                        <p:outputLabel value="Giọng đọc" for="voice"/>
+                        <p:selectOneMenu  rendered="true" id="voice"  value="#{RecordController.voice}" effect="fade" >     
+                                <!--<f:selectItem itemLabel="Xuân Tín (nam miền Bắc)" itemValue="0"/>
+                                <f:selectItem itemLabel="Xuân Thu (nữ miền Bắc)" itemValue="1"/>
+                                <f:selectItem itemLabel="Thu Trang (nữ Miền Bắc)" itemValue="2"/>
+                                <f:selectItem itemLabel="Xuân Kiên (nam miền Nam)" itemValue="3"/>
+                                <f:selectItem itemLabel="Xuân Hồng (nữ miền Nam)" itemValue="4"/>-->
+                                <f:selectItems value="#{RecordController.voices}" />
+                            </p:selectOneMenu>
+                        <p:outputLabel value="Tốc độ đọc" for="speed"/>
+                        <p:selectOneMenu  rendered="true" id="speed"  value="#{RecordController.speed}" effect="fade" >    
+                                <f:selectItem itemLabel="-3" itemValue="-3"/>
+                                <f:selectItem itemLabel="-2" itemValue="-2"/>
+                                <f:selectItem itemLabel="-1" itemValue="-1"/>
+                                <f:selectItem itemLabel="0" itemValue="0"/>
+                                <f:selectItem itemLabel="+1" itemValue="1"/>
+                                <f:selectItem itemLabel="+2" itemValue="2"/>
+                                <f:selectItem itemLabel="+3" itemValue="3"/>
+                            </p:selectOneMenu>
+                        
+                    </p:panelGrid>
+                    
+                    
+                        
+                    <p:panelGrid columns="2" columnClasses="ui-grid-col-2,ui-grid-col-10" styleClass="ui-panelgrid-blank stf-view" layout="grid" >     
+                        <p:commandButton   value="Đọc" icon="fa fa-check-square" update=" :grow_main_dt"
+                                           actionListener="#{RecordController.handlePostT2TMobiFoneEvent(evt)}" style="margin-left: 5px!important; border-radius: 20px !important;"
+                                           styleClass="btn-primary btn-width" />
+                 
+                        <audio preload="auto" id="playbackT2T" src="" autobuffer ="true" controls="controls" style=" width: 100%"></audio>
+                    </p:panelGrid>
+                    
+                 
+                        <script>
+                        //<![CDATA[
+                                function handleSubmitRequestRecord2(xhr, status, args) {
+                                    if (!args.validationFailed) {
+                                       
+                                        PF('dlgAddRecord').hide();
+                                        //PF('dtRecord').clearFilters();
+                                        
+                                    }
+                                }
+                        //]]>
+                        </script>
+                    <div class="ui-dialog-action">
+                        <p:commandButton   value="Đồng ý" icon="fa fa-check-square" 
+                                           update="formAddRecord:fileName :grow_main_dt" actionListener="#{RecordController.saveT2TFileEvent(evt)}"
+                                           styleClass="btn-primary btn-width" oncomplete="handleT2TFile(xhr, status, args); " />
+                        <p:commandButton rendered="true" global="false"  id="btnBack" process="" icon="fa fa-times-circle"  value="Đóng" 
+                                         oncomplete="PF('dlgT2T').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            <p:dialog header="Lịch sử phát tin" id="dlghistory" widgetVar="dlghistory"  width="800" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <h:form id="formHistory">
+          
+                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%" >
+
+                        <p:dataTable id="dtHistoryRecord" value="#{RecordController.recordHistory}" var="history"
+                                     rowKey="#{history.playTimeString}"
+                                     rowIndexVar="rownum"
+                                     widgetVar="dtHistoryRecord"
+                                     sortBy="#{history.playTime}" 
+                                     sortOrder="descending"
+                                     style="margin: 10px; font-size: 90%"
+                                     emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+  
+                            <p:column headerText="STT" style="width: 2%!important" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column headerText="Thời gian phát" id="maincontent" style="width: 20%!important" >  
+                                <h:outputText value="#{history.playTimeString}">
+                                </h:outputText>
+                            </p:column> 
+
+
+                            <p:column headerText="Đã phát/tổng số cần phát" style="width: 7%!important"  >  
+                                <h:outputText value="#{history.numberPlay}/#{RecordController.mcuHistory.size()}">
+                                 </h:outputText>
+                            </p:column>
+       
+                           
+
+                            <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 5%!important;" >
+                                <p:commandLink  id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin" 
+                                                actionListener="#{RecordController.viewMCUHistoryEvent(history)}" update="dlgmcuhistory formMCUHistory" oncomplete="PF('dlgmcuhistory').show();">
+                                </p:commandLink>
+                                
+                      
+
+                                <p:tooltip for="bntView" value="Xem chi tiết" trackMouse="true" />
+                              
+                            </p:column>
+                                                        
+                        </p:dataTable>
+                        
+                        <script>
+                        //<![CDATA[
+                                function handleSubmitRequestRecord2(xhr, status, args) {
+                                    if (!args.validationFailed) {
+                                       
+                                        PF('dlgAddRecord').hide();
+                                        //PF('dtRecord').clearFilters();
+                                        
+                                    }
+                                }
+                        //]]>
+                        </script>
+                    </h:panelGrid>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton rendered="true" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="Đóng" 
+                                         oncomplete="PF('dlghistory').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            
+            
+            <p:dialog header="Chi tiết thiết bị đã phát/ không phát" id="dlgmcuhistory" widgetVar="dlgmcuhistory"  width="1100" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <h:form id="formMCUHistory">
+          
+                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%" >
+
+                        <p:dataTable id="dtHistoryMCU" value="#{RecordController.mcuHistory}" var="mcuhistory"
+                                     rowKey="#{mcuhistory.mcu_id}"
+                                     rowIndexVar="rownum"
+                                     widgetVar="dtHistoryMCU"
+                                     sortOrder="descending"
+                                     style="margin: 10px; font-size: 85%; "
+                                     emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+  
+                            <p:column headerText="STT" style="width: 2%!important" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column headerText="Mã thiết bị" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcuhistory.mcu_id}" sortBy="#{mcuhistory.mcu_id}">  
+                                <h:outputText value=" #{mcuhistory.mcu_id}">
+                                </h:outputText>
+                            </p:column>
+                    
+
+                            <p:column headerText="Loại" rendered="#{RecordController.allowHouseManagement}" style="width: 7%!important" filterMatchMode="exact" filterBy="#{mcuhistory.mcu_type}" sortBy="#{mcuhistory.mcu_type}" width="7% !important">  
+                                <f:facet name="filter">
+                                    <p:selectOneMenu  onchange="PF('dtHistoryMCU').filter()">
+                                        <f:selectItem itemValue="" itemLabel="" />
+                                        <f:selectItem itemValue="1" itemLabel="mGateway" />
+                                        <f:selectItem itemValue="2" itemLabel="MIRA" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText value=" #{mcuhistory.mcu_type eq 1 ? 'mGateway' : 'MIRA'}" >
+                                </h:outputText>
+                            </p:column> 
+
+                            <p:column headerText="#{RecordController.allowHouseManagement?'Hộ gia đình/Tên MIRA':'Tên MIRA'}" style="width: 10%!important" filterMatchMode="contains" filterBy="#{mcuhistory.mira_name}" sortBy="#{mcuhistory.mira_name}">  
+                                <h:outputText value=" #{mcuhistory.mira_name}">
+                                </h:outputText>
+                            </p:column> 
+                            <p:column headerText="Địa chỉ" style="width: 20%!important" filterMatchMode="contains" filterBy="#{mcuhistory.address}" sortBy="#{mcuhistory.address}">  
+                                <h:outputText value=" #{mcuhistory.address}">
+                                </h:outputText>
+                            </p:column> 
+                            <p:column headerText="Tình trạng phát" style="width: 10%!important" filterMatchMode="exact" filterBy="#{mcuhistory.playStatus}" sortBy="#{mcuhistory.playStatus}" width="7%">  
+                                <f:facet name="filter">
+                                    <p:selectOneMenu  onchange="PF('dtHistoryMCU').filter()">
+                                        <f:selectItem itemValue="" itemLabel="" />
+                                        <f:selectItem itemValue="1" itemLabel="Đã phát" />
+                                        <f:selectItem itemValue="0" itemLabel="Không phát" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <h:outputText value=" #{mcuhistory.playStatus eq 1 ? 'Đã phát' : 'Không phát'}"
+                                              style="color: #{mcuhistory.playStatus eq 1? 'blue' : 'red' }" >
+                                </h:outputText>
+                            </p:column> 
+                                                        
+                        </p:dataTable>
+                        
+                        <script>
+                        //<![CDATA[
+                                function handleSubmitRequestRecord2(xhr, status, args) {
+                                    if (!args.validationFailed) {
+                                       
+                                        PF('dlgAddRecord').hide();
+                                        //PF('dtRecord').clearFilters();
+                                        
+                                    }
+                                }
+                        //]]>
+                        </script>
+                    </h:panelGrid>
+
+                    <div class="ui-dialog-action">
+                        <p:commandButton rendered="true" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="Đóng" 
+                                         oncomplete="PF('dlgmcuhistory').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            <p:dialog header="Ghi âm thông báo" onHide="stopRecorder();" onShow="showRecorder();"  id="dlgRec" widgetVar="dlgRec" width="800" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <div style="margin-left: 10px"> 
+                    <ui:include src="audioRecordWidget.xhtml"/>    
+                </div>
+
+
+                <div class="ui-dialog-action">
+                    <p:commandButton   id="btnSaveAudioRecord" value="#{PP_SHARED.ok}" icon="fa fa-check-square" 
+                                       update="formAddRecord:fileName :grow_main_dt" 
+                                       styleClass="btn-primary btn-width" oncomplete="PF('dlgRec').hide();"
+                                       onclick="uploadFile();"
+                                       />   
+                </div>
+
+            </p:dialog>
+
+            <p:confirmDialog styleClass="stf-confirm" header="#{RecordController.selectedRecord.status eq 0? 'Xóa thông báo':'Hủy thông báo'}"
+                             message="#{RecordController.selectedRecord.status eq 0? 'Bạn có chắc muốn xóa thông báo?':'Bạn có chắc muốn hủy thông báo?'}" 
+                             id="cfmDeleteRecord" severity="alert" widgetVar="cfmDeleteRecord" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{RecordController.saveRecord(evt)}" update="form_main:dtRecord :grow_main_dt" 
+                                     onclick="PF('cfmDeleteRecord').hide();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}" 
+                                     onclick="PF('cfmDeleteRecord').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog> 
+
+        </ui:composition>
+    </h:body>
+
+</html>            

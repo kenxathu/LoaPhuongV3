@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core">
+    
+  <head>
+
+   <style>
+  /* change player background color */
+  #myAudio {
+      background-color: #9FD6BA;
+  }
+  </style>
+ 
+</head>
+
+    <body>
+         <h:form enctype="multipart/form-data" id="recorderForm">
+             
+            <p:fileUpload id="uploadAudio" value="#{RecordController.audioFile}" 
+                                                  mode="advanced" 
+                                                  auto="true" style="display: none"
+                                                  skinSimple="true" fileUploadListener="#{RecordController.uploadAudioHandler}"
+                                                  label="Upload file âm thanh"  />
+            
+           <audio id="myAudio" class="video-js vjs-default-skin"></audio>
+           
+        </h:form>
+    </body>
+  
+
+<script>
+
+
+
+    
+</script>
+</html>            

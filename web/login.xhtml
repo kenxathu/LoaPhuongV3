@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"          
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+          
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <title>Đăng nhập</title>
+        <link rel="shortcut icon" href="#{request.contextPath}/resources/images/icon/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/login-layout.css" />
+        <!-- stf add css customize -->
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/customize.css" />
+        <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/responsive.css" />
+        <script type="text/javascript" src="#{request.contextPath}/resources/js/jquery-timing.min.js"></script>
+        <script type="text/javascript" src="#{request.contextPath}/resources/js/rotator.js"></script>
+            
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/custom.css" />
+            <!--<script type="text/javascript" src="#{request.contextPath}/resources/css/custom.js" />-->
+            
+
+        
+        
+    </h:head>
+    <h:body>
+
+        <!-- stf remake all layout -->
+        <p:growl id="messages" showDetail="true" showSummary="false" sticky="false" />
+
+        <h:form id="form_login">
+            <div id="header">
+                <a href="index.php" id="logo">
+                    <img src="#{request.contextPath}/resources/images/mobifone-logo2.png" width="180" alt=""></img>
+                </a>
+                <h1 class="title">Hệ thống <strong>quản lý tin tức</strong></h1>
+            </div>
+            <p:panelGrid id="panelMain" columnClasses="ui-grid-col-6 panel-left,ui-grid-col-6 panel-right" columns="1" layout="grid" styleClass="ui-panelgrid-blank" >
+                <p:outputPanel>
+                    <div id="login">
+                        <div class="wrapper">
+                            <h2>Đăng nhập</h2>
+                            <div class="form-group">
+                                <div id="box-username" class="form">
+                                    <p:inputText id="username" requiredMessage="Chưa nhập tài khoản" value="#{secuser.username}" required="true" label="Tài khoản" tabindex="1" autocomplete="off" />
+                                </div>
+                                <div id="box-password" class="form">
+                                    <p:password id="password" requiredMessage="Chưa nhập mật khẩu" value="#{secuser.password}" required="true" label="Mật khẩu" tabindex="2" autocomplete="off" />
+                                </div>
+                                <div id="box-password" class="form">
+                                 
+                                    <div style="transform:scale(1.13);transform-origin:0 0">
+                                        <p:captcha id="captchaLogin" rendered="#{secuser.showCaptcha}" label="Captcha" language="vi" theme="white" ></p:captcha>
+                                   </div>
+
+                                </div>
+                            </div>
+                            <p:commandButton action="#{secuser.validateUser()}" id="login_button" tabindex="5" process="form_login" update="form_login, :messages,captchaLogin" ajax="false" style="width: 100%; white-space: nowrap;" />
+                        </div>
+                    </div>
+                    <p:watermark rendered="#{not cas.isCasEnable()}" for="username" value="TÊN ĐĂNG NHẬP" />
+                    <p:watermark rendered="#{not cas.isCasEnable()}" for="password" value="MẬT KHẨU" />
+                    
+                    <p:focus context="form_login" />
+                </p:outputPanel>
+                <p:outputPanel rendered="false">
+                    <div id="rotator-wrapper" >
+                        <div class="wrapper">
+                            <div id="rotator">
+                                <div class="satelite"></div>
+                                <div class="satelite"></div>
+                                <div class="satelite"></div>
+                                <div class="satelite"></div>
+                            </div>
+                            <div class="inner">
+                                <h4><p>Quản lí khách hàng</p></h4>
+                                <ul>
+                                    <li><span>Khai thông tin khách hàng</span></li>
+                                    <!--                                    <li><span>Lập KHCP năm, KHCP 12 tháng</span></li>
+                                                                        <li><span>Lập bổ sung, điều chuyển KHCP</span></li>-->
+                                </ul>
+                            </div>
+                            
+                            <div class="inner">
+                                <h4><p>Quản lí dịch vụ</p></h4>
+                                <!--                   <ul>
+                                                                    <li><span>Đăng ký, cập nhật thực hiện công việc</span></li>
+                                                                    <li><span>Chuyển tiếp thực hiện công việc</span></li>
+                                                                    <li><span>Quản lý hợp đồng, tờ trình, nghiệm thu, hóa đơn</span></li>
+                                                    </ul>-->
+                            </div>
+                            <div class="inner">
+                                <h4>Quản lý thanh toán</h4>
+                                <!--                    <ul>
+                                                                    <li><span>Quản lý thanh toán, tạm ứng, trích trước</span></li>
+                                                                    <li><span>Quản lý hạch toán kế toán</span></li>
+                                                    </ul>-->
+                            </div>
+                            
+                            <div class="inner">
+                                <h4><p>Các chức năng</p><p>quản trị, báo cáo</p></h4>
+                                <ul>
+                                    <li><span>Quản trị hệ thống, quản lý danh mục</span></li>
+                                    <li><span>Quản lý báo cáo</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </p:outputPanel>
+            </p:panelGrid>
+        </h:form>                    
+
+        <p:ajaxStatus onstart="PF('statusDialog').show();" onsuccess="PF('statusDialog').hide();"/>
+        <p:dialog id="status_dialog" modal="true" widgetVar="statusDialog" draggable="false" closable="false" resizable="false" >
+            <p:graphicImage value="/resources/images/gif-load.gif" />
+        </p:dialog>
+    </h:body>
+</html>

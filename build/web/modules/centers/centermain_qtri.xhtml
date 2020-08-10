@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core">
+    <h:head>
+        
+        
+
+    </h:head>
+    <h:body>
+        <ui:composition>
+            <script src="#{request.contextPath}/resources/js/highcharts.js"></script>
+            <script src="#{request.contextPath}/resources/js/exporting.js"></script>
+            <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript" ></script>
+            <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyC2nGDxgbOEzdU-cS6FHGYUtwGKUAx0B5s"></script>
+            
+
+            <style type="text/css" >
+                #formChooseOrg\:treeOrg .ui-tree-container {
+                    max-height: 450px;
+                }
+
+                #formMain\:treeOrg {
+                    overflow: auto;
+                }
+
+                hr {
+                    border: 0;
+                    height: 2px;
+                    background: #999999;
+                }
+
+                .btn-right {
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                }
+
+                .org-name {
+                    font-size: 1.1em;
+                    font-weight: bold;
+                    color: #666666;
+                    text-transform: uppercase;
+                    line-height: 2.5em;
+                    margin-right: 10px;
+                }
+                .ui-selectonemenu{
+                    width: 5%;
+                    margin: 0px 5px 0 0 ;
+                }
+                .ui-selectonemenu
+                .ui-selectonemenu-label{
+                    color: black !important;
+                    width: 95% !important;
+                }
+            </style>            
+            <h:form id="formMain" >
+                <section class="content">
+                    <div class="row">
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-orange">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_area}
+                                        </h3>
+                                        <p>
+                                            Địa bàn
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-ios7-briefcase-outline"></i>
+                                    </div>
+                                    <a href="/quangtri/client/area-management" class="small-box-footer" >Quản lý địa bàn <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-aqua">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_household}</h3>
+                                        <p>
+                                            Hộ gia đình
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="/quangtri/client/holdhouse-management" class="small-box-footer">Quản lý hộ gia đình <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-green">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_mcu}</h3>
+                                        <p>
+                                            Thiết bị MCU
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-stats-bars"></i>
+                                    </div>
+                                    <a href="/quangtri/client/mcu-management" class="small-box-footer">Quản lý thiết bị MCU <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-yellow-active">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_user}</h3>
+                                        <p>
+                                            Tài khoản người dân
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-person-add"></i>
+                                    </div>
+                                    <a href="/quangtri/module/user-normal" class="small-box-footer">Quản lý TK người dân <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-red">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_record}
+                                        </h3>
+                                        <p>
+                                            Thông báo
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-pie-graph"></i>
+                                    </div>
+                                    <a href="/quangtri/client/record-management" class="small-box-footer">Quản lý thông báo <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-2 col-xs-6">
+                                <!-- small box -->
+                                <div class="small-box bg-blue">
+                                    <div class="inner">
+                                        <h3>#{DashBoardController.dbData.count_news}</h3>
+                                        <p>
+                                            Tin bài
+                                        </p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-ios7-cart-outline"></i>
+                                    </div>
+                                    <a href="/quangtri/client/news-management" class="small-box-footer">Quản lý tin bài <i class="fa fa-arrow-circle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                        </div>
+                    
+         </section>
+       
+                
+                
+        <section >
+          
+            <h:form id="frmMCUmap">  
+               
+                <p:panelGrid id="pnlScheduleConfig" columns="2" columnClasses="ui-grid-col-2,ui-grid-col-2" styleClass="ui-panelgrid-blank stf-view" layout="grid" >  
+                    <h4 style="float: left">Bản đồ thiết bị MCU trên địa bàn</h4>
+                    
+                    <p:inputText id="txtarea" value="#{MCUMapController.selectedArea.areaName}" style="height: 40px;" onclick="PF('olPanel').loadContents();" />       
+                                
+                </p:panelGrid>
+
+               <p:gmap id="gmap"  center="21.0227387,105.8194541" zoom="13" type="ROADMAP" model="#{MCUMapController.advancedModel}" style="width:100%;height:600px">
+
+                    
+                    <p:ajax event="overlaySelect" listener="#{MCUMapController.onMarkerSelect}" />
+                    
+                    
+
+                    <p:gmapInfoWindow id="infoWindow" >
+                        <p:outputPanel style="height: 150px" >
+                            <p:panelGrid id="MCUInfo" columns="2" columnClasses="ui-grid-col-6,ui-grid-col-6" styleClass="ui-panelgrid-blank  stf-view" layout="grid" >  
+
+                                <p:outputLabel value="Tên chủ hộ" for="housename" style="float: left"/>
+                                <p:inputText id="housename" value="#{MCUMapController.marker.title}" disabled="true" style="border: none"/> 
+                                
+                                <p:outputLabel value="Địa chỉ" for="addr" style="float: left"/>
+                                <p:inputTextarea id="addr" value="#{MCUMapController.marker.data}" disabled="true" rows="1" cols="3"/>
+                                
+                                <p:outputLabel value="Trạng thái" for="status" style="float: left" />
+                                <p:inputText id="status" value="#{MCUMapController.marker.shadow}" disabled="true" />
+
+                            </p:panelGrid>
+                        </p:outputPanel>
+                    </p:gmapInfoWindow>
+                </p:gmap>
+
+ 
+                
+                <p:overlayPanel id="timePanel" widgetVar="olPanel" 
+                                for="txtarea" style="height: fit-content; width: 280px" hideEffect="fade" >
+                    <h:form id="formPlayTimeConf2">
+                        <p:tree id="docs" style="margin-top: 10px; width: 250px;" value="#{MCUMapController.areaRoot}" var="doc" selectionMode="single" 
+                                        selection="#{MCUMapController.selectedArea}" dynamic="true"  >                    
+                            <p:ajax event="select" update="formMain:frmMCUmap:txtarea formMain:frmMCUmap:gmap :grow_main_dt" />
+                                
+                                <p:treeNode expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed">
+                                    <h:outputText value="#{doc.areaName}" style="font-weight:bold;"/>
+                                </p:treeNode>
+                                <p:treeNode type="tp" icon="ui-icon-document">
+                                    <h:outputText value="TP. #{doc.areaName}" style="font-weight:bold;" />
+                                </p:treeNode>
+                                <p:treeNode type="q" icon="ui-icon-document">
+                                    <h:outputText value="Q. #{doc.areaName}" style="font-weight:bold;"/>
+                                </p:treeNode>
+                                <p:treeNode type="p" icon="ui-icon-document">
+                                    <h:outputText value="P. #{doc.areaName}"/>
+                                </p:treeNode>
+                                <p:treeNode type="t" icon="ui-icon-document">
+                                    <h:outputText value="T. #{doc.areaName}"/>
+                                </p:treeNode>
+                                <p:treeNode type="document" icon="ui-icon-document">
+                                    <h:outputText value="#{doc.areaName}" />
+                                </p:treeNode>
+                      
+                            </p:tree>
+                    </h:form>
+
+                </p:overlayPanel>
+            </h:form>
+            
+            
+        </section>
+               
+        </h:form>
+        </ui:composition>
+    </h:body>
+</html>

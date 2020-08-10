@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:mce="http://java.sun.com/jsf/composite/editor">
+
+    <head>
+
+
+    </head>
+
+    <h:head>
+
+    </h:head>
+    <h:body>
+
+        <ui:composition>
+            <link href="#{request.contextPath}/resources/js/video-js.min.css" rel="stylesheet"/>
+            <link href="#{request.contextPath}/resources/assets/css/videojs.record.css" rel="stylesheet"/>
+            <link href="#{request.contextPath}/resources/assets/css/style.css" rel="stylesheet"/>
+
+            <script src="#{request.contextPath}/resources/js/video.min.js"></script>
+            <script src="#{request.contextPath}/resources/js/recorder.js"></script>
+            <script src="#{request.contextPath}/resources/js/wavesurfer.min.js"></script>
+            <script src="#{request.contextPath}/resources/js/wavesurfer.microphone.min.js"></script>
+            <script src="#{request.contextPath}/resources/js/videojs.wavesurfer.min.js"></script>
+
+            <script src="#{request.contextPath}/resources/js/videojs.record.min.js"></script>
+            <script src="#{request.contextPath}/resources/js/videojs.record.recorderjs.min.js"></script>    
+            <link rel="stylesheet" href="#{request.contextPath}/resources/css/jquery.loading.min.css"></link>
+
+
+
+            <link rel="stylesheet" href="#{request.contextPath}/resources/js/timepicker/css/timepicker.css"/>
+            <script src="#{request.contextPath}/resources/js/timepicker/js/timepicker.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/resources/js/loader.js"></script>
+            
+           
+
+
+
+                
+
+         
+
+     <!--<script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/tinymce.min.js"> </script>
+     <script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/jquery.tinymce.min.js"></script>-->
+
+
+
+
+            <style>
+
+                .menu
+                {
+                    font-weight: bold;
+                }
+
+                #frmDlgSubmission\:dtlist table{
+                    table-layout: fixed;
+                }
+                .ui-selectonemenu-list-item{
+                    white-space: normal!important;
+                }
+                .someClass {
+                    word-wrap: break-word;
+                    white-space: normal!important;
+                }
+                .import-btn{
+                    width: 130px!important;
+                }
+                .panelUploadFile.ui-overlaypanel{
+                    margin-bottom: 50px!important;
+                }
+            </style>
+
+            <script>
+                function handleSubmitRequestChannel(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddChannel').hide();
+                    }
+                }
+
+    
+                
+                
+
+         
+
+
+            </script>
+
+            <h:form id="form_main" onkeypress="if (event.keyCode == 13) {
+                
+                        return false;
+                    }" >
+                
+                
+
+                <p:panel id="pnl_main">  
+
+
+                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%" >
+
+                        <p:dataTable id="dtChannel" value="#{RadioController.listChanel}" var="channel"
+                                     rowKey="#{channel.id}" selectionMode="single"
+                                     paginator="true" 
+                                     rows="30"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                     rowsPerPageTemplate="10,20,30,50"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     currentPageReportTemplate="{startRecord} - {endRecord} / {totalRecords} kênh"
+                                     widgetVar="dtChannel"
+                                     
+                                     emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+                            
+                             
+
+                            <f:facet name="header">
+                                <div class="stf-table-label">
+
+                                        <h4 style="color: #0259A4; margin-top: 38px; position: absolute">
+                                            Danh sách kênh đài FM
+                                        </h4>
+
+                                        <p:commandButton id="cmdAddRecord" process="@this" value="Thêm kênh" icon="fa fa-plus-square" style="font-weight: 400; float: right"
+                                                         styleClass=" btn-success btn-auto" actionListener="#{RadioController.addChannelEvent(evt)}" update="dlgAddChannel"
+                                                         oncomplete="PF('dlgAddChannel').show();" >
+                                            <p:resetInput target="formDlgAddChannel"/> </p:commandButton>
+                                    
+                          
+                                </div>
+
+                                <!--                                <div class="clear" />-->
+                            </f:facet>
+
+
+
+                            <p:column headerText="STT" style="width: 5%!important" >
+                                #{rownum + 1}
+                            </p:column>
+                            <p:column headerText="Tên kênh" id="maincontent" style="width: 20%!important" filterMatchMode="contains" filterBy="#{channel.name}" sortBy="#{channel.name}">  
+                                <h:outputText value="#{channel.name}">
+                                </h:outputText>
+                            </p:column> 
+
+                            <p:column headerText="Mô tả" style="width: 20%!important" filterMatchMode="contains" filterBy="#{channel.description}" sortBy="#{channel.description}" >  
+                                <h:outputText value=" #{channel.description}">
+                                                 </h:outputText>
+                            </p:column>
+                           
+                            <p:column headerText="URL kênh" style="width: 20%!important" filterMatchMode="contains" filterBy="#{channel.url}" sortBy="#{channel.url}">  
+                                <h:outputText value=" #{channel.url}">
+                                </h:outputText>
+                            </p:column> 
+                            <p:column headerText="Tần số kênh (mHz)" style="width: 20%!important" filterMatchMode="contains" filterBy="#{channel.frequency}" sortBy="#{channel.frequency}">  
+                                <h:outputText value=" #{channel.frequency}">
+                                </h:outputText>
+                            </p:column>
+                          
+
+                            <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 10%!important;" >
+                               
+                                <p:commandLink id="bntEdit" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil" global="false" process="@this" 
+                                               actionListener="#{RadioController.editChannelEvent(channel)}" update="dlgAddChannel" oncomplete="PF('dlgAddChannel').show();" >
+                                    <p:resetInput target="formDlgAddChannel "/>
+                                </p:commandLink>
+                                
+                                <p:commandLink id="bntDelete" style="margin-left: 5px; color: red!important;"  global="false" process="@this"
+                                               actionListener="#{RadioController.deleteChannelEvent(channel)}" update="cfmDeleteChannel" oncomplete="PF('cfmDeleteChannel').show();" styleClass="btn-margin fa fa-trash" />
+                                
+
+                                <p:tooltip for="bntEdit" value="#{PP_SHARED.edit}" trackMouse="true" />
+                                <p:tooltip for="bntDelete" value="Xóa" trackMouse="true" />
+                            </p:column>
+                            
+                            
+                        </p:dataTable>
+
+                    </h:panelGrid>
+
+
+
+                </p:panel>
+            </h:form>   
+
+
+            
+            <p:dialog header="#{RadioController.channelAction eq 'CREATE'?'Thêm ':'Sửa thông tin '}kênh" 
+                      id="dlgAddChannel" widgetVar="dlgAddChannel" width="900" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form id="formDlgAddChannel" >
+                    <div>
+
+                        <p:panelGrid id="pnlChannelInfo" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Tên kênh" for="txtChannelName" />
+                                           <p:inputText id="txtChannelName" value="#{RadioController.selectedChannel.name}"
+                                         required="true" requiredMessage="Tên kênh #{PP_SHARED.can_not_be_empty}"
+                                         >                             
+                            </p:inputText>
+              
+                            <p:outputLabel value="Mô tả" for="txtDescription"/>
+                            <p:inputText id="txtDescription"  value="#{RadioController.selectedChannel.description}"
+                                         
+                                          >
+                            </p:inputText>
+                            
+                            <p:outputLabel value="URL kênh" for="txURL"/>
+                            <p:inputText id="txURL"  value="#{RadioController.selectedChannel.url}"
+                                          >
+                            </p:inputText>
+                            
+                            <p:outputLabel value="Tần số kênh (mHz)" for="txfrequency"/>
+                            <p:inputText id="txfrequency"  value="#{RadioController.selectedChannel.frequency}">
+                                 <pe:keyFilter regEx="/[0-9.]/i" preventPaste="false" />
+                            </p:inputText>
+                            <p:outputLabel value=""/>
+                            
+
+
+                        </p:panelGrid>
+                       
+                        
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave"  value="#{PP_SHARED.ok}"  actionListener="#{RadioController.saveChannel(evt)}" icon="fa fa-check-square" 
+                                               update="form_main formDlgAddChannel :grow_main_dt" 
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestChannel(xhr, status, args);" />
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}" 
+                                             oncomplete="PF('dlgAddChannel').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+
+      
+
+            <p:confirmDialog styleClass="stf-confirm" header="Xóa kênh đài FM"
+                             message="Bạn có chắc muốn xóa kênh?" 
+                             id="cfmDeleteChannel" severity="alert" widgetVar="cfmDeleteChannel" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{RadioController.saveChannel(evt)}" update="form_main:dtChannel :grow_main_dt" 
+                                     onclick="PF('cfmDeleteChannel').hide();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}" 
+                                     onclick="PF('cfmDeleteChannel').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog> 
+
+        </ui:composition>
+    </h:body>
+
+</html>            

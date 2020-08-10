@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:mce="http://java.sun.com/jsf/composite/editor">
+    
+    <h:head>
+       
+    </h:head>
+    <h:body>
+        
+        <ui:composition>
+
+            <link rel="stylesheet" href="#{request.contextPath}/resources/css/jquery.loading.min.css"></link>
+            
+       
+            <!--<script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/tinymce.min.js"> </script>
+            <script type="text/javascript"  src="#{request.contextPath}/resources/js/tinymce/jquery.tinymce.min.js"></script>-->
+            
+            
+            
+            
+            <style>
+
+                .menu
+                {
+                    font-weight: bold;
+                }
+
+                #frmDlgSubmission\:dtlist table{
+                    table-layout: fixed;
+                }
+                .ui-selectonemenu-list-item{
+                    white-space: normal!important;
+                }
+                .someClass {
+                    word-wrap: break-word;
+                    white-space: normal!important;
+                }
+                .import-btn{
+                    width: 130px!important;
+                }
+                .panelUploadFile.ui-overlaypanel{
+                    margin-bottom: 50px!important;
+                }
+            </style>
+
+            <script>
+                function handleSubmitRequestArea(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddArea').hide();
+                    }
+                }
+                
+                function handleSubmitRequestHouse(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddHouse').hide();
+                    }
+                }
+                function handleSubmitRequestRecord(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddRecord').hide();
+                    }
+                }
+                function handleSubmitRequestNews(xhr, status, args) {
+                    if (!args.validationFailed) {
+                        PF('dlgAddNews').hide();
+                    }
+                }
+                
+
+            </script>
+
+            <h:form id="form_main"  >
+               <div class="stf-view-header">
+                         
+        
+                   <p:layout style="height: 800px;" >
+                    <p:layoutUnit position="west" resizable="true" size="350" minSize="200" maxSize="800" style="background: white;">
+                            <h3 style="margin-top:20px">hệ thống địa bàn</h3>
+                            
+                            
+                                <p:inputText id="txtSearch"  >
+                                </p:inputText>
+                                <p:commandButton id="cmdAdd" value="Tìm kiếm" actionListener="#{MediaController.displaySelectedSingle()}" rendered="true" icon="ui-icon-search" 
+                                                 global="true"/>
+                                
+                            
+
+                            <p:tree  id="docs" style="margin-top: 10px" value="#{MediaController.areaRoot}" var="doc" 
+                                     selectionMode="single"  selection="#{MediaController.selectedArea}" dynamic="true">                    
+                                <p:ajax event="select" update="form_main:formAreaDetail:tabArea:dtRecord form_main:formAreaDetail:tabArea:dtNews form_main:formAreaDetail:lbAreaName"/>
+                              
+                                <p:treeNode  expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed" styleClass="">
+                                    <h:outputText value="#{doc.areaName}" style="font-weight:bold;"/>
+                                </p:treeNode>
+                                <p:treeNode type="tp" icon="ui-icon-document">
+                                    <h:outputText value="TP. #{doc.areaName}" style="font-weight:bold;" />
+                                </p:treeNode>
+                                <p:treeNode type="q" icon="ui-icon-document">
+                                    <h:outputText value="Q. #{doc.areaName}" style="font-weight:bold; color: #1C7EBB; co" />
+                                </p:treeNode>
+                                <p:treeNode type="p" icon="ui-icon-document">
+                                    <h:outputText value="P. #{doc.areaName}"/>
+                                </p:treeNode>
+                                <p:treeNode type="t" icon="ui-icon-document">
+                                    <h:outputText value="T. #{doc.areaName}"/>
+                                </p:treeNode>
+                                <p:treeNode type="document" icon="ui-icon-document">
+                                    <h:outputText value="#{doc.areaName}" />
+                                </p:treeNode>
+                      
+                            </p:tree>
+                         
+                    </p:layoutUnit>
+
+                       <p:layoutUnit position="center" style="background: white;">
+                        
+                           <h:form id="formAreaDetail">    
+                  
+                            <h3 title="#{MediaController.selectedArea.areaName}" style="margin-top:20px"></h3>
+                            <h:outputText id="lbAreaName" value="#{MediaController.selectedArea.areaName}" style="font-weight:bold; font-size: 17px"/>
+                            <p:tabView id="tabArea" cache="false" >
+                                  
+                              
+                                <p:tab title="Thông báo" >
+                                    <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%">
+                                            
+                                        <p:commandButton id="cmdAddRecord" process="@this" value="Thêm thông báo" icon="fa fa-plus-square"   rendered="#{MediaController.isAllowInsertRECORD()}"
+                                                             styleClass=" btn-success btn-auto" actionListener="#{MediaController.addRecordEvent()}" update="dlgAddRecord"
+                                                             oncomplete="PF('dlgAddRecord').show();" />
+
+
+                                             
+                                            <p:dataTable id="dtRecord" value="#{MediaController.listRecord}" var="record"
+                                                         rowKey="#{record.rec_id}" 
+                                                            paginator="true"  
+                                                            rows="10"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                                            rowsPerPageTemplate="10,20,30"
+                                                            widgetVar="dtService" 
+                                                            emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+
+
+
+                                                    <p:column headerText="STT" style="width: 5%!important" >
+                                                        #{rownum + 1}
+                                                    </p:column>
+
+                                                    <p:column headerText="Danh mục" style="width: 10%">  
+                                                        <h:outputText  value="#{record.categoryName}">
+                                                        </h:outputText>
+                                                    </p:column>
+                                                    <p:column headerText="Nội dung chính" style="width: 25%!important">  
+                                                        <h:outputText value="#{record.rec_summary}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    <p:column headerText="Thời gian phát" style="width: 10%!important">  
+                                                        <h:outputText value=" #{record.rec_play_timeString}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    <p:column headerText="Kiểu phát" style="width: 10%!important">  
+                                                        <h:outputText value=" #{record.rec_receipt_type eq 1 ? 'Danh sách địa bàn' : ecord.rec_receipt_type eq 0 ? 'Danh sách MCU' : ''}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    <p:column headerText="Danh sách phát" style="width: 10%!important">  
+                                                        <h:outputText value=" #{record.rec_receipt}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    <p:column headerText="Lặp lại" style="width: 10%!important">  
+                                                        <h:outputText value="#{record.rec_play_repeat_type eq 0 ? 'Theo tuần' : 'Theo tháng'}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                      <p:column headerText="Trạng thái" style="width: 10%!important">  
+                                                          <h:outputText value=" #{record.status eq 0 ? 'Chờ duyệt' : record.status eq 1 ? 'Đã duyệt' : 'Đã hủy'}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    
+
+                                                    <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 10%!important;" >
+                                                        <p:commandLink id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin" 
+                                                                        actionListener="#{MediaController.viewRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();">
+                                                        </p:commandLink>
+                                                        <p:commandLink rendered="#{MediaController.isAllowUpdateRECORD()}" id="bntEdit" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil-square" global="false" process="@this" 
+                                                                       actionListener="#{MediaController.editRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();" >
+                                                        </p:commandLink>
+                                                        <p:commandLink rendered="#{MediaController.isAllowDeleteRECORD()}"  id="bntDelete" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                                       actionListener="#{MediaController.deleteRecordEvent(record)}" update="cfmDeleteRecord" oncomplete="PF('cfmDeleteRecord').show();" styleClass="btn-margin fa fa-trash-o" />
+                                                        <p:commandLink rendered="#{MediaController.isAllowApprovalRECORD()}" id="bntApprove" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil-square" global="false" process="@this" 
+                                                                       actionListener="#{MediaController.approveRecordEvent(record)}" update="dlgAddRecord" oncomplete="PF('dlgAddRecord').show();" >
+                                                        </p:commandLink>
+                                                        
+                                                        <p:tooltip for="bntView" value="#{PP_SHARED.view}" trackMouse="true"  />
+                                                        <p:tooltip for="bntEdit" value="#{PP_SHARED.edit}" trackMouse="true" />
+                                                        <p:tooltip for="bntDelete" value="#{PP_SHARED.del}" trackMouse="true" />
+                                                        <p:tooltip for="bntApprove" value="Phê duyệt" trackMouse="true" />
+                                                    </p:column>
+                                                </p:dataTable>
+                                           
+                                     </h:panelGrid>
+                                     
+                                     
+                                </p:tab>
+                                <p:tab title="Tin tức">
+                                   <h:panelGrid columns="1" class="ui-fluid stf-table" width="100%">
+                                            
+                                            <p:commandButton id="cmdAddNews" process="@this" value="Thêm tin tức" icon="fa fa-plus-square"  
+                                                             styleClass=" btn-success btn-auto" actionListener="#{MediaController.addNewsEvent()}" update="dlgAddNews"
+                                                             oncomplete="PF('dlgAddNews').show();" />
+
+
+                                             
+                                            <p:dataTable id="dtNews" value="#{MediaController.listNews}" var="news"
+                                                         rowKey="#{news.id}" 
+                                                            paginator="true"  
+                                                            rows="10"  paginatorPosition="bottom" rowIndexVar="rownum"
+                                                            rowsPerPageTemplate="10,20,30" 
+                                                            widgetVar="dtNews" 
+                                                            emptyMessage="#{PP_SHARED.empty_message}" filterDelay="500" >
+
+
+
+                                                    <p:column headerText="STT" style="width: 5%!important" >
+                                                        #{rownum + 1}
+                                                    </p:column>
+
+                                                    <p:column headerText="Tiêu đề" style="width: 15%!important" filterMatchMode="contains" filterBy="#{news.title}" sortBy="#{news.title}" >  
+                                                        <h:outputText value=" #{news.title}">
+                                                        </h:outputText>
+                                                    </p:column>
+                                                    <p:column headerText="Danh mục" style="width: 10%!important" filterMatchMode="exact" width="7%" filterBy="#{news.categoryName}" sortBy="#{news.categoryName}">  
+                          
+                                                            <f:facet name="filter">
+                                                                <p:selectOneMenu  onchange="PF('dtNews').filter()">
+                                                                    <f:selectItem itemValue="" itemLabel="" />
+                                                                    <f:selectItems value="#{MediaController.listRecordcategory}" var="cate" itemValue="#{cate.name}" itemLabel="#{cate.name}" />
+                                                                </p:selectOneMenu>
+                                                            </f:facet>
+                                                        <h:outputText value=" #{news.categoryName}">
+                                                        </h:outputText>
+                                                    </p:column>
+                                                    <p:column headerText="Ngày tạo" style="width: 10%!important" filterMatchMode="contains" filterBy="#{news.create_date}" sortBy="#{news.create_date}">  
+                                                        <h:outputText value=" #{news.create_date}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                    <p:column headerText="Ngày bắt đầu" style="width: 15%!important" filterMatchMode="contains" filterBy="#{news.from_date}" sortBy="#{news.from_date}">  
+                                                        <h:outputText value=" #{news.from_date}">
+                                                        </h:outputText>
+                                                    </p:column> 
+                                                
+                                                    <p:column headerText="Trạng thái" filterMatchMode="exact" filterBy="#{news.status}" sortBy="#{news.status}" width="7%">  
+                                                            <f:facet name="filter">
+                                                                <p:selectOneMenu  onchange="PF('dtNews').filter()">
+                                                                    <f:selectItem itemValue="" itemLabel="" />
+                                                                    <f:selectItem itemValue="0" itemLabel="Chờ duyệt" />
+                                                                    <f:selectItem itemValue="1" itemLabel="Đã duyệt" />
+                                                                    <f:selectItem itemValue="2" itemLabel="Đã hủy" />
+                                                                </p:selectOneMenu>
+                                                            </f:facet>
+                                                          <h:outputText value=" #{news.status eq 0 ? 'Chờ duyệt' : news.status eq 1 ? 'Đã duyệt' : 'Đã hủy'}">
+                                                        </h:outputText>
+                                                    </p:column> 
+         
+
+                                                    <p:column headerText="#{PP_SHARED.manipulate}"  style="text-align: center; width: 10%!important;" >
+                                                        <p:commandLink id="bntView" process="@this" resetValues="true" styleClass="fa fa-eye btn-margin" 
+                                                                        actionListener="#{MediaController.viewNewsEvent(news)}" update="dlgAddNews" oncomplete="PF('dlgAddNews').show();">
+                                                        </p:commandLink>
+                                                        <p:commandLink rendered="#{news.status eq 0}" id="bntEdit" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil-square" global="false" process="@this" 
+                                                                       actionListener="#{MediaController.editNewsEvent(news)}" update="dlgAddNews" oncomplete="PF('dlgAddNews').show();" >
+                                                        </p:commandLink>
+                                                        <p:commandLink rendered="true"  id="bntDelete" style="margin-left: 5px; color: red;"  global="false" process="@this"
+                                                                       actionListener="#{MediaController.deleteNewsEvent(news)}" update="cfmDeleteNews" oncomplete="PF('cfmDeleteNews').show();" styleClass="btn-margin fa fa-trash-o" >
+                                                        </p:commandLink>
+                                                        <p:commandLink rendered="#{news.status eq 0}" id="bntApprove" resetValues="true" style="margin-left: 5px; color: green;"  styleClass="btn-margin fa fa-pencil-square" global="false" process="@this" 
+                                                                       actionListener="#{MediaController.approveNewsEvent(news)}" update="dlgAddNews" oncomplete="PF('dlgAddNews').show();" >
+                                                        </p:commandLink>
+                                                        
+                                                        <p:tooltip for="bntView" value="#{PP_SHARED.view}" trackMouse="true" />
+                                                        <p:tooltip for="bntEdit" value="#{PP_SHARED.edit}" trackMouse="true" />
+                                                        <p:tooltip for="bntDelete" value="#{PP_SHARED.del}" trackMouse="true" />
+                                                        <p:tooltip for="bntApprove" value="Duyệt tin" trackMouse="true" />
+                                                    </p:column>
+                                                </p:dataTable>
+                                           
+                                     </h:panelGrid>
+                                     
+                                </p:tab>
+                            </p:tabView>
+
+                        </h:form>
+                    </p:layoutUnit>
+                </p:layout>
+                
+              </div>
+            </h:form>   
+            
+
+
+            <p:dialog id="dlgAddRecord" widgetVar="dlgAddRecord" width="1200" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <f:facet name="header" >
+                    <h:outputText value="Thêm thông báo" rendered="#{MediaController.recordActtionFlag eq 'CREATE'}"/>
+                    <h:outputText value="Sửa thông báo" rendered="#{MediaController.recordActtionFlag eq 'UPDATE'}"/>
+                    <h:outputText value="Xem thông báo" rendered="#{MediaController.recordActtionFlag eq 'VIEW'}"/>
+                    <h:outputText value="Phê duyệt thông báo" rendered="#{MediaController.recordActtionFlag eq 'APPROVE'}"/>
+                </f:facet>
+                
+                <h:form id="formAddRecord" enctype="multipart/form-data">
+                    <div>
+
+                        <p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-3,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Nội dung chính" for="txtRecSummary"/>
+                            <p:inputText id="txtRecSummary"   value="#{MediaController.selectedRecord.rec_summary}"
+                                         disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}"
+                                         required="true" requiredMessage="Nội dung chính #{PP_SHARED.can_not_be_empty}"
+                                          >
+                            </p:inputText>
+              
+                            <p:outputLabel for="slCategory" value="Danh mục"/>
+                            <p:selectOneMenu id="slCategory"  filter="true" filterMatchMode="contains"  
+                                             value="#{MediaController.selectedRecord.category_id}"  required="true"
+                                             disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItems value="#{MediaController.listRecordcategory}" var="recordCat" itemLabel="#{recordCat.name}" itemValue="#{recordCat.id}"/>
+                                </p:selectOneMenu>
+                            
+                            <p:outputLabel value="File thông báo"/>
+                            <p:fileUpload id="uploadFile" value="#{MediaController.file}" 
+                                          mode="advanced" 
+                                          disabled="#{MediaController.newsActtionFlag eq 'VIEW' or MediaController.newsActtionFlag eq 'APPROVE'}"
+                                          skinSimple="true" auto="true" fileUploadListener="#{MediaController.uploadRecord}"
+                                          styleClass="fileupload-simple"
+                                          update="audioName2"
+                                          label="Tải lên"
+                                          required="true"
+                                          />
+                            
+                            <p:outputLabel for="recMode" value="Chế độ phát"/>
+                            <p:selectOneMenu id="recMode"  value="#{MediaController.selectedRecord.rec_play_mode}" filter="true" filterMatchMode="contains"  required="true"
+                                                 effect="fade" disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItem itemLabel="Phát theo lịch" itemValue="1"/>
+                                    <f:selectItem itemLabel="Phát ngay lập tức" itemValue="2"/>
+                                    <f:selectItem itemLabel="Không phát" itemValue="0"/>
+                                </p:selectOneMenu>
+                            
+                            
+                                         
+
+                            <p:outputLabel value=""/>
+                            <p:commandLink id="audioName"  >
+                                <h:outputText id="audioName2" value="#{MediaController.selectedRecord.recFileName}" style="color: #005CAC" />
+                            </p:commandLink>
+                            
+                            <p:outputLabel value=""/>
+                            <p:outputLabel value=""/>
+                            
+                     
+                            <p:outputLabel value="Mức độ ưu tiên" for="txtPriority"/>
+                            <p:selectOneMenu id="txtPriority"  value="#{MediaController.selectedRecord.rec_priority}" filter="true" filterMatchMode="contains"  required="true"
+                                                 effect="fade"  disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItem itemLabel="Bình thường" itemValue="3"/>
+                                    <f:selectItem itemLabel="Quan trọng" itemValue="2"/>
+                                    <f:selectItem itemLabel="Rất quan trọng" itemValue="1"/>
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel value="Thông báo đến điện thoại" for="txtNotifyFlag"/>
+                            <p:selectBooleanCheckbox id="txtNotifyFlag" value="#{MediaController.selectedRecord.notify_flagBoolean}" 
+                                                     disabled="#{MediaController.recordActtionFlag eq 'VIEW'}"/>
+                  
+                            
+                            <p:outputLabel value=""  />
+                            <p:outputLabel value=""  />
+                            <p:outputLabel value=""  />
+                            <p:outputLabel value=""  />
+                                
+                            
+                            
+                            <p:outputLabel for="playMode" value="Kiểu phát"/>
+                            <p:selectOneMenu id="playMode"   value="#{MediaController.selectedRecord.rec_receipt_type}" filter="true" filterMatchMode="contains"  
+                                                 effect="fade" disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItem itemLabel="Phát đến danh sách địa bàn" itemValue="1" />
+                                    <f:selectItem itemLabel="Phát đến danh sách MCU" itemValue="2" />
+                                </p:selectOneMenu>
+                            
+                            <p:outputLabel value="Danh sách phát" for="txtRecListPlay"/>
+                            <p:inputText rendered="false" id="txtRecListPlay" 
+                                         onclick="PF('dlgPlayListConfig').show();"
+                                         disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}">
+                            </p:inputText>
+                            
+                            <p:commandButton rendered="true" id="cmdAPlayListConfig" process="@this" value="Cấu hình danh sách phát" icon="fa fa-plus-square"  
+                                                             styleClass=" btn-success btn-auto"  
+                                                             />
+                            
+                            <p:overlayPanel id="imagePanel" for="cmdAPlayListConfig" hideEffect="fade" >
+                                 <h:form>
+                                    <div >
+                                        <p:tree  id="areaTree"  value="#{MediaController.areaRoot}" var="doc" 
+                                             selectionMode="checkbox" selection="#{MediaController.listSelectedArea2}"
+                                             
+
+                                              >           
+
+                                        <p:ajax event="select" update="areaTree"  listener="#{MediaController.saveListArea(evt)}" />
+                                        <p:ajax event="unselect" listener="#{MediaController.saveListArea(evt)}" />
+
+                                            <p:treeNode  expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed" styleClass="">
+
+                                                <h:outputText value="#{doc.areaName}" style="font-weight:bold;"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="tp" >
+
+                                                <h:outputText value="TP. #{doc.areaName}" style="font-weight:bold;" />
+                                            </p:treeNode>
+                                            <p:treeNode type="q" >
+                                                <h:outputText value="Q. #{doc.areaName}" style="font-weight:bold;" />
+                                            </p:treeNode>
+                                            <p:treeNode type="p" >
+                                                <h:outputText value="P. #{doc.areaName}"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="t" >
+                                                <h:outputText value="T. #{doc.areaName}"/>
+                                            </p:treeNode>
+                                            <p:treeNode type="document" >
+                                                <h:outputText value="#{doc.areaName}" />
+                                            </p:treeNode>
+
+                                        </p:tree>
+                                        
+                                    </div>
+                                </h:form>
+                            </p:overlayPanel>
+                            
+                            
+                            
+                        </p:panelGrid>    
+                            
+                        <p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-3,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+    
+                            <p:outputLabel value="Giờ phát" for="txtPlayTime"/>
+                            <p:inputText id="txtPlayTime" value="#{MediaController.selectedRecord.rec_play_timeString}" 
+                                         title="Mời nhập vào giờ phát dạng hh:mm các nhau bởi dấu phẩy"
+                                         required="true" requiredMessage="Giờ phát #{PP_SHARED.can_not_be_empty}"
+                                         disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}">
+                            </p:inputText>
+   
+                            <p:outputLabel for="repeatType" value="Kiểu lặp lại"/>
+                            <p:selectOneMenu id="repeatType"  value="#{MediaController.selectedRecord.rec_play_repeat_type}" filter="true" filterMatchMode="contains" 
+                                                 effect="fade" disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}">       
+                                    <f:selectItem itemLabel="Theo tuần" itemValue="0" />
+                                    <f:selectItem itemLabel="Theo tháng" itemValue="1" />
+                                    <p:ajax update="pnlRepeatConfig"/>
+                            </p:selectOneMenu>
+                        </p:panelGrid>  
+                        
+                            
+                        <p:panelGrid id="pnlRepeatConfig" columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-3,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Cấu hình lặp lại" />
+                            <p:selectCheckboxMenu id="selectDaysInWeek" value="#{MediaController.listDaysSelected}" label=""  
+                                                  style="height: 35px; background: white; " rendered="#{MediaController.selectedRecord.rec_play_repeat_type eq 0}" 
+                                                  disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}"> 
+                                    <f:selectItems value="#{MediaController.listDaysWeek}" var="dayweek" itemLabel="#{dayweek.name}" itemValue="#{dayweek.value}" />
+                            </p:selectCheckboxMenu>
+                            
+                            <p:selectCheckboxMenu id="selectDaysInMounth" value="#{MediaController.listDaysSelected}" label="" 
+                                                  disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}"
+                                                  style="height: 35px; background: white; "  rendered = "#{MediaController.selectedRecord.rec_play_repeat_type eq 1}" > 
+                                    <f:selectItems value="#{MediaController.listDaysMounth}" var="dayweek" itemLabel="#{dayweek.name}" itemValue="#{dayweek.value}" />
+                            </p:selectCheckboxMenu>
+                           <p:outputLabel value=""  />
+                           <p:outputLabel value=""  />
+                             
+                            
+                        </p:panelGrid> 
+                        
+                            
+                        <p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-3,ui-grid-col-4" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                            <p:outputLabel value="Ngày bắt đầu" for="txtStartDate"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtStartDate" timeZone="GMT+7"   
+                                        required="true" requiredMessage="Ngày bắt đầu #{PP_SHARED.can_not_be_empty}"
+                                        disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}"/>
+                            
+                            <p:outputLabel value="Ngày kết thúc" for="txtEndDate"/>
+                            <p:calendar pattern="dd/MM/yyyy" id="txtEndDate" timeZone="GMT+7"  value="#{MediaController.selectedRecord.rec_playExpireDate}" 
+                                        required="true" requiredMessage="Ngày kết thúc #{PP_SHARED.can_not_be_empty}"
+                                        disabled="#{MediaController.recordActtionFlag eq 'VIEW' or MediaController.recordActtionFlag eq 'APPROVE'}"/>
+ 
+                            <p:commandButton rendered="false" value="Submit" ajax="false" actionListener="#{MediaController.upload}"  />
+
+                        
+
+                        </p:panelGrid>
+                        
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave" value="#{MediaController.recordActtionFlag eq 'APPROVE' ? 'Phê duyệt' : 'Đồng ý'}"  actionListener="#{MediaController.saveRecord(evt)}" icon="fa fa-check-square" 
+                                               update="form_main:formAreaDetail:tabArea:dtRecord :grow_main_dt"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestRecord(xhr, status, args);"/> 
+                            <p:commandButton global="false"  id="btnReject" process="@this" icon="fa fa-times-circle"  value="Hủy" 
+                                             oncomplete="PF('dlgAddRecord').hide();" styleClass="btn-danger btn-margin btn-width" rendered="#{MediaController.recordActtionFlag eq 'APPROVE'}" />                     
+                                                 
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}" 
+                                             oncomplete="PF('dlgAddRecord').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            
+            <p:dialog id="dlgAddNews" widgetVar="dlgAddNews" width="1300" height="800px" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+                <f:facet name="header" >
+                    <h:outputText value="Thêm tin tức" rendered="#{MediaController.newsActtionFlag eq 'CREATE'}"/>
+                    <h:outputText value="Sửa tin tức" rendered="#{MediaController.newsActtionFlag eq 'UPDATE'}"/>
+                    <h:outputText value="Xem tin tức" rendered="#{MediaController.newsActtionFlag eq 'VIEW'}"/>
+                    <h:outputText value="Phê duyệt tin tức" rendered="#{MediaController.newsActtionFlag eq 'APPROVE'}"/>
+                </f:facet>
+                <h:form enctype="multipart/form-data" >
+                    <div>
+                        
+                        <p:panel  style="float:left; overflow-y: auto; height: 700px; width: 1300px">
+                        
+                            <p:panelGrid id="pnlMCUInfo" columns="2"  columnClasses="ui-grid-col-2,ui-grid-col-12" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                <p:outputLabel value="Địa bàn" for="txtMCUarea"/>
+                                <p:inputText id="txtMCUarea" value="#{MediaController.selectedArea.areaName}"
+                                             disabled="true" required="true" requiredMessage="Địa bàn #{PP_SHARED.can_not_be_empty}">
+                                </p:inputText>
+                                
+                                <p:outputLabel value="Tiêu đề" for="txtNewsTitle"/>
+                                <p:inputText id="txtNewsTitle"   value="#{MediaController.selectedNews.title}"
+                                            required="true" requiredMessage="Tiêu đề #{PP_SHARED.can_not_be_empty}"
+                                            disabled="#{MediaController.newsActtionFlag eq 'VIEW' or MediaController.newsActtionFlag eq 'APPROVE'}"
+                                             >                             
+                                </p:inputText>
+                                
+                                <p:outputLabel value="Mô tả ngắn" for="txtNewsShortDesc"/>
+                                <p:inputText id="txtNewsShortDesc"   value="#{MediaController.selectedNews.short_description}"
+                                             required="true" requiredMessage="Mô tả ngắn #{PP_SHARED.can_not_be_empty}"
+                                             disabled="#{MediaController.newsActtionFlag eq 'VIEW' or MediaController.newsActtionFlag eq 'APPROVE'}" >
+                                </p:inputText>
+                                 
+                            </p:panelGrid>    
+                                 
+                            <p:panelGrid id="pnlMCUInfo2" columns="6" style="margin-top: 0px; padding-top: 0px" columnClasses="ui-grid-col-2,ui-grid-col-3,ui-grid-col-3,ui-grid-col-2,ui-grid-col-1,ui-grid-col-3" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                
+                                    <p:outputLabel value="Danh mục" for="slCategory"  />
+                                    <p:selectOneMenu id="slCategory" value="#{MediaController.selectedNews.category_id}" filter="true" filterMatchMode="contains"  
+                                                    required="true" requiredMessage="Danh mục #{PP_SHARED.can_not_be_empty}"
+                                                    disabled="#{MediaController.newsActtionFlag eq 'VIEW' or MediaController.newsActtionFlag eq 'APPROVE'}" >       
+                                        <f:selectItems value="#{MediaController.listNewsCategory}" var="recordCat" itemLabel="#{recordCat.name}" itemValue="#{recordCat.id}"/>
+                                        </p:selectOneMenu>
+                                    
+                                    <p:outputLabel value="Gửi thông báo" for="txtNewsNotifyFlag"/>
+                                    <p:selectBooleanCheckbox id="txtNewsNotifyFlag" value="#{MediaController.selectedNews.notifyFlagBool}" 
+                                                             disabled="#{MediaController.newsActtionFlag eq 'VIEW'}"/>
+                                
+                                    
+                                    <p:outputLabel value="" for="text" />
+                                    <p:outputLabel id="text" value="Ảnh bìa tin tức" rendered="#{(MediaController.newsActtionFlag eq 'VIEW' or MediaController.newsActtionFlag eq 'APPROVE')}"/>
+                                    <p:fileUpload id="uploadImage" value="#{MediaController.image}" binding="#{upload}"
+                                                  mode="advanced" rendered="#{!(MediaController.newsActtionFlag eq 'VIEW' or MediaController.newsActtionFlag eq 'APPROVE')}"
+                                                  skinSimple="true" auto="true" fileUploadListener="#{MediaController.upload}"
+                                                  styleClass="fileupload-simple"
+                                                  update="imageName2"
+                                                  label="Ảnh bìa tin tức"/>
+                                    
+                                    
+
+                                    <p:outputLabel value="Ngày bắt đầu" for="txtStartDate"/>
+                                    <p:calendar pattern="dd/MM/yyyy" id="txtStartDate" timeZone="GMT+7" 
+                                                value="#{MediaController.selectedNews.fromDate}" 
+                                                disabled="#{MediaController.newsActtionFlag eq 'VIEW' or MediaController.newsActtionFlag eq 'APPROVE'}"
+                                                required="true" requiredMessage="Ngày bắt đầu #{PP_SHARED.can_not_be_empty}"/>
+                                    
+                                    <p:outputLabel value="Tin đầu mục" for="txtNewsSticky"/>
+                                    <p:selectBooleanCheckbox id="txtNewsSticky" value="#{MediaController.selectedNews.notifyFlagBool}" 
+                                                             disabled="#{MediaController.newsActtionFlag eq 'VIEW'}"/>
+                                
+                                    
+                                    <p:outputLabel value="" />
+                                    <img  height="100" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSy8XKx4dRUUTaLoiGIr-_KUcuD_MJaNLooBohU6eG6AerE1KSK" />
+                                    
+
+                                    
+                                    
+                                
+
+    <!--                            <img  height="100" src="http://10.3.11.148:7004/loaphuong2/resource/images/20170810111352_sansangchupanhthuebao.jpg" /> -->
+
+                                <p:outputLabel value="" />
+                                <p:outputLabel value="" />
+                                <p:commandLink id="imageName" rendered="true" >
+
+                                    <h:outputText id="imageName2" value="#{MediaController.selectedNews.imageName}" style="color: #005CAC" />
+                                </p:commandLink>
+
+
+                                <p:overlayPanel rendered="false" id="imgPanel" for="imageName" showEffect="blind" hideEffect="explode" showEvent="mouseover" hideEvent="mousedown"
+                                                dismissable="false" showCloseIcon="true">
+                                    <img src="http://10.3.11.148:7004/loaphuong2/resource/images/20170810111352_sansangchupanhthuebao.jpg" /> 
+                                        <p:graphicImage name="https://www.primefaces.org/showcase/javax.faces.resource/main/images/logoBlue.svg.xhtml" />
+                                        <p:graphicImage width="300" />
+
+                                </p:overlayPanel>
+
+
+                            </p:panelGrid>
+
+
+
+
+                            <p:remoteCommand name="uploadAssets" id="uploadAssets" action="#{MediaController.uploadAssets}" process="@this" />
+                            <div style="margin-left: 20px; margin-right: 20px; height: 400px">
+                                <p:outputLabel value="Nội dung:" for="newsEditor" style="font-weight: bold"/>
+                                <mce:loadRichTextEditor/>
+                                <mce:richTextEditor id="newsEditor" tinyValue="#{MediaController.selectedNews.full_description}"/>
+                            </div>
+
+                        </p:panel>
+
+
+                            
+<!--                            <ui:include src="user-management.xhtml"/>-->
+                        
+             
+                        
+                        <div class="ui-dialog-action" style="position: absolute !important; bottom: 0px !important; right: 0px; left: 0px;">
+                            <p:commandButton   id="btnSave" value="#{PP_SHARED.ok}"  actionListener="#{MediaController.saveNews(evt)}" icon="fa fa-check-square" 
+                                               update="form_main:formAreaDetail:tabArea:dtNews :grow_main_dt"
+                                               styleClass="btn-primary btn-width" oncomplete="handleSubmitRequestNews(xhr, status, args);"
+                                               
+                                               />   
+                            <p:commandButton global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}" 
+                                             oncomplete="PF('dlgAddNews').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+            
+            <p:dialog header="Cấu hình danh sách phát"  id="dlgPlayListConfig" widgetVar="dlgPlayListConfig" width="200" modal="true" appendTo="@(body)" showEffect="fade" closeOnEscape="true" resizable="false">
+
+                <h:form>
+                    <div >
+                        
+                        <div style="margin-left: 30px">
+                            <p:panelGrid rendered="false" id="pnlMCUInfo" columns="2" columnClasses="ui-grid-col-2,ui-grid-col-10" styleClass="ui-panelgrid-blank stf-view" layout="grid" >
+                                    <p:outputLabel value="Phát đến địa bàn: " for="txtPlayList"/>
+                                    <p:inputText id="txtPlayList"   value="#{MediaController.listSelectedArea}"
+                                                 requiredMessage="#{PP_PRODUCT.param_Code}#{PP_SHARED.can_not_be_empty}" 
+                                                  >
+                                    </p:inputText>       
+
+                            </p:panelGrid>
+
+                            <p:tree  id="areaTree" style="margin-top: 10px; margin-left: 30px;" value="#{MediaController.areaRoot}" var="doc" 
+                                     selectionMode="checkbox"  selection="#{MediaController.listSelectedArea2}" 
+                                      
+                                      
+                                      >           
+                                
+                                <p:ajax event="select" listener="#{MediaController.saveListArea(evt)}" />
+                                <p:ajax event="unselect" listener="#{MediaController.saveListArea(evt)}" />
+
+                                    <p:treeNode  expandedIcon="ui-icon-folder-open" collapsedIcon="ui-icon-folder-collapsed" styleClass="">
+
+                                        <h:outputText value="#{doc.areaName}" style="font-weight:bold;"/>
+                                    </p:treeNode>
+                                    <p:treeNode type="tp" >
+                                       
+                                        <h:outputText value="TP. #{doc.areaName}" style="font-weight:bold;" />
+                                    </p:treeNode>
+                                    <p:treeNode type="q" >
+                                        <h:outputText value="Q. #{doc.areaName}" style="font-weight:bold;" />
+                                    </p:treeNode>
+                                    <p:treeNode type="p" >
+                                        <h:outputText value="P. #{doc.areaName}"/>
+                                    </p:treeNode>
+                                    <p:treeNode type="t" >
+                                        <h:outputText value="T. #{doc.areaName}"/>
+                                    </p:treeNode>
+                                    <p:treeNode type="document" >
+                                        <h:outputText value="#{doc.areaName}" />
+                                    </p:treeNode>
+
+                            </p:tree>
+                        </div>
+                        
+                        
+                        <div class="ui-dialog-action">
+                            <p:commandButton   id="btnSave" value="#{PP_SHARED.ok}" icon="fa fa-check-square" 
+                                               update="form_main:formAreaDetail:tabArea:dtNews :grow_main_dt" 
+                                               styleClass="btn-primary btn-width" oncomplete="PF('dlgPlayListConfig').hide();"
+                                               
+                                               />   
+                            <p:commandButton rendered="false" global="false"  id="btnBack" process="@this" icon="fa fa-times-circle"  value="#{PP_SHARED.cancel}" 
+                                             oncomplete="PF('dlgPlayListConfig').hide();" styleClass="btn-danger btn-margin btn-width" />                                
+                        </div>
+                    </div>
+                </h:form>
+            </p:dialog>
+            
+           
+
+            
+            <p:confirmDialog styleClass="stf-confirm" message="#{PP_SHARED.confirm_delete}" header="#{PP_SHARED.delete_dialog_header}" id="cfmDeleteRecord" severity="alert" widgetVar="cfmDeleteRecord" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{MediaController.saveRecord(evt)}" update="form_main:formAreaDetail:tabArea:dtRecord :grow_main_dt" 
+                                     onclick="PF('cfmDeleteRecord').hide();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}" 
+                                     onclick="PF('cfmDeleteRecord').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog> 
+            
+                        
+            <p:confirmDialog styleClass="stf-confirm" message="#{PP_SHARED.confirm_delete}" header="#{PP_SHARED.delete_dialog_header}" id="cfmDeleteNews" severity="alert" widgetVar="cfmDeleteNews" appendTo="@(body)">
+                <div class="ui-dialog-action">
+                    <p:commandButton global="true"  value="#{PP_SHARED.yes}"  process="@this"  actionListener="#{MediaController.saveRecord(evt)}" update="form_main:formAreaDetail:tabArea:dtNews :grow_main_dt" 
+                                     onclick="PF('cfmDeleteNews').hide();" icon="fa fa-check-square" styleClass="btn-primary" />
+                    <p:commandButton global="true" process="@this" value="#{PP_SHARED.no}" 
+                                     onclick="PF('cfmDeleteNews').hide();" styleClass="btn-danger" icon="fa fa-times-circle" />
+                </div>
+            </p:confirmDialog> 
+            
+            
+        </ui:composition>
+    </h:body>
+</html>            
