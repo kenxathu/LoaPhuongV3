@@ -14,6 +14,7 @@ public class HttpOutput {
     private String messageHttp;  
     private String dataSent;
     private WebserviceOutput wsOutput;
+    private OtpResponse otpRes;
     private String responseJson;
     private boolean success;
 
@@ -70,5 +71,14 @@ public class HttpOutput {
     public void setMessageHttp(String messageHttp) {
         this.messageHttp = messageHttp;
     }
+
+    public OtpResponse getOtpRes() {
+        return otpRes;
+    }
+
+    public void setOtpRes(OtpResponse otpRes) {
+        this.otpRes = otpRes;
+    }
+    
     
 }

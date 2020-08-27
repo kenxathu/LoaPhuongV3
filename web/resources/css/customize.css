@@ -433,6 +433,12 @@ li {
     height: 100%;
 }
 
+.otp #main {
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+}
+
 #menu {
     padding: 0;
     position: relative;
@@ -2064,11 +2070,24 @@ body.login {
     overflow: hidden;
 }
 
+body.otp {
+    height: 100vh;
+    overflow: hidden;
+}
+
 .ui-menu.ui-widget {
 
 }
 
 #login-wrapper {
+    width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#otp-wrapper {
     width: 1200px;
     margin: 0 auto;
     position: relative;
@@ -2085,7 +2104,24 @@ body.login {
     position: relative;
 }
 
+#otp .wrapper {
+    width: 341px;
+    height: 380px;
+    background: url(../images/login.png) no-repeat;
+    position: relative;
+}
+
 #login h2 {
+    margin: 0;
+    height: 72px;
+    line-height: 72px;
+    padding-left: 25px;
+    font-size: 20px;
+    color: white;
+    font-weight: 600;
+}
+
+#otp h2 {
     margin: 0;
     height: 72px;
     line-height: 72px;
@@ -2100,7 +2136,16 @@ body.login {
     margin-top: 25px;
 }
 
+#otp .form-group {
+    padding: 0 25px;
+    margin-top: 25px;
+}
+
 #login .form-group .form {
+    margin-bottom: 10px;
+}
+
+#otp .form-group .form {
     margin-bottom: 10px;
 }
 
@@ -2121,7 +2166,30 @@ body.login {
     line-height: 142%;
 }
 
+#otp .form-group .form input {
+    width: 100%!important;
+    outline: none;
+    border: 2px solid white;
+    background: transparent;
+    border-radius: 4px;
+    padding: 13px 15px 12px!important;
+    color: #313D4F;
+    font-weight: 500;
+    transition: all 0.2s ease-out;
+    text-shadow: none;
+    text-transform: none!important;
+    height: auto!important;
+    font-weight: 600;
+    line-height: 142%;
+}
+
 #login .form-group .form input:focus {
+    background: white;
+    color: #26334B;
+    border-color: white!important;
+}
+
+#otp .form-group .form input:focus {
     background: white;
     color: #26334B;
     border-color: white!important;
@@ -2145,11 +2213,37 @@ body.login {
     cursor: pointer;
 }
 
+#form_otp\:otp_button {
+    color: transparent;
+    background: url(../images/login-btn.png) no-repeat;
+    width: 89px!important;
+    height: 89px;
+    outline: none;
+    border: none;
+    display: block;
+    position: absolute;
+    bottom: 15px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    transition: all 0.2s ease-out;
+    background-size: 100%;
+    cursor: pointer;
+}
+
 #form_login\:login_button span {
     display: none;
 }
 
+#form_otp\:otp_button span {
+    display: none;
+}
+
 #form_login\:login_button:hover {
+    background: url(../images/login-btn-hover.png);
+}
+
+#form_otp\:otp_button:hover {
     background: url(../images/login-btn-hover.png);
 }
 /* @keyframes circle {

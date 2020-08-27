@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ws.rs.core.MultivaluedMap;
 import vn.mobifone.loaphuong.security.EncryptionService;
 import vn.mobifone.loaphuong.entity.HttpOutput;
 import vn.mobifone.loaphuong.entity.WebserviceOutput;
@@ -30,7 +32,10 @@ import vn.mobifone.loaphuong.action.Action;
 import vn.mobifone.loaphuong.entity.DataResponse;
 import vn.mobifone.loaphuong.entity.ListDataResponse;
 import vn.mobifone.loaphuong.entity.DashBoard;
+import vn.mobifone.loaphuong.entity.Otp;
+import vn.mobifone.loaphuong.entity.OtpResponse;
 import vn.mobifone.loaphuong.entity.TimeTable;
+import vn.mobifone.loaphuong.lib.Session;
 import vn.mobifone.loaphuong.role.Role;
 import vn.mobifone.loaphuong.security.SecUser;
 import vn.mobifone.loaphuong.user.User;
@@ -106,7 +111,7 @@ public class LoginWebservice extends DataPreprocessor{
         return output;
     }
     
-     public static HttpOutput executePOST(String actionLink, String data) {
+     public static HttpOutput executePOST(String actionLink, String sessionId, String otpCode) {
 
         HttpOutput output = new HttpOutput();
 
@@ -116,12 +121,15 @@ public class LoginWebservice extends DataPreprocessor{
             WebResource webResource = client
                     .resource(WS_LINK + actionLink);
             ////System.out.println("mobifone.marketplace.admin.controller.CallWS  WS link: " + WS_LINK + actionLink);
-
-            ClientResponse response = webResource.accept("application/json; charset=utf-8").type("application/json; charset=utf-8")
+            // send request param
+            MultivaluedMap formData = new MultivaluedMapImpl();
+            formData.add("sessionId", sessionId);
+            formData.add("otpCode", otpCode);
+            ClientResponse response = webResource
                     .header("username", "cmsuser")
                     .header("password", "cmspass!@#")
-                    .post(ClientResponse.class, data);
-            output.setDataSent(data);
+                    .post(ClientResponse.class, formData);
+            //output.setDataSent(formData);
 
             if (response.getStatus() != 201 && response.getStatus() != 200) {
                 output.setHeaderHttp(response.getStatus() + "");
@@ -146,8 +154,9 @@ public class LoginWebservice extends DataPreprocessor{
                 ////System.out.println("mobifone.marketplace.admin.controller.CallWS  WS result: " + outputStr);
 
                 output.setResponseJson(outputStr);
-                WebserviceOutput wsOutput = gson.fromJson(outputStr, WebserviceOutput.class);
-                output.setWsOutput(wsOutput);
+                OtpResponse otpRes = gson.fromJson(outputStr, OtpResponse.class);
+                //WebserviceOutput wsOutput = gson.fromJson(outputStr, WebserviceOutput.class);
+                output.setOtpRes(otpRes);
 
             }
 
@@ -339,6 +348,29 @@ public class LoginWebservice extends DataPreprocessor{
             }
             
             return loginEntity;
+
+    }
+    
+    
+     public OtpResponse executeOtp(Otp otp) {                   
+            
+            OtpResponse otpEntity = new OtpResponse();
+           
+            try {
+                //String WSlink = WS_LINK + "otpAuth?sessionId=" + sessionId + "&otpCode=" + otpCode;
+               String sessionId = otp.getSessionId();
+               String otpCode = otp.getOtpCode();
+          
+                HttpOutput output = executePOST("otpAuth",sessionId,otpCode);
+                
+                ObjectMapper objectMapper = new ObjectMapper();
+                otpEntity = objectMapper.readValue(output.getResponseJson(), OtpResponse.class);
+                //System.out.println("mobifone.marketplace.client.webservice.CallWebservice.main()    success");
+            } catch (IOException ex) {
+                Logger.getLogger(CallWebservice.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            return otpEntity;
 
     }
     

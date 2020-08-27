@@ -18,9 +18,7 @@ public class DataResponse {
     private String codeDescEn;
     private int code;
 
-    public Object javaResponse;
-    
-    
+    public Object javaResponse;        
     
     public DataResponse() {
     }

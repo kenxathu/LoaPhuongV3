@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Nhập mã OTP</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <link rel="shortcut icon" href="#{request.contextPath}/resources/images/icon/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/login-layout.css" />
+        <!-- stf add css customize -->
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/customize.css" />
+        <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/responsive.css" />
+        <script type="text/javascript" src="#{request.contextPath}/resources/js/jquery-timing.min.js"></script>
+        <script type="text/javascript" src="#{request.contextPath}/resources/js/rotator.js"></script>
+
+        <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/custom.css" />
+
+        <style>
+            #checkCountDown {                
+                font-size: 17px;
+                position: static;
+                margin-top: 10px;
+                color: #000;          
+              
+            }
+            
+            #checkCountDown p{
+                display: inline-block;
+            }
+        </style>
+    </h:head>
+    <h:body>
+         <p:growl id="messages" showDetail="true" showSummary="false" sticky="false" />
+        <script>
+           function showAlert(){
+               alert('Bạn đã nhập sai OTP');
+           }
+        </script>
+        <h:form>
+              <p:remoteCommand name="otpCommand" action="#{secuser.resetOtp}"  />
+        </h:form>
+        <h:form id="form_otp">
+            <div id="header">
+                <h1 class="title">Hệ thống <strong>quản lý tin tức</strong></h1>
+            </div>
+            <p:panelGrid id="panelMain" columnClasses="ui-grid-col-6 panel-left,ui-grid-col-6 panel-right" columns="1" layout="grid" styleClass="ui-panelgrid-blank" >
+                <p:outputPanel>
+                    <div id="otp">
+                        <div class="wrapper">
+                            <h2>Nhập OTP</h2>
+                            <div class="form-group">
+                                <div id="box-username" class="form">
+                                    <p:inputText id="otpInput" requiredMessage="Chưa nhập mã OTP" value="#{secuser.otpCode}" required="true" label="OTP" tabindex="1" autocomplete="off" onkeyup="if (/[^a-Z0-9]/g.test(this.value))
+                                                this.value = this.value.replace(/[^a-Z0-9]/g, '')" maxlength="6"  />
+                                </div>
+                                <div  id="checkCountDown">
+                                    <div><p style="color: #4cae4c">Thời gian hiệu lực OTP tồn tại sau:</p>   <p id="countDown" style="color: #fff;"></p></div>
+                                </div>                                    
+                                        <script>
+                                            // Set the date we're counting down to
+                                            var countDownDate = 120;
+                                            // Update the count down every 1 second
+                                            var x = setInterval(function () {
+                                                var distance = countDownDate--;
+                                                document.getElementById("countDown").innerHTML = distance + " giây ";
+                                                // If the count down is over, write some text 
+                                                if (distance === 0) {
+                                                    clearInterval(x);
+                                                    document.getElementById("countDown").innerHTML = "Hết thời gian";
+                                                    otpCommand();
+                                                }
+                                            }, 1000);
+                                        </script>    
+                                        <div id="box-password" class="form">
+
+                                            <div style="transform:scale(1.13);transform-origin:0 0">
+                                                <p:captcha id="captchaOtp" rendered="#{secuser.showCaptcha}" label="Captcha" language="vi" theme="white" ></p:captcha>
+                                            </div>
+                                        </div>
+                                   
+                                  
+                                    <p:commandButton action="#{secuser.validateOtp()}" id="otp_button" tabindex="5" process="form_otp" update="form_otp, :messages,captchaOtp" ajax="false" style="width: 80%; white-space: nowrap;" />
+                                </div>
+                            </div>
+                        
+                            <p:watermark rendered="#{not cas.isCasEnable()}" for="otpInput" value="NHẬP MÃ OTP" />                                     
+                            <p:focus context="form_otp" />
+                    </div>
+                            </p:outputPanel>
+                            <p:outputPanel rendered="false">
+                                <div id="rotator-wrapper" >
+                                    <div class="wrapper">
+                                        <div id="rotator">
+                                            <div class="satelite"></div>
+                                            <div class="satelite"></div>
+                                            <div class="satelite"></div>
+                                            <div class="satelite"></div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </p:outputPanel>
+                            </p:panelGrid>
+                            </h:form>   
+                            </h:body>
+                            </html>

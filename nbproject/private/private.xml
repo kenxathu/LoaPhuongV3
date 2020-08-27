@@ -3,9 +3,36 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/controller/RecordController.java</file>
-            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/security/EncryptionService.java</file>
-            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/controller/RecordController1.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/web/login.xhtml</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/web/otp.xhtml</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/admin/model/AuthorizatorModel.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/controller/DashBoardController.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/web/modules/client/user-info.xhtml</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/security/SecUser.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/lib/SystemConfig.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/entity/WebserviceOutput.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/entity/Record.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/action/ActionModel.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/webservice/AreaWebservice.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/entity/DataResponse.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/web/client.xhtml</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/web/WEB-INF/jsf-faces-navigation-rule.xml</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/security/CacheFilter.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/lib/config/SessionKeyDefine.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/controller/CenterProcess.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/SERVERCONFIG.properties</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/controller/ServeyController.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/web/resources/css/responsive.css</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/entity/Otp.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/entity/OtpResponse.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/web/resources/css/login-layout.css</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/security/Authorizator.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/webservice/LoginWebservice.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/user/User.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/entity/HttpOutput.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/web/resources/css/customize.css</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/src/java/vn/mobifone/loaphuong/security/CheckUserLogin.java</file>
+            <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/nbproject/build-impl.xml</file>
             <file>file:/G:/TTCS_FULL/LoaPhuong3_0708/web/resources/css/custom.css</file>
         </group>
     </open-files>

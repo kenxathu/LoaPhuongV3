@@ -15,12 +15,30 @@
             </to-view-id>
             <redirect />
         </navigation-case>
+         <navigation-case>
+            <from-outcome>
+                /
+            </from-outcome>
+            <to-view-id>
+                /login.xhtml
+            </to-view-id>
+            <redirect />
+        </navigation-case>
         <navigation-case>
             <from-outcome>
                 app-main
             </from-outcome>
             <to-view-id>
                 /index.xhtml
+            </to-view-id>
+            <redirect />
+        </navigation-case>
+         <navigation-case>
+            <from-outcome>
+                otp
+            </from-outcome>
+            <to-view-id>
+                /otp.xhtml
             </to-view-id>
             <redirect />
         </navigation-case>

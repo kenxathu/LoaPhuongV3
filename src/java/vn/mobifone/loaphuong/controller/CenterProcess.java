@@ -51,7 +51,7 @@ public class CenterProcess implements Serializable {
         try {
             //Nếu không tồn tại sesion thì bỏ qua hết
             if (SecUser.getUserLogged() == null) {
-               // return;
+               // return ;
             }
 
             //Lấy danh sách quyền
@@ -259,8 +259,6 @@ public class CenterProcess implements Serializable {
     public String getMstrPath() {
         return mstrPath;
     }
-
-
 
     public DefaultMenuModel getMbreadcrumb() {
         return mbreadcrumb;

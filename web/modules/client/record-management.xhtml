@@ -892,12 +892,12 @@
 
 
                             <p:outputLabel value="#{RecordController.selectedRecord.rec_play_mode eq 3?'Ngày phát' : 'Ngày bắt đầu' }" for="txtStartDate" 
-                                           rendered="#{RecordController.selectedRecord.rec_play_mode ne 2}"/>
+                                           rendered="#{RecordController.selectedRecord.rec_play_mode ne 2}" />
                             <p:calendar pattern="dd/MM/yyyy" id="txtStartDate" value="#{RecordController.selectedRecord.rec_playStartDate}" 
-                                        rendered="#{RecordController.selectedRecord.rec_play_mode ne 2}"  locale="vi"
+                                        rendered="#{RecordController.selectedRecord.rec_play_mode ne 2}" timeZone="GMT+7" locale="vi"
                                         required="true" requiredMessage="#{RecordController.selectedRecord.rec_play_mode eq 3?'Ngày phát ' : 'Ngày bắt đầu ' } #{PP_SHARED.can_not_be_empty}" mindate="#{RecordController.today}" label="Chọn ngày"
                                         disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE' or !RecordController.startDateEditable}" converterMessage="Ngày bắt đầu sai định dạng (dd/MM/yyyy)">
-                                <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                <f:convertDateTime pattern="dd/MM/yyyy" timeZone="GMT+7" />
                             </p:calendar>
                             
                         

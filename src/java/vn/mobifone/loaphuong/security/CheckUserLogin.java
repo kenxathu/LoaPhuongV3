@@ -67,11 +67,33 @@ public class CheckUserLogin implements PhaseListener, Serializable {
 
     private void backHome(FacesContext context) {
         try {
-            if (!requestingSecureView(context)) {
-                context.getApplication().getNavigationHandler().handleNavigation(context, null, "app-main");
-                context.responseComplete();
-            }
+            ExternalContext extContext = context.getExternalContext();
+            String path = extContext.getRequestPathInfo();
+//            Boolean checkPathOTP = false;
+//            if(!requestingSecureLoginView(context)){
+//               checkPathOTP = true;
+//               Session.setSessionValue("statusOTP", checkPathOTP);
+//            }
+            int statusOTP = Integer.valueOf(Session.getSessionValue(SessionKeyDefine.STATUS_OTP).toString());
 
+           if (!requestingSecureIndexView(context) && statusOTP == 1 ) {         
+                      
+               
+                    context.getApplication().getNavigationHandler().handleNavigation(context, null, "otp");
+                    context.responseComplete();          
+                    
+                
+            }       
+            
+
+//           if (!requestingSecureIndexView(context) && statusOTP == 1) {
+//                context.getApplication().getNavigationHandler().handleNavigation(context, null, "otp");
+//                context.responseComplete();
+//            }
+//            if ("/".equals(path)) {
+//                context.getApplication().getNavigationHandler().handleNavigation(context, null, "login");
+//                context.responseComplete();
+//            }
         } catch (Exception ex) {
             SystemLogger.getLogger().error(ex);
         }
@@ -86,7 +108,7 @@ public class CheckUserLogin implements PhaseListener, Serializable {
         if (requestingSecureView(context)) {
             String strCurrentPath = Config.getCurrentPath();
             setReferer(strCurrentPath);
-            
+
             context.getApplication().getNavigationHandler().handleNavigation(context, null, USER_LOGIN_OUTCOME);
             context.responseComplete();
         }
@@ -105,5 +127,21 @@ public class CheckUserLogin implements PhaseListener, Serializable {
         ExternalContext extContext = context.getExternalContext();
         String path = extContext.getRequestPathInfo();
         return (!"/login.xhtml".equals(path));
+    }
+
+    ////////////////////////////////////////////////////////////////
+    private boolean requestingSecureLoginView(FacesContext context) {
+        ExternalContext extContext = context.getExternalContext();
+        String path = extContext.getRequestPathInfo();
+
+        return (!"/otp.xhtml".equals(path));
+    }
+    
+      ////////////////////////////////////////////////////////////////
+    private boolean requestingSecureIndexView(FacesContext context) {
+        ExternalContext extContext = context.getExternalContext();
+        String path = extContext.getRequestPathInfo();
+
+        return (!"/index.xhtml".equals(path));
     }
 }

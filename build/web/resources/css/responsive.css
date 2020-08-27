@@ -20,7 +20,19 @@
     top: 0;
     transform: none;
     }
+    
+    #form_otp\:panelMain_content {
+    width: 100%;
+    max-width: 1024px;
+    top: 0;
+    transform: none;
+    }
     #form_login {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    
+     #form_otp {
         overflow-y: auto;
         overflow-x: hidden;
     }

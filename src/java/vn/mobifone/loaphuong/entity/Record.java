@@ -275,6 +275,184 @@ public class Record implements Serializable{
         this.notify_flag = notify_flag;
     }
     
+//    public int getPlayStatus() {
+////        try {
+////            rec_playExpireDate = rec_play_expire_date.equals("")?null:DateFormatter2.parse(rec_play_expire_date);
+////        } catch (ParseException ex) {
+////            Logger.getLogger(Record.class.getName()).log(Level.SEVERE, null, ex);
+////        }
+////        if (!rec_playExpireDate.after(new Date())) {
+////            return 1; 
+////        } else if (status == -1) {
+////            return 1;
+////        } else return 2;
+//
+//            
+//            /*try {
+//                rec_playExpireDate = rec_play_expire_date.equals("")?null:DateFormatter2.parse(rec_play_expire_date);
+//                
+//                String expireDate = DateFormatter.format(rec_playExpireDate);
+//                String today = DateFormatter.format(new Date());
+//                if (expireDate.compareTo(today) < 0) {
+//                    return 1; 
+//                } else if (status == -1) {
+//                    return 1;
+//                } else return 2;
+//            } catch (ParseException ex) {
+//                Logger.getLogger(Record.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//            return 2;*/
+//        try {
+//            if (status == -1) {
+//                //Da huy
+//                return -1;
+//            }else if (status == 1){
+//                rec_playExpireDate = rec_play_expire_date.equals("")?null:DateFormatter2.parse(rec_play_expire_date);
+//                rec_playStartDate = rec_play_start.equals("")?null:DateFormatter2.parse(rec_play_start);
+//                String expireDate = DateFormatter.format(rec_playExpireDate);
+//                String startDate = DateFormatter.format(rec_playStartDate);
+//                String today = DateFormatter.format(new Date());
+//                
+//                if (today.compareTo(startDate)<0){
+//                    //Chua den lich phat
+//                    return 3;
+//                }else if (today.compareTo(expireDate)> 0){
+//                    //Da hoan thanh
+//                    return 2;
+//                }else{
+//                    Calendar now = Calendar.getInstance();
+//                    Calendar midnight = Calendar.getInstance();
+//                    midnight.set(Calendar.HOUR_OF_DAY, 0);
+//                    midnight.set(Calendar.MINUTE, 0);
+//                    midnight.set(Calendar.SECOND, 0);
+//                    midnight.set(Calendar.MILLISECOND, 0);
+//                    long timeNow = (now.getTime().getTime() - midnight.getTime().getTime())/1000;
+//                    
+//                    
+//                    switch (rec_play_mode){
+//                        case 1:// phat theo lich
+//                            if (rec_type == 2){
+//                                if(rec_play_time.size()>1){
+//                                      Collections.sort(rec_play_time);
+//                                }
+//                                if(rec_end_time.size()>1){
+//                                      Collections.sort(rec_end_time);
+//                                }
+//                                if (timeNow < rec_play_time.get(0)){
+//                                    if (rec_play_time.get(0) - timeNow <=30*60){
+//                                        return 0;
+//                                    }else{
+//                                        //Chua den lich phat
+//                                        return 3;
+//                                    }
+//                                }else if (timeNow> rec_end_time.get(rec_end_time.size()-1)){
+//                                    //Da hoan thanh
+//                                    return 2;
+//                                }else{
+//                                    boolean isPlaying = false;
+//                                    for (int i=0; i< rec_play_time.size(); i++) {
+//                                        if (timeNow >= rec_play_time.get(i) && timeNow <= rec_end_time.get(i)){
+//                                            isPlaying = true;
+//                                            break;
+//                                        }else if (i < rec_play_time.size() - 1 && timeNow > rec_end_time.get(i) && timeNow <rec_play_time.get(i+1)){
+//                                            if (rec_play_time.get(i+1) - timeNow <= 30*60){
+//                                                return 0;
+//                                            }else{
+//                                                return 3;
+//                                            }
+//                                        }
+//                                    }
+//                                    if (isPlaying){
+//                                        return 1;
+//                                    }else{
+//                                        return 0;
+//                                    }
+//                                }
+//                            }else{
+//                                if(rec_play_time.size()>1){
+//                                      Collections.sort(rec_play_time);
+//                                }
+//                                if (timeNow < rec_play_time.get(0)){
+//                                    if (rec_play_time.get(0) - timeNow <=30*60){
+//                                        return 0;
+//                                    }else{
+//                                        //Chua den lich phat
+//                                        return 3;
+//                                    }
+//                                }else if (timeNow> rec_play_time.get(rec_play_time.size()-1) + duration){
+//                                    //Da hoan thanh
+//                                    return 2;
+//                                }else{
+//                                    boolean isPlaying = false;
+//                                    for (int i=0; i< rec_play_time.size(); i++) {
+//                                        if (timeNow >= rec_play_time.get(i) && timeNow <= rec_play_time.get(i) + duration){
+//                                            isPlaying = true;
+//                                            break;
+//                                        }else if (i < rec_play_time.size() - 1 && timeNow > rec_play_time.get(i) + duration && timeNow <rec_play_time.get(i+1)){
+//                                            if (rec_play_time.get(i+1) - timeNow <= 30*60){
+//                                                return 0;
+//                                            }else{
+//                                                return 3;
+//                                            }
+//                                        }
+//                                    }
+//                                    if (isPlaying){
+//                                        return 1;
+//                                    }else{
+//                                        return 0;
+//                                    }
+//                                }
+//                            }
+//                        case 2: //phat ngay lap tuc
+//                            
+//                            if (rec_type == 0){// tin thuong
+//                                long playTime = (DateFormatter3.parse(approve_date).getTime() - midnight.getTime().getTime())/1000;
+//                                if (timeNow< playTime){
+//                                    if (playTime - timeNow <=30*60){
+//                                        return 0;
+//                                    }else{
+//                                        //Chua den lich phat
+//                                        return 3;
+//                                    }
+//                                }else if (timeNow> playTime+ duration){
+//
+//                                    //Da hoan thanh
+//                                    return 2;
+//                                }
+//                                else{
+//                                    //Dang phat
+//                                    return 1;
+//                                }
+//                            }else if (rec_type==2){//tin tiep song
+//                                int playTime = rec_play_time.get(0);
+//                                int endTime = rec_end_time.get(0);
+//                                if (timeNow< playTime){
+//                                    if (playTime - timeNow <=30*60){
+//                                        return 0;
+//                                    }else{
+//                                        //Chua den lich phat
+//                                        return 3;
+//                                    }
+//                                }else if (timeNow> endTime){
+//                                    //Da hoan thanh
+//                                    return 2;
+//                                }
+//                                else{
+//                                    //Dang phat
+//                                    return 1;
+//                                }
+//                            }else{
+//                                return -2;
+//                            }
+//                    }
+//                }
+//            }
+//        }catch (ParseException ex) {
+//            Logger.getLogger(Record.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return -2;
+//    } 
+    
     public int getPlayStatus() {
 //        try {
 //            rec_playExpireDate = rec_play_expire_date.equals("")?null:DateFormatter2.parse(rec_play_expire_date);
@@ -347,7 +525,11 @@ public class Record implements Serializable{
                                     }
                                 }else if (timeNow> rec_end_time.get(rec_end_time.size()-1)){
                                     //Da hoan thanh
-                                    return 2;
+                                    if (today.compareTo(expireDate)<0){
+                                        return 4;
+                                    }else{
+                                        return 2;
+                                    }
                                 }else{
                                     boolean isPlaying = false;
                                     for (int i=0; i< rec_play_time.size(); i++) {
@@ -381,7 +563,12 @@ public class Record implements Serializable{
                                     }
                                 }else if (timeNow> rec_play_time.get(rec_play_time.size()-1) + duration){
                                     //Da hoan thanh
-                                    return 2;
+                                    //return 4;
+                                    if (today.compareTo(expireDate)<0){
+                                        return 4;
+                                    }else{
+                                        return 2;
+                                    }
                                 }else{
                                     boolean isPlaying = false;
                                     for (int i=0; i< rec_play_time.size(); i++) {

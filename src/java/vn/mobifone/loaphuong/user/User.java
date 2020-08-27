@@ -56,7 +56,10 @@ public class User implements Serializable {
     private int isHouseOwner;
     @Expose
     private boolean isHouseOwnerBool;
-
+    @SerializedName("isOtpAuth")
+    private String isOtpAuth;
+    @SerializedName("sessionId")
+     private String sessionId;
     public User() {
     }
 
@@ -78,6 +81,8 @@ public class User implements Serializable {
         this.actions = user.actions;
         this.area_branch = user.area_branch;
         this.isHouseOwner = user.isHouseOwner;
+        this.isOtpAuth = user.isOtpAuth;
+        this.sessionId = user.sessionId;
         //  this.permitCode = user.permitCode;
     }
 
@@ -258,6 +263,24 @@ public class User implements Serializable {
         this.permitCode = permitCode;
     }
 
+    public String getIsOtpAuth() {
+        return isOtpAuth;
+    }
+
+    public void setIsOtpAuth(String isOtpAuth) {
+        this.isOtpAuth = isOtpAuth;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+    
+    
+    
     public String toJson() {
         JSONObject jsonAdd = new JSONObject(); // we need another object to store the address
         jsonAdd.put("user_id", this.userId);
@@ -270,6 +293,7 @@ public class User implements Serializable {
         jsonAdd.put("email", this.email);
         jsonAdd.put("area_id", this.areaId);
         jsonAdd.put("household_id", "");
+       
         JSONArray jsArray = new JSONArray(this.roles);
 
         jsonAdd.put("roles", (Object) jsArray);
