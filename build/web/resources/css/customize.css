@@ -2149,6 +2149,10 @@ body.otp {
     margin-bottom: 10px;
 }
 
+#resend .form-group .form {
+    margin-bottom: 10px;
+}
+
 #login .form-group .form input {
     width: 100%!important;
     outline: none;
@@ -2231,6 +2235,24 @@ body.otp {
     cursor: pointer;
 }
 
+/*#form_resendOtp\:resend_otp {
+
+    width: 89px!important;
+    height: 89px;
+    outline: none;
+    border: none;
+    display: inline-block;
+    position: absolute;
+    z-index: 2;
+    bottom: 15px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    transition: all 0.2s ease-out;
+    background-size: 100%;
+    cursor: pointer;
+}*/
+
 #form_login\:login_button span {
     display: none;
 }
@@ -2239,11 +2261,19 @@ body.otp {
     display: none;
 }
 
+/*#form_resendOtp\:resend_otp span {
+    display: none;
+}*/
+
 #form_login\:login_button:hover {
     background: url(../images/login-btn-hover.png);
 }
 
 #form_otp\:otp_button:hover {
+    background: url(../images/login-btn-hover.png);
+}
+
+#form_resendOtp\:resend_otp:hover {
     background: url(../images/login-btn-hover.png);
 }
 /* @keyframes circle {

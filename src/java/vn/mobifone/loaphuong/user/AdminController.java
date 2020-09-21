@@ -16,7 +16,7 @@ import javax.faces.event.ActionEvent;
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.TreeNode;
 import org.primefaces.model.Visibility;
-import vn.mobifone.loaphuong.controller.AreaController;
+
 import vn.mobifone.loaphuong.controller.DocumentService;
 import vn.mobifone.loaphuong.entity.AreaTree;
 import vn.mobifone.loaphuong.entity.DataResponse;
@@ -335,7 +335,7 @@ public class AdminController extends TSPermission implements Serializables {
             reset();
 
         } catch (Exception ex) {
-            Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+       //     Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

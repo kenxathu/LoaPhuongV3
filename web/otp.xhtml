@@ -19,32 +19,36 @@ and open the template in the editor.
         <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/responsive.css" />
         <script type="text/javascript" src="#{request.contextPath}/resources/js/jquery-timing.min.js"></script>
         <script type="text/javascript" src="#{request.contextPath}/resources/js/rotator.js"></script>
-
         <link type="text/css" rel="stylesheet" href="#{request.contextPath}/resources/css/custom.css" />
-
-        <style>
-            #checkCountDown {                
-                font-size: 17px;
-                position: static;
-                margin-top: 10px;
-                color: #000;          
-              
-            }
-            
-            #checkCountDown p{
-                display: inline-block;
-            }
-        </style>
+        <link href="#{request.contextPath}/resources/css/otp.css" rel="stylesheet" type="text/css"/>
+ 
+   
     </h:head>
     <h:body>
-         <p:growl id="messages" showDetail="true" showSummary="false" sticky="false" />
+        <p:growl id="messages" showDetail="true" showSummary="false" sticky="false" />
         <script>
-           function showAlert(){
-               alert('Bạn đã nhập sai OTP');
-           }
+
+            function showResendOTP() {
+            $('#checkCountDown').hide();
+            $('#form_resendOtp').hide();
+            $('#form_resendOtp1').show();
+            }
+
+           
+//              $('#form_resendOtp1').click({
+//                   text-decoration: none;
+//              });
+
+
+
         </script>
-        <h:form>
-              <p:remoteCommand name="otpCommand" action="#{secuser.resetOtp}"  />
+
+        <h:form id="form_resendOtp">
+            <div id="resend">             
+                <div id="reSendOTP">
+                    <div><p:commandLink process="@form" update="form_resendOtp: messages" style="color: #EEEEEE" value="Gửi lại mã OTP!" action="#{secuser.reSendOtp()}" ></p:commandLink></div>
+                </div>  
+            </div>
         </h:form>
         <h:form id="form_otp">
             <div id="header">
@@ -57,57 +61,62 @@ and open the template in the editor.
                             <h2>Nhập OTP</h2>
                             <div class="form-group">
                                 <div id="box-username" class="form">
-                                    <p:inputText id="otpInput" requiredMessage="Chưa nhập mã OTP" value="#{secuser.otpCode}" required="true" label="OTP" tabindex="1" autocomplete="off" onkeyup="if (/[^a-Z0-9]/g.test(this.value))
-                                                this.value = this.value.replace(/[^a-Z0-9]/g, '')" maxlength="6"  />
+                                    <p:inputText id="otpInput" requiredMessage="Chưa nhập mã OTP" value="#{secuser.otpCode}" required="true" label="OTP" tabindex="1" autocomplete="off" onkeyup="if (/[^0-9]/g.test(this.value))
+                                                this.value = this.value.replace(/[^0-9]/g, '')" maxlength="6"  />
                                 </div>
                                 <div  id="checkCountDown">
                                     <div><p style="color: #4cae4c">Thời gian hiệu lực OTP tồn tại sau:</p>   <p id="countDown" style="color: #fff;"></p></div>
-                                </div>                                    
-                                        <script>
-                                            // Set the date we're counting down to
-                                            var countDownDate = 120;
-                                            // Update the count down every 1 second
-                                            var x = setInterval(function () {
-                                                var distance = countDownDate--;
-                                                document.getElementById("countDown").innerHTML = distance + " giây ";
-                                                // If the count down is over, write some text 
-                                                if (distance === 0) {
-                                                    clearInterval(x);
-                                                    document.getElementById("countDown").innerHTML = "Hết thời gian";
-                                                    otpCommand();
-                                                }
-                                            }, 1000);
-                                        </script>    
-                                        <div id="box-password" class="form">
+                                </div>
 
-                                            <div style="transform:scale(1.13);transform-origin:0 0">
-                                                <p:captcha id="captchaOtp" rendered="#{secuser.showCaptcha}" label="Captcha" language="vi" theme="white" ></p:captcha>
-                                            </div>
-                                        </div>
-                                   
-                                  
+                                <script>
+                                    // Set the date we're counting down to
+                                    var countDownDate = #{secuser.remainTime};
+                                    // Update the count down every 1 second 
+                                    //var i = 0;
+                                    var x = setInterval(function () {
+                                    var distance = countDownDate--;
+                                    // i = i++;
+                                    // sessionStorage.setItem("timeOtp",countDownDate);
+//                                        if(sessionStorage.getItem('reloaded') !== null){
+//                                            console.log('aaaaaaa');
+//                                            sessionStorage.setItem("timeOtp",distance-i);
+//                                           
+//                                        }else{
+//                                             sessionStorage.setItem("timeOtp",countDownDate);
+//                                            
+//                                        }
+//                                         var timeOtp = sessionStorage.getItem("timeOtp");
+//                                            distance1 = timeOtp--;
+
+                                    document.getElementById("countDown").innerHTML = distance + " giây ";
+                                    // If the count down is over, write some text 
+                                    if (distance === 0) {
+                                    clearInterval(x);
+                                    document.getElementById("countDown").innerHTML = "Hết giờ";
+//                                            document.getElementById("box-username").style.display = "none";
+//                                            document.getElementById("formSubmit").style.display = "none";
+//                                            otpCommand();
+                                    //showResendOTP();
+                                    }
+                                    }, 1000);
+                                </script>
+
+                                <div id="box-password" class="form">
+                                    <div style="transform:scale(1.13);transform-origin:0 0">
+                                        <p:captcha id="captchaOtp" rendered="#{secuser.showCaptcha}" label="Captcha" language="vi" theme="white" ></p:captcha>
+                                    </div>
+                                </div>
+                                <div id="formSubmit">
                                     <p:commandButton action="#{secuser.validateOtp()}" id="otp_button" tabindex="5" process="form_otp" update="form_otp, :messages,captchaOtp" ajax="false" style="width: 80%; white-space: nowrap;" />
                                 </div>
                             </div>
-                        
-                            <p:watermark rendered="#{not cas.isCasEnable()}" for="otpInput" value="NHẬP MÃ OTP" />                                     
-                            <p:focus context="form_otp" />
+                        </div>
+                        <p:watermark rendered="#{not cas.isCasEnable()}" for="otpInput" value="NHẬP MÃ OTP" />                                     
+                        <p:focus context="form_otp" />
                     </div>
-                            </p:outputPanel>
-                            <p:outputPanel rendered="false">
-                                <div id="rotator-wrapper" >
-                                    <div class="wrapper">
-                                        <div id="rotator">
-                                            <div class="satelite"></div>
-                                            <div class="satelite"></div>
-                                            <div class="satelite"></div>
-                                            <div class="satelite"></div>
-                                        </div>
+                </p:outputPanel>
+            </p:panelGrid>
+        </h:form>
 
-                                    </div>
-                                </div>
-                            </p:outputPanel>
-                            </p:panelGrid>
-                            </h:form>   
-                            </h:body>
-                            </html>
+    </h:body>
+</html>

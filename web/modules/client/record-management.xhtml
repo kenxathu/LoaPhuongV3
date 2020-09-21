@@ -16,13 +16,11 @@
             <link href="#{request.contextPath}/resources/js/video-js.min.css" rel="stylesheet"/>
             <link href="#{request.contextPath}/resources/assets/css/videojs.record.css" rel="stylesheet"/>
             <link href="#{request.contextPath}/resources/assets/css/style.css" rel="stylesheet"/>
-
             <script src="#{request.contextPath}/resources/js/video.min.js"></script>
             <script src="#{request.contextPath}/resources/js/recorder.js"></script>
             <script src="#{request.contextPath}/resources/js/wavesurfer.min.js"></script>
             <script src="#{request.contextPath}/resources/js/wavesurfer.microphone.min.js"></script>
             <script src="#{request.contextPath}/resources/js/videojs.wavesurfer.min.js"></script>
-
             <script src="#{request.contextPath}/resources/js/videojs.record.min.js"></script>
             <script src="#{request.contextPath}/resources/js/videojs.record.recorderjs.min.js"></script>    
             <link rel="stylesheet" href="#{request.contextPath}/resources/css/jquery.css"></link>
@@ -869,10 +867,8 @@
                                          disabled="#{RecordController.recordActtionFlag eq 'VIEW' or RecordController.recordActtionFlag eq 'APPROVE'}"
                                          required="true" requiredMessage="Thời gian kết thúc #{PP_SHARED.can_not_be_empty}"
                                          rendered="#{RecordController.selectedRecord.rec_play_mode eq 2 and RecordController.selectedRecord.rec_type ne 0}">
-                            </p:inputText> 
-                               
-                         
-                            
+                            </p:inputText>                            
+                                                 
                             
                             <p:outputLabel for="repeatType" value="Kiểu lặp lại" rendered="#{RecordController.selectedRecord.rec_play_mode eq 1}"/>
                             <p:selectOneMenu id="repeatType"  value="#{RecordController.selectedRecord.rec_play_repeat_type}"

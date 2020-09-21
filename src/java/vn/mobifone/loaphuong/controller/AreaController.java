@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package vn.mobifone.loaphuong.controller;
 
 import be.tarsos.transcoder.Attributes;
@@ -40,9 +35,10 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -54,14 +50,16 @@ import org.primefaces.event.NodeExpandEvent;
 import org.primefaces.event.timeline.TimelineSelectEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
-import org.primefaces.model.timeline.TimelineEvent;
-import org.primefaces.model.timeline.TimelineModel;
 import org.primefaces.model.TreeNode;
 import org.primefaces.model.UploadedFile;
+import org.primefaces.model.timeline.TimelineEvent;
+import org.primefaces.model.timeline.TimelineModel;
+import vn.mobifone.loaphuong.controller.DocumentService;
+import vn.mobifone.loaphuong.controller.RecordController;
+import vn.mobifone.loaphuong.controller.RecordController.PersistAction;
 import vn.mobifone.loaphuong.entity.AiCamera;
 import vn.mobifone.loaphuong.entity.AiCameraMCU;
 import vn.mobifone.loaphuong.entity.AiCameraSlot;
-import vn.mobifone.loaphuong.model.AreaModel;
 import vn.mobifone.loaphuong.entity.AreaTree;
 import vn.mobifone.loaphuong.entity.DataResponse;
 import vn.mobifone.loaphuong.entity.HouseHold;
@@ -78,65 +76,74 @@ import vn.mobifone.loaphuong.lib.Session;
 import vn.mobifone.loaphuong.lib.SystemConfig;
 import vn.mobifone.loaphuong.lib.TSPermission;
 import vn.mobifone.loaphuong.lib.config.SessionKeyDefine;
+import vn.mobifone.loaphuong.model.AreaModel;
 import vn.mobifone.loaphuong.security.SecUser;
 import vn.mobifone.loaphuong.util.DateUtil;
 import vn.mobifone.loaphuong.util.ResourceBundleUtil;
 import vn.mobifone.loaphuong.webservice.AreaWebservice;
 
-/**
- *
- * @author cuong.trinh
- */
 @ManagedBean(name = "AreaController")
 @ViewScoped
 public class AreaController extends TSPermission implements Serializable {
 
     private TreeNode selectedNode;
+
     private AreaTree selectedArea;
+
     private AreaTree areaRoot;
+
     private AreaTree addedArea;
+
     private List<HouseHold> listHouse;
+
     private List<MCU> listMCU;
+
     private List<MCU> listHouseMCU;
+
     private List<MCU> listMCUAdded;
+
     private int tabSelect;
+
     private AreaModel areaModel;
+
     private List<Long> treeExpandedNode;
-    
+
     private boolean allowHouseManagement;
+
     private boolean isCityMode;
-    
-    // flag for ADD/EDIT/DELETE...
+
     private PersistAction acttionFlag;
+
     private PersistAction houseActtionFlag;
+
     private PersistAction mcuActtionFlag;
+
     private HouseHold selectedHouse;
+
     private MCU selectedMCU;
+
     private AreaWebservice areaWS;
-    
-    
-    // Radio
+
     private List<RadioChannel> listChannelByArea;
+
     private List<RadioChannel> listAllChannel;
-    private List<Long> listAreaChannelId; 
+
+    private List<Long> listAreaChannelId;
+
     private long selectedChannelId;
 
     private DocumentService service;
-    
+
     private List<MCURecord> listMCURecord;
     // Operation Flag -- Enum
-    
 
-    
-        // Camera
+    // Camera
     private List<AiCamera> listAiCameraByArea;
     private AiCamera selectedAiCamera;
     private PersistAction cameraActtionFlag;
 
     // AI Camera Mcu
     private List<MCUForAICameraDirection> listMCUForAICameraDirections;
-    
-
 
     // Ai CAmera Slot
     private String startTimeAdded;
@@ -148,56 +155,67 @@ public class AreaController extends TSPermission implements Serializable {
     private List<SlotForAiCamera> listSlotForAiCamerasOff;
     private List<SlotForAiCamera> listSlotForAiCamerasAll;
 
-    public static enum PersistAction {
+    private TimelineModel modelLog;
 
-        SELECT,
-        CREATE,
-        CREATE2,
-        DELETE,
-        VIEW,
-        UPDATE
-    }
+    private TimelineModel modelFirst;
 
-    //@ManagedProperty("#{documentService}")
+    private TimelineModel modelSecond;
+
+    private boolean aSelected;
+
+    SimpleDateFormat df;
+
+    private Date fromDateForTimeline;
+
+    private Date fromDateForLog;
+
+    private Date toDateForTimeline;
+
+    private String fileName;
+
+    private UploadedFile audioFile;
+
+    private File tmpAudioFile;
+
+    private String audioPath;
+
+    private int type;
+
+    private long receiveId;
+
     public AreaController() {
-
-        service = new DocumentService();
-        areaRoot = service.createAreaTree();
-        areaRoot.getChildren().get(0).setSelected(true);
-        areaRoot.getChildren().get(0).setExpanded(true);
-        selectedArea = (AreaTree) areaRoot.getChildren().get(0);
-        treeExpandedNode = new ArrayList<>();
-        
-        //allowHouseManagement = Integer.parseInt(SystemConfig.getConfig("viewHouseManagement"))==1?true:false;
-        allowHouseManagement = (boolean)Session.getSessionValue(SessionKeyDefine.ALLOW_HOUSE_MANAGEMENT);
-        isCityMode = Integer.parseInt(SystemConfig.getConfig("areaMode"))==2?true:false;
-
+        this.df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        this.fileName = "";
+        this.audioPath = "";
+        this.service = new DocumentService();
+        this.areaRoot = this.service.createAreaTree();
+        ((TreeNode) this.areaRoot.getChildren().get(0)).setSelected(true);
+        ((TreeNode) this.areaRoot.getChildren().get(0)).setExpanded(true);
+        this.selectedArea = (AreaTree) this.areaRoot.getChildren().get(0);
+        this.treeExpandedNode = new ArrayList<>();
+        this.allowHouseManagement = ((Boolean) Session.getSessionValue(SessionKeyDefine.ALLOW_HOUSE_MANAGEMENT)).booleanValue();
+        this.isCityMode = (Integer.parseInt(SystemConfig.getConfig("areaMode")) == 2);
         this.selectedArea = new AreaTree();
-        areaModel = new AreaModel();
-        listHouse = new ArrayList<>();
-        listChannelByArea = new ArrayList<>();
-        listHouseMCU = new ArrayList<>();
-        acttionFlag = PersistAction.SELECT;
-        houseActtionFlag = PersistAction.SELECT;
-        mcuActtionFlag = PersistAction.SELECT;
-        areaWS = new AreaWebservice();
-
+        this.areaModel = new AreaModel();
+        this.listHouse = new ArrayList<>();
+        this.listChannelByArea = new ArrayList<>();
+        this.listHouseMCU = new ArrayList<>();
+        this.acttionFlag = PersistAction.SELECT;
+        this.houseActtionFlag = PersistAction.SELECT;
+        this.mcuActtionFlag = PersistAction.SELECT;
+        this.areaWS = new AreaWebservice();
         if (ResourceBundleUtil.getCurrentPath().equalsIgnoreCase("area-management")) {
-            tabSelect = 0;
-        } else if (ResourceBundleUtil.getCurrentPath().equalsIgnoreCase("mcu-management") && allowHouseManagement) {
-            tabSelect = 2;
-        } else if (ResourceBundleUtil.getCurrentPath().equalsIgnoreCase("camera-management") && allowHouseManagement) {
-            tabSelect = 4;
+            this.tabSelect = 0;
+        } else if (ResourceBundleUtil.getCurrentPath().equalsIgnoreCase("mcu-management") && this.allowHouseManagement) {
+            this.tabSelect = 2;
         } else {
-            tabSelect = 1;
+            this.tabSelect = 1;
         }
-        
-        Calendar cal = Calendar.getInstance();  
-        // date for timeline
-        toDateForTimeline = new Date();
-        fromDateForLog = toDateForTimeline;
-        cal.add(Calendar.DATE, -7);  
-        fromDateForTimeline = cal.getTime();
+        Calendar cal = Calendar.getInstance();
+        this.toDateForTimeline = new Date();
+        this.fromDateForLog = this.toDateForTimeline;
+        cal.add(5, -7);
+        this.fromDateForTimeline = cal.getTime();
 
         //areaWS.getMCUStateTimeline();
         //System.out.println(ResourceBundleUtil.getCurrentPath());
@@ -208,11 +226,10 @@ public class AreaController extends TSPermission implements Serializable {
         listMCUForAICameraDirections.add(new MCUForAICameraDirection(1));
         listMCUForAICameraDirections.add(new MCUForAICameraDirection(2));
         listMCUForAICameraDirections.add(new MCUForAICameraDirection(3));
-
     }
 
     public int getTabSelect() {
-        return tabSelect;
+        return this.tabSelect;
     }
 
     public void setTabSelect(int tabSelect) {
@@ -220,13 +237,11 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public TreeNode getSelectedNode() {
-        return selectedNode;
+        return this.selectedNode;
     }
 
     public void setSelectedNode(TreeNode selectedNode) {
         this.selectedNode = selectedNode;
-
-        // System.out.println("vn.mobifone.controller.AreaController.displaySelectedSingle()" + "select note " + selectedArea.getAreaName());
     }
 
     public void setService(DocumentService service) {
@@ -234,388 +249,297 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public void displaySelectedSingle() {
-
     }
-    
+
     public void resetTree(TreeNode node) {
         List<TreeNode> child = node.getChildren();
         node.setSelected(false);
         node.setExpanded(false);
-        
-        if (selectedArea.getAreaId() - ((AreaTree)node).getAreaId() == 0) {
-            //setSelectedArea((AreaTree)node);
+        if (this.selectedArea.getAreaId() - ((AreaTree) node).getAreaId() == 0L) {
             node.setSelected(true);
         }
-        
-        for (Long areaId : treeExpandedNode) {
-            if (areaId - ((AreaTree)node).getAreaId() == 0) {
+        for (Long areaId : this.treeExpandedNode) {
+            if (areaId.longValue() - ((AreaTree) node).getAreaId() == 0L) {
                 node.setExpanded(true);
                 break;
             }
         }
-        
-        
         for (TreeNode treeNode : child) {
             resetTree(treeNode);
         }
-        
     }
-    
+
     public void editHeaderEvent() {
-        type = 1;
-        receiveId  = selectedArea.getAreaId();
-        audioFile = null;
-        audioPath = "";
-        fileName = "";
+        this.type = 1;
+        this.receiveId = this.selectedArea.getAreaId();
+        this.audioFile = null;
+        this.audioPath = "";
+        this.fileName = "";
     }
-    
+
     public void editAreaEvent() {
-        addedArea = selectedArea;
-        acttionFlag = PersistAction.UPDATE;
+        this.addedArea = this.selectedArea;
+        this.acttionFlag = PersistAction.UPDATE;
     }
 
     public void deleteAreaEvent() {
-        addedArea = selectedArea;
-        acttionFlag = PersistAction.DELETE;
+        this.addedArea = this.selectedArea;
+        this.acttionFlag = PersistAction.DELETE;
     }
 
     public void addAreaEvent() {
-
-        acttionFlag = PersistAction.CREATE;
-
-        //System.out.println("vn.mobifone.controller.AreaController.displaySelectedSingle()" + "select into  note " + selectedArea.getAreaName());
-        addedArea = new AreaTree();
-        addedArea.setParentAreaId(selectedArea.getAreaId());
-        addedArea.setAreaType(selectedArea.getAreaType() + 1);
-        audioFile = null;
+        this.acttionFlag = PersistAction.CREATE;
+        this.addedArea = new AreaTree();
+        this.addedArea.setParentAreaId(this.selectedArea.getAreaId());
+        this.addedArea.setAreaType(this.selectedArea.getAreaType() + 1);
+        this.audioFile = null;
     }
 
     public void saveHeader() {
         try {
-            
-            uploadRecordToFileServer(audioFile);
-            DataResponse response;
-            response = areaWS.addHeader(type, receiveId, audioPath);
-
-            
+            uploadRecordToFileServer(this.audioFile);
+            DataResponse dataResponse = this.areaWS.addHeader(this.type, this.receiveId, this.audioPath);
         } catch (Exception ex) {
-            Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+//      Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
-
     }
-    
-//    public void saveMCUHeader() {
-//        try {
-//            
-//            uploadRecordToFileServer(audioFile);
-//            DataResponse response;
-//            response = areaWS.addHeader(2, selectedMCU.getMcu_id(), audioPath);
-//
-//            
-//        } catch (Exception ex) {
-//            Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//
-//    }
-//    
-     public void saveArea() {
-        try {
-            DataResponse response;
 
-            if (acttionFlag == PersistAction.CREATE) {
-                response = areaWS.addArea(addedArea);
-                
-                
-                
+    public void saveArea() {
+        try {
+            if (this.acttionFlag == PersistAction.CREATE) {
+                DataResponse response = this.areaWS.addArea(this.addedArea);
                 if (response.getCode() == 200) {
                     ClientMessage.logSuccess("Thêm địa bàn thành công");
                 } else {
-                    ClientMessage.logErr("Không thành công: " + response.getCodeDescVn());
+                    ClientMessage.logErr("Không thành công" + response.getCodeDescVn());
                 }
-
-
-            } else if (acttionFlag == PersistAction.UPDATE) {
-                response = areaWS.updateArea(addedArea);
+            } else if (this.acttionFlag == PersistAction.UPDATE) {
+                DataResponse response = this.areaWS.updateArea(this.addedArea);
                 if (response.getCode() == 200) {
-                    
-//                    if (!uploadRecordToFileServer(audioFile)) {
-//                           ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Không thành công: Đã xảy ra lỗi trong quá trình upload file!");
-//                           return;
-//                    }
-//                    response = areaWS.updateHeader(9, addedArea.getAreaId(), 1, addedArea.getAudio_path());
-//                    if (response.getCode() == 200) {
-//                        ClientMessage.logSuccess("Cập nhật địa bàn thành công");
-//                    } else {
-//                        ClientMessage.logErr("Không thành công: " + response.getCodeDescVn());
-//                    }
-                    
-                    ClientMessage.logSuccess("Cập nhật địa bàn thành công");
+                    ClientMessage.logSuccess("Cnhbthc");
                 } else {
-                    ClientMessage.logErr("Không thành công: " + response.getCodeDescVn());
+                    ClientMessage.logErr("Không thành công" + response.getCodeDescVn());
                 }
-
-            } else if (acttionFlag == PersistAction.DELETE) {
-                if (selectedArea.getChildren().size() > 0 || listHouse.size() > 0 || listMCU.size()>0) {
-                    ClientMessage.logErr("Địa bàn gồm nhiều địa bàn trực thuộc hoặc có hộ gia đình hoặc có thiết bị. Không được xóa!" );
+            } else if (this.acttionFlag == PersistAction.DELETE) {
+                if (this.selectedArea.getChildren().size() > 0 || this.listHouse.size() > 0 || this.listMCU.size() > 0) {
+                    ClientMessage.logErr("Địa bàn gồm nhiều địa bàn trực thuộc hoặc có hộ gia đình có thiết bị. Không được xóa!");
                     return;
                 }
-                
-                response = areaWS.deleteArea(addedArea.getAreaId());
+                DataResponse response = this.areaWS.deleteArea(this.addedArea.getAreaId());
                 if (response.getCode() == 200) {
                     ClientMessage.logSuccess("Xóa địa bàn thành công");
-                    selectedArea = (AreaTree)selectedArea.getParent();
+                    this.selectedArea = (AreaTree) this.selectedArea.getParent();
                 } else {
-                    ClientMessage.logErr("Không thành công: " + response.getCodeDescVn());
+                    ClientMessage.logErr("Không thành công" + response.getCodeDescVn());
                 }
             }
-            areaRoot = service.createAreaTree();
-            resetTree(areaRoot);
-            areaRoot.getChildren().get(0).setExpanded(true);
+            this.areaRoot = this.service.createAreaTree();
+            resetTree((TreeNode) this.areaRoot);
+            ((TreeNode) this.areaRoot.getChildren().get(0)).setExpanded(true);
         } catch (Exception ex) {
-            Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+//      Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
-
     }
 
     public void addHouseEvent() {
-
-        houseActtionFlag = PersistAction.CREATE;
-
-        //System.out.println("vn.mobifone.controller.AreaController.displaySelectedSingle()" + " add house ");
-        selectedHouse = new HouseHold();
-        selectedHouse.setArea_id(selectedArea.getAreaId());
-        selectedHouse.setArea_name(selectedArea.getAreaName());
-        listMCUAdded = new ArrayList<>();
-        listHouseMCU = new ArrayList<>();
-        selectedMCU = new MCU();
-
+        this.houseActtionFlag = PersistAction.CREATE;
+        this.selectedHouse = new HouseHold();
+        this.selectedHouse.setArea_id(this.selectedArea.getAreaId());
+        this.selectedHouse.setArea_name(this.selectedArea.getAreaName());
+        this.listMCUAdded = new ArrayList<>();
+        this.listHouseMCU = new ArrayList<>();
+        this.selectedMCU = new MCU();
     }
 
     public void viewHouseEvent(HouseHold house) {
-
-        houseActtionFlag = PersistAction.VIEW;
-        selectedHouse = house;
-        selectedHouse.setAreaName(selectedArea.getAreaName());
-        listHouseMCU = areaWS.getListMCUByHouse(house.getId());
-
+        this.houseActtionFlag = PersistAction.VIEW;
+        this.selectedHouse = house;
+        this.selectedHouse.setAreaName(this.selectedArea.getAreaName());
+        this.listHouseMCU = this.areaWS.getListMCUByHouse(house.getId());
     }
 
     public void editHouseEvent(HouseHold house) {
-        houseActtionFlag = PersistAction.UPDATE;
-        selectedHouse = house;
-        selectedHouse.setAreaName(selectedArea.getAreaName());
-        listHouseMCU = areaWS.getListMCUByHouse(house.getId());
-        selectedMCU = new MCU();
+        this.houseActtionFlag = PersistAction.UPDATE;
+        this.selectedHouse = house;
+        this.selectedHouse.setAreaName(this.selectedArea.getAreaName());
+        this.listHouseMCU = this.areaWS.getListMCUByHouse(house.getId());
+        this.selectedMCU = new MCU();
     }
 
     public void deleteHouseEvent(HouseHold house) {
-        houseActtionFlag = PersistAction.DELETE;
-        selectedHouse = house;
+        this.houseActtionFlag = PersistAction.DELETE;
+        this.selectedHouse = house;
     }
-    
-   
-    
+
     public void deleteMCU(ActionEvent evt) {
-        DataResponse response = areaWS.deleteMCU(selectedMCU.getMcu_id());
+        DataResponse response = this.areaWS.deleteMCU(this.selectedMCU.getMcu_id());
         if (response.getCode() == 200) {
-            ClientMessage.logSuccess( "Xóa mGateway thành công!");
-            listMCU = areaWS.getListMCUByArea(selectedArea.getAreaId());
-            listHouseMCU = areaWS.getListMCUByHouse(selectedHouse.getId());
+            ClientMessage.logSuccess("Xóa mGateway thành công!");
+            this.listMCU = this.areaWS.getListMCUByArea(this.selectedArea.getAreaId());
+            this.listHouseMCU = this.areaWS.getListMCUByHouse(this.selectedHouse.getId());
         } else {
-            ClientMessage.logErr("Không thành công: " + response.getCodeDescVn());
+            ClientMessage.logErr("Không thành công" + response.getCodeDescVn());
         }
     }
-    
+
     public void rebootMCU(ActionEvent evt) {
-        areaWS.rebootMCU(selectedMCU.getMcu_id());
-        
+        this.areaWS.rebootMCU(this.selectedMCU.getMcu_id());
     }
-    
+
     public void rebootMCUEvent(MCU mcu) {
-        selectedMCU = mcu;
+        this.selectedMCU = mcu;
     }
+
     public void syncMCU(ActionEvent evt) {
-        areaWS.syncMCU(selectedMCU.getMcu_id());
-        
+        this.areaWS.syncMCU(this.selectedMCU.getMcu_id());
     }
-    
+
     public void syncMCUEvent(MCU mcu) {
-        selectedMCU = mcu;
+        this.selectedMCU = mcu;
     }
 
     public void saveHouse(ActionEvent evt) {
         try {
             DataResponse response = new DataResponse();
-            if (houseActtionFlag == PersistAction.CREATE) {
-                response = areaWS.addHouseHold(selectedHouse);
-
-            } else if (houseActtionFlag == PersistAction.UPDATE) {
-                response = areaWS.updateHouseHold(selectedHouse);
-            } else if (houseActtionFlag == PersistAction.DELETE) {
-                response = areaWS.deleteHouseHold(selectedHouse.getId());
+            if (this.houseActtionFlag == PersistAction.CREATE) {
+                response = this.areaWS.addHouseHold(this.selectedHouse);
+            } else if (this.houseActtionFlag == PersistAction.UPDATE) {
+                response = this.areaWS.updateHouseHold(this.selectedHouse);
+            } else if (this.houseActtionFlag == PersistAction.DELETE) {
+                response = this.areaWS.deleteHouseHold(this.selectedHouse.getId());
             }
-
-            if (response.getCode() == 200) {    // thanh cong
-                // load lại anh sách hộ gd
-                listHouse = areaWS.getListHouseByArea(selectedArea.getAreaId());
+            if (response.getCode() == 200) {
+                this.listHouse = this.areaWS.getListHouseByArea(this.selectedArea.getAreaId());
             }
-
         } catch (Exception ex) {
-            Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+            //     Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
-
     }
 
     public void addMCUEvent() {
-        selectedMCU = new MCU();
-        selectedMCU.setHolder_name(selectedHouse.getHolder_name());
-        selectedMCU.setHousehold_id(selectedHouse.getId());
-        selectedMCU.setMcu_area_id(selectedHouse.getArea_id());
+        this.selectedMCU = new MCU();
+        this.selectedMCU.setHolder_name(this.selectedHouse.getHolder_name());
+        this.selectedMCU.setHousehold_id(this.selectedHouse.getId());
+        this.selectedMCU.setMcu_area_id(this.selectedHouse.getArea_id());
+    }
 
+    public void addMCUEvent(HouseHold house) {
+        this.mcuActtionFlag = PersistAction.CREATE;
+        this.selectedMCU = new MCU();
+        this.selectedMCU.setHolder_name(house.getHolder_name());
+        this.selectedMCU.setHousehold_id(house.getId());
     }
-    
-    public void addMCUEvent(HouseHold house) { 
-       mcuActtionFlag = PersistAction.CREATE;
-       selectedMCU = new MCU();
-       
-       selectedMCU.setHolder_name(house.getHolder_name());
-       selectedMCU.setHousehold_id(house.getId());
-       //selectedMCU.setMcu_area_id(house.getArea_id());
-    } 
-    
-     public void viewMCUEvent(MCU mcu) {
-        mcuActtionFlag = PersistAction.VIEW;
-        selectedMCU = mcu;
-        selectedMCU.setPhone_number(mcu.getMcu_tel());
+
+    public void viewMCUEvent(MCU mcu) {
+        this.mcuActtionFlag = PersistAction.VIEW;
+        this.selectedMCU = mcu;
+        this.selectedMCU.setPhone_number(mcu.getMcu_tel());
     }
-    
+
     public void updateMCUEvent(MCU mcu) {
-        mcuActtionFlag = PersistAction.UPDATE;
-        selectedMCU = new MCU(mcu);
+        this.mcuActtionFlag = PersistAction.UPDATE;
+        this.selectedMCU = new MCU(mcu);
     }
-    
-    public void updateMCUHeaderEvent(MCU mcu) {
-        type = 2; 
-        receiveId = mcu.getMcu_id();
-        fileName = "";
-        audioFile = null;
-    }
-    
-    public void deleteMCUEvent(MCU mcu) {
-        mcuActtionFlag = PersistAction.DELETE;
-        selectedMCU = mcu;
-    }
-    
-    public void addPublicMCUEvent(ActionEvent evt) { 
-       selectedMCU = new MCU();
-       mcuActtionFlag = PersistAction.CREATE2;
-       selectedMCU.setMcu_area_id(selectedArea.getAreaId());
-    }  
-    
-    public void addChannelForArea(ActionEvent evt) { 
-       listAllChannel = new ArrayList<>();
-       listAllChannel = areaWS.getListChannel();
-       //listAreaChannelId = new long[listChannelByArea.size()];
-       listAreaChannelId = new ArrayList<>();
-        for (int i = 0; i < listChannelByArea.size(); i++) {
-            listAreaChannelId.add(listChannelByArea.get(i).getId());
-        }
-    } 
 
-    public void updateRadioArea(ActionEvent evt) { 
-       areaWS.updateRadioArea(selectedArea.getAreaId(), listAreaChannelId);
-       listChannelByArea = areaWS.getListChannelByArea(selectedArea.getAreaId(), 0);
+    public void updateMCUHeaderEvent(MCU mcu) {
+        this.type = 2;
+        this.receiveId = mcu.getMcu_id();
+        this.fileName = "";
+        this.audioFile = null;
+    }
+
+    public void deleteMCUEvent(MCU mcu) {
+        this.mcuActtionFlag = PersistAction.DELETE;
+        this.selectedMCU = mcu;
+    }
+
+    public void addPublicMCUEvent(ActionEvent evt) {
+        this.selectedMCU = new MCU();
+        this.mcuActtionFlag = PersistAction.CREATE2;
+        this.selectedMCU.setMcu_area_id(this.selectedArea.getAreaId());
+    }
+
+    public void addChannelForArea(ActionEvent evt) {
+        this.listAllChannel = new ArrayList<>();
+        this.listAllChannel = this.areaWS.getListChannel();
+        this.listAreaChannelId = new ArrayList<>();
+        for (int i = 0; i < this.listChannelByArea.size(); i++) {
+            this.listAreaChannelId.add(Long.valueOf(((RadioChannel) this.listChannelByArea.get(i)).getId()));
+        }
+    }
+
+    public void updateRadioArea(ActionEvent evt) {
+        this.areaWS.updateRadioArea(this.selectedArea.getAreaId(), this.listAreaChannelId);
+        this.listChannelByArea = this.areaWS.getListChannelByArea(this.selectedArea.getAreaId(), 0);
     }
 
     public void saveMCU(ActionEvent evt) {
         try {
-            
-            if (selectedMCU.getMcu_lat() < 7 || selectedMCU.getMcu_lat() > 23.2) {
-                ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR,"Vĩ độ không nằm trong địa phận Việt Nam! Mời nhập vĩ độ trong khoảng từ 7.0 - 23.2");
+            if (this.selectedMCU.getMcu_lat() < 7.0D || this.selectedMCU.getMcu_lat() > 23.2D) {
+                ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Vĩ độ không nằm trong địa phận Việt Nam! Mời nhập vĩ độ trong khoảng từ 7.0 - 23.2");
                 return;
             }
-            if (selectedMCU.getMcu_lng() < 100 || selectedMCU.getMcu_lng() > 116) {
-                ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR,"Kinh độ không nằm trong địa phận Việt Nam! Mời nhập kinh độ trong khoảng từ 100 - 116");
+            if (this.selectedMCU.getMcu_lng() < 100.0D || this.selectedMCU.getMcu_lng() > 116.0D) {
+                ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Kinh độ không nằm trong địa phận Việt Nam! Mời nhập kinh độ trong khoảng từ 100 - 116");
                 return;
             }
-            
-            
             DataResponse response = null;
-            if (mcuActtionFlag == PersistAction.CREATE) {
-                response = areaWS.addMCU(selectedMCU);
-            } else if (mcuActtionFlag == PersistAction.CREATE2) {
-                response = areaWS.addPublicMCU(selectedMCU);
-            } else if (mcuActtionFlag == PersistAction.UPDATE) {
-                response = areaWS.updateMCU(selectedMCU);
+            if (this.mcuActtionFlag == PersistAction.CREATE) {
+                response = this.areaWS.addMCU(this.selectedMCU);
+            } else if (this.mcuActtionFlag == PersistAction.CREATE2) {
+                response = this.areaWS.addPublicMCU(this.selectedMCU);
+            } else if (this.mcuActtionFlag == PersistAction.UPDATE) {
+                response = this.areaWS.updateMCU(this.selectedMCU);
             }
-
-
             if (response.getCode() == 200) {
-                ClientMessage.logSuccess(mcuActtionFlag == PersistAction.UPDATE? "Cập nhật thông tin thành công" : "Thêm thiết bị thành công!");
-                listMCU = areaWS.getListMCUByArea(selectedArea.getAreaId());
+                ClientMessage.logSuccess((this.mcuActtionFlag == PersistAction.UPDATE) ? "Cập nhật thông tin thành công" : "Thêm thiết bị thành công");
+                this.listMCU = this.areaWS.getListMCUByArea(this.selectedArea.getAreaId());
             } else {
-                ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR,"Không thành công: " + response.getCodeDescVn());
+                ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Không thành công" + response.getCodeDescVn());
                 return;
             }
-
-//            } else if (houseActtionFlag == PersistAction.CREATE) {
-//                listHouseMCU.add(selectedMCU);
-//                listMCUAdded.add(selectedMCU);
-//            }
-
         } catch (Exception ex) {
-            Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+//      Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
-
     }
 
     public void deleteNode() {
-        System.out.println("vn.mobifone.controller.AreaController.displaySelectedSingle()" + " delete note");
-        selectedNode.getChildren().clear();
-        selectedNode.getParent().getChildren().remove(selectedNode);
-        selectedNode.setParent(null);
-
-        selectedNode = null;
+        System.out.println("vn.mobifone.controller.AreaController.displaySelectedSingle() delete note");
+        this.selectedNode.getChildren().clear();
+        this.selectedNode.getParent().getChildren().remove(this.selectedNode);
+        this.selectedNode.setParent(null);
+        this.selectedNode = null;
     }
 
     public AreaTree getSelectedArea() {
-        return selectedArea;
+        return this.selectedArea;
     }
 
     public void setSelectedArea(AreaTree selectedArea) {
         this.selectedArea = selectedArea;
-
         try {
             if (selectedArea != null) {
-               // System.out.println("vn.mobifone.controller.AreaController.displaySelectedSingle()" + "select area " + selectedArea.getAreaName());
-
-                if (allowHouseManagement) {
-                    listHouse = areaWS.getListHouseByArea(selectedArea.getAreaId());
+                if (this.allowHouseManagement) {
+                    this.listHouse = this.areaWS.getListHouseByArea(selectedArea.getAreaId());
                 }
-                
-                listChannelByArea = areaWS.getListChannelByArea(selectedArea.getAreaId(), 0);
-                
-                listMCU = areaWS.getListMCUByArea(selectedArea.getAreaId());
-
-                listAiCameraByArea = areaWS.getAiCameraListByArea(selectedArea.getAreaId());
-
+                this.listChannelByArea = this.areaWS.getListChannelByArea(selectedArea.getAreaId(), 0);
+                this.listMCU = this.areaWS.getListMCUByArea(selectedArea.getAreaId());
             }
         } catch (Exception ex) {
-            Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+            //   Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
     }
-    
+
     public void onNodeExpand(NodeExpandEvent event) {
-        treeExpandedNode.add(((AreaTree)event.getTreeNode()).getAreaId());
-        
+        this.treeExpandedNode.add(Long.valueOf(((AreaTree) event.getTreeNode()).getAreaId()));
     }
- 
+
     public void onNodeCollapse(NodeCollapseEvent event) {
-        treeExpandedNode.remove(((AreaTree)event.getTreeNode()).getAreaId());        
+        this.treeExpandedNode.remove(Long.valueOf(((AreaTree) event.getTreeNode()).getAreaId()));
     }
 
     public AreaTree getAreaRoot() {
-        return areaRoot;
+        return this.areaRoot;
     }
 
     public void setAreaRoot(AreaTree areaRoot) {
@@ -623,7 +547,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public AreaTree getAddedArea() {
-        return addedArea;
+        return this.addedArea;
     }
 
     public void setAddedArea(AreaTree addedArea) {
@@ -631,7 +555,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public List<HouseHold> getListHouse() {
-        return listHouse;
+        return this.listHouse;
     }
 
     public void setListHouse(List<HouseHold> listHouse) {
@@ -639,7 +563,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public PersistAction getHouseActtionFlag() {
-        return houseActtionFlag;
+        return this.houseActtionFlag;
     }
 
     public void setHouseActtionFlag(PersistAction houseActtionFlag) {
@@ -647,7 +571,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public HouseHold getSelectedHouse() {
-        return selectedHouse;
+        return this.selectedHouse;
     }
 
     public void setSelectedHouse(HouseHold selectedHouse) {
@@ -655,7 +579,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public List<MCU> getListHouseMCU() {
-        return listHouseMCU;
+        return this.listHouseMCU;
     }
 
     public void setListHouseMCU(List<MCU> listMCU) {
@@ -663,7 +587,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public MCU getSelectedMCU() {
-        return selectedMCU;
+        return this.selectedMCU;
     }
 
     public void setSelectedMCU(MCU selectedMCU) {
@@ -671,7 +595,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public List<MCU> getListMCU() {
-        return listMCU;
+        return this.listMCU;
     }
 
     public void setListMCU(List<MCU> listMCU) {
@@ -679,7 +603,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public PersistAction getActtionFlag() {
-        return acttionFlag;
+        return this.acttionFlag;
     }
 
     public void setActtionFlag(PersistAction acttionFlag) {
@@ -687,7 +611,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public PersistAction getMcuActtionFlag() {
-        return mcuActtionFlag;
+        return this.mcuActtionFlag;
     }
 
     public void setMcuActtionFlag(PersistAction mcuActtionFlag) {
@@ -695,59 +619,63 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public List<RadioChannel> getListChannel() {
-        return listChannelByArea;
+        return this.listChannelByArea;
     }
 
     public void setListChannel(List<RadioChannel> listChannel) {
         this.listChannelByArea = listChannel;
     }
-    
-    //- ----  quyen mcu
-    public boolean isAllowUpdateMCU(){
-        return super.isIsAllowUpdate("EDIT_MCU") ;
+
+    public boolean isAllowUpdateMCU() {
+        return isIsAllowUpdate("EDIT_MCU");
     }
-    public boolean isAllowInsertMCU(){
-        return super.isIsAllowInsert("ADD_MCU") ;
+
+    public boolean isAllowInsertMCU() {
+        return isIsAllowInsert("ADD_MCU");
     }
-    public boolean isAllowDeleteMCU(){
-        return super.isIsAllowDelete("DELETE_MCU") ;
+
+    public boolean isAllowDeleteMCU() {
+        return isIsAllowDelete("DELETE_MCU");
     }
-    
-     //- ----  quyen dia ban
-    public boolean isAllowUpdateAREA(){
-        return super.isIsAllowUpdate("EDIT_AREA") ;
+
+    public boolean isAllowUpdateAREA() {
+        return isIsAllowUpdate("EDIT_AREA");
     }
-    public boolean isAllowInsertAREA(){
-        return super.isIsAllowInsert("ADD_AREA") ;
+
+    public boolean isAllowInsertAREA() {
+        return isIsAllowInsert("ADD_AREA");
     }
-    public boolean isAllowDeleteAREA(){
-        return super.isIsAllowDelete("DELETE_AREA") ;
+
+    public boolean isAllowDeleteAREA() {
+        return isIsAllowDelete("DELETE_AREA");
     }
-    public boolean isAllowRadioAREA(){
-        return super.isIsAllowDelete("APPROVAL_AREA") ;
+
+    public boolean isAllowRadioAREA() {
+        return isIsAllowDelete("APPROVAL_AREA");
     }
-    
-    //- ----  quyen doi voi ho gia dinh
-    public boolean isAllowUpdateHOUSEHOLD(){
-        return super.isIsAllowUpdate("EDIT_HOUSEHOLD") ;
+
+    public boolean isAllowUpdateHOUSEHOLD() {
+        return isIsAllowUpdate("EDIT_HOUSEHOLD");
     }
-    public boolean isAllowInsertHOUSEHOLD(){
-        return super.isIsAllowInsert("ADD_HOUSEHOLD") ;
+
+    public boolean isAllowInsertHOUSEHOLD() {
+        return isIsAllowInsert("ADD_HOUSEHOLD");
     }
-    public boolean isAllowDeleteHOUSEHOLD(){
-        return super.isIsAllowDelete("DELETE_HOUSEHOLD") ;
+
+    public boolean isAllowDeleteHOUSEHOLD() {
+        return isIsAllowDelete("DELETE_HOUSEHOLD");
     }
-   
+
     public boolean isAllowHouseManagement() {
-        return allowHouseManagement;
+        return this.allowHouseManagement;
     }
 
     public boolean isIsCityMode() {
-        return isCityMode;
+        return this.isCityMode;
     }
 
     public List<RadioChannel> getListAllChannel() {
-        return listAllChannel;
+        return this.listAllChannel;
     }
 
     public void setListAllChannel(List<RadioChannel> listAllChannel) {
@@ -755,7 +683,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public long getSelectedChannelId() {
-        return selectedChannelId;
+        return this.selectedChannelId;
     }
 
     public void setSelectedChannelId(long selectedChannelId) {
@@ -763,204 +691,120 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public List<Long> getListAreaChannelId() {
-        return listAreaChannelId;
+        return this.listAreaChannelId;
     }
 
     public void setListAreaChannelId(List<Long> listAreaChannelId) {
         this.listAreaChannelId = listAreaChannelId;
     }
 
-
-
-    
-    
     public void viewMCUTimeline(MCU mcu) {
-        selectedMCU = mcu;
+        this.selectedMCU = mcu;
         initTimeline();
-    
     }
-    
+
     public void viewMCULog(MCU mcu) {
-        selectedMCU = mcu;
+        this.selectedMCU = mcu;
         initMCULog();
-    
     }
-    
+
     public void initTimeline() {
-        toDateForTimeline = DateUtil.getEndOfDay(toDateForTimeline);
-        fromDateForTimeline = DateUtil.getStartOfDay(fromDateForTimeline);
-        MCUState mcuState = areaWS.getMCUStateTimeline(selectedMCU.getMcu_id(), fromDateForTimeline,toDateForTimeline);
+        this.toDateForTimeline = DateUtil.getEndOfDay(this.toDateForTimeline);
+        this.fromDateForTimeline = DateUtil.getStartOfDay(this.fromDateForTimeline);
+        MCUState mcuState = this.areaWS.getMCUStateTimeline(this.selectedMCU.getMcu_id(), this.fromDateForTimeline, this.toDateForTimeline);
         createSecondTimeline(mcuState.getStatusLog());
         createFirstTimeline(mcuState.getPlayStateList(), mcuState.getScheduleList());
     }
-    
-    public void initMCULog() { 
-        try {
-            toDateForTimeline = DateUtil.getEndOfDay(toDateForTimeline);
-            fromDateForLog = DateUtil.getStartOfDay(fromDateForLog);
 
-            modelLog = new TimelineModel();
+    public void initMCULog() {
+        try {
+            this.toDateForTimeline = DateUtil.getEndOfDay(this.toDateForTimeline);
+            this.fromDateForLog = DateUtil.getStartOfDay(this.fromDateForLog);
+            this.modelLog = new TimelineModel();
             List<MCULog> MCUlogList = new ArrayList<>();
-            MCUlogList = areaWS.getMCULogList(selectedMCU.getMcu_id(), fromDateForLog,toDateForTimeline);
-
+            MCUlogList = this.areaWS.getMCULogList(this.selectedMCU.getMcu_id(), this.fromDateForLog, this.toDateForTimeline);
             for (MCULog mCULog : MCUlogList) {
-                modelLog.add(new TimelineEvent(mCULog, df.parse(mCULog.getCreated_date())));
-                //modelLog.add(new TimelineEvent());
-                //modelLog.add(new TimelineEvent(mCULog.getCreated_date(), df.parse(mCULog.getCreated_date()), false, ""+mCULog.getLog_index()));
+                this.modelLog.add(new TimelineEvent(mCULog, this.df.parse(mCULog.getCreated_date())));
             }
-        
         } catch (ParseException ex) {
-                Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+            //  Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
-        
-     
- 
-      
-       //Date time = df.parse(play.getLog_time());  
-       // modelLog.add(new TimelineEvent(play.getRec_summary(), time));
-
-            
-
-        
-
-        
     }
-    
-    // Timeline 
-    private TimelineModel modelLog;
-    private TimelineModel modelFirst;  // model of the first timeline  
-    private TimelineModel modelSecond; // model of the second timeline   
-    private boolean aSelected;         // flag if the project A is selected (for test of select() call on the 2. model)  
-    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private Date fromDateForTimeline;
-    private Date fromDateForLog;
-    private Date toDateForTimeline;
- 
-    @PostConstruct 
+
+    @PostConstruct
     public void init() {
-        //createFirstTimeline();
-        //createSecondTimeline();
     }
- 
+
     private void createFirstTimeline(List<MCUPlayStateList> playList, List<MCUScheduleList> schedules) {
-        modelFirst = new TimelineModel();
+        this.modelFirst = new TimelineModel();
         try {
- 
             for (MCUPlayStateList play : playList) {
-                if (play.getLog_type() == 3 || play.getLog_type()==20) {
-                    Date time = df.parse(play.getLog_time());  
-                    String type = play.getRec_type()==0?"TT":play.getRec_type()==2?"TS":"FM";
-                    modelFirst.add(new TimelineEvent(type + "_" + play.getRec_summary(), time));
+                if (play.getLog_type() == 3 || play.getLog_type() == 20) {
+                    Date time = this.df.parse(play.getLog_time());
+                    String type = (play.getRec_type() == 0) ? "TT" : ((play.getRec_type() == 2) ? "TS" : "FM");
+                    this.modelFirst.add(new TimelineEvent(type + "_" + play.getRec_summary(), time));
                 }
             }
-            
             for (MCUScheduleList schedule : schedules) {
                 boolean isPlayed = false;
                 for (MCUPlayStateList play : playList) {
-                    if ((play.getLog_type() == 3||play.getLog_type()==20) && play.getRec_id() == schedule.getRec_id()) {
-                        Date timeSchedule = df.parse(schedule.getStart_time()); 
-                        Date timePlay = df.parse(play.getLog_time()); 
-                        
-                        long seconds = Math.abs((timeSchedule.getTime()-timePlay.getTime()))/1000;
-                        
-                        if (seconds < 10) {
+                    if ((play.getLog_type() == 3 || play.getLog_type() == 20) && play.getRec_id() == schedule.getRec_id()) {
+                        Date timeSchedule = this.df.parse(schedule.getStart_time());
+                        Date timePlay = this.df.parse(play.getLog_time());
+                        long seconds = Math.abs(timeSchedule.getTime() - timePlay.getTime()) / 1000L;
+                        if (seconds < 10L) {
                             isPlayed = true;
                             break;
                         }
                     }
                 }
                 if (!isPlayed) {
-                    String type = schedule.getRec_type()==0?"TT":schedule.getRec_type()==2?"TS":"FM";
-                    modelFirst.add(new TimelineEvent(type + "_"+ schedule.getRec_summary(), df.parse(schedule.getStart_time()), false, null, "unavailable"));
+                    String type = (schedule.getRec_type() == 0) ? "TT" : ((schedule.getRec_type() == 2) ? "TS" : "FM");
+                    this.modelFirst.add(new TimelineEvent(type + "_" + schedule.getRec_summary(), this.df.parse(schedule.getStart_time()), Boolean.valueOf(false), null, "unavailable"));
                 }
-                
-                
-
             }
-        
         } catch (ParseException ex) {
-                Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+            // Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
-        
-        
-           
-    
     }
-    
+
     private void createSecondTimeline(List<MCUStatusLog> statusList) {
-        modelSecond = new TimelineModel();
-        
-         
+        this.modelSecond = new TimelineModel();
         try {
             for (int i = 0; i < statusList.size(); i++) {
-                
-
-
-                    Date startProject = df.parse(statusList.get(i).getMcu_log_time());
-                    Date endProject = new Date();
-                    if (i < statusList.size()-1) {
-                        endProject = df.parse(statusList.get(i+1).getMcu_log_time());
-                    } 
-                    String status = "available";
-                    String operator = SystemConfig.getConfig("operator");
-                    if ((operator != null && operator.length()>0)  || SecUser.isSuperAdmin()){
-                        status = statusList.get(i).getMcu_status()==1?"available":"unavailable2";
-                    }
-                    modelSecond.add(new TimelineEvent("", startProject, endProject, false, "Trạng thái kết nối", status));
-
+                Date startProject = this.df.parse(((MCUStatusLog) statusList.get(i)).getMcu_log_time());
+                Date endProject = new Date();
+                if (i < statusList.size() - 1) {
+                    endProject = this.df.parse(((MCUStatusLog) statusList.get(i + 1)).getMcu_log_time());
+                }
+                String status = "available";
+                String operator = SystemConfig.getConfig("operator");
+                if ((operator != null && operator.length() > 0) || SecUser.isSuperAdmin()) {
+                    status = (((MCUStatusLog) statusList.get(i)).getMcu_status() == 1) ? "available" : "unavailable2";
+                }
+                this.modelSecond.add(new TimelineEvent("", startProject, endProject, Boolean.valueOf(false), "Trạng thái kết nối", status));
             }
-        
         } catch (ParseException ex) {
-                Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+            //  Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, (String) null, ex);
         }
-        
- 
-       
     }
- 
-    public void onSelect(TimelineSelectEvent e) {  
-        TimelineEvent timelineEvent = e.getTimelineEvent();  
-   
-        MCULog mcuLog  = (MCULog) timelineEvent.getData();
-        listMCURecord = areaWS.getMCURecordList(mcuLog.getLog_index());
-        
-    }  
- 
+
+    public void onSelect(TimelineSelectEvent e) {
+        TimelineEvent timelineEvent = e.getTimelineEvent();
+        MCULog mcuLog = (MCULog) timelineEvent.getData();
+        this.listMCURecord = this.areaWS.getMCURecordList(mcuLog.getLog_index());
+    }
+
     public TimelineModel getModelFirst() {
-        return modelFirst;
+        return this.modelFirst;
     }
- 
+
     public TimelineModel getModelSecond() {
-        return modelSecond;
-    }
- 
-    public class Task implements Serializable {
- 
-        private String title;
-        private String imagePath;
-        private boolean period;
- 
-        public Task(String title, String imagePath, boolean period) {
-            this.title = title;
-            this.imagePath = imagePath;
-            this.period = period;
-        }
- 
-        public String getTitle() {
-            return title;
-        }
- 
-        public String getImagePath() {
-            return imagePath;
-        }
- 
-        public boolean isPeriod() {
-            return period;
-        }
+        return this.modelSecond;
     }
 
     public Date getFromDateForTimeline() {
-        return fromDateForTimeline;
+        return this.fromDateForTimeline;
     }
 
     public void setFromDateForTimeline(Date fromDateForTimeline) {
@@ -968,7 +812,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public Date getToDateForTimeline() {
-        return toDateForTimeline;
+        return this.toDateForTimeline;
     }
 
     public void setToDateForTimeline(Date toDateForTimeline) {
@@ -976,7 +820,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public String getFileName() {
-        return fileName;
+        return this.fileName;
     }
 
     public void setFileName(String fileName) {
@@ -984,7 +828,7 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public TimelineModel getModelLog() {
-        return modelLog;
+        return this.modelLog;
     }
 
     public void setModelLog(TimelineModel modelLog) {
@@ -992,72 +836,55 @@ public class AreaController extends TSPermission implements Serializable {
     }
 
     public List<MCURecord> getListMCURecord() {
-        return listMCURecord;
+        return this.listMCURecord;
     }
 
     public Date getFromDateForLog() {
-        return fromDateForLog;
+        return this.fromDateForLog;
     }
 
     public void setFromDateForLog(Date fromDateForLog) {
         this.fromDateForLog = fromDateForLog;
     }
 
-
-    // --------------------------------UPLOAD HEADER FILE----------------------------------------
-    private String fileName = "";
-    private UploadedFile audioFile;
-    private File tmpAudioFile;
-    private String audioPath = "";
-    private int type;
-    private long receiveId;
-    
     private void saveInputStreamToFile(InputStream inStream, String target) throws IOException {
-		OutputStream out = null;
-		int read = 0;
-		byte[] bytes = new byte[1024];
-
-		out = new FileOutputStream(new File(target));
-		while ((read = inStream.read(bytes)) != -1) {
-			out.write(bytes, 0, read);
-		}
-		out.flush();
-		out.close();
+        OutputStream out = null;
+        int read = 0;
+        byte[] bytes = new byte[1024];
+        out = new FileOutputStream(new File(target));
+        while ((read = inStream.read(bytes)) != -1) {
+            out.write(bytes, 0, read);
+        }
+        out.flush();
+        out.close();
     }
-    
+
     public void uploadAudioHandler(FileUploadEvent event) {
-        UploadedFile file = event.getFile();
-        
         String ext;
+        UploadedFile file = event.getFile();
         try {
             ext = file.getFileName().substring(file.getFileName().lastIndexOf(".") + 1);
             ext = ext.toUpperCase();
         } catch (Exception e) {
             ext = "";
         }
-
-        if (ext == null || ext.length()==0) {
-
-        } else if (!(ext.equals("WAV") || ext.equals("MP3") || ext.equals("AMR") || ext.equals("GIF") || ext.equals("M4A") ||ext.equals("AAC") || ext.equals("FLAC") || ext.equals("OGG"))){
-            ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "File không được hỗ trợ. Mời tải lên định dạng file WAV/MP3/M4A/AMR/AAC/OGG..."); 
-            return;
+        if (ext != null && ext.length() != 0) {
+            if (!ext.equals("WAV") && !ext.equals("MP3") && !ext.equals("AMR") && !ext.equals("GIF") && !ext.equals("M4A") && !ext.equals("AAC") && !ext.equals("FLAC") && !ext.equals("OGG")) {
+                ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "File không được hỗ trợ. Mời tải lên định dạng file WAV/MP3/M4A/AMR/AAC/OGG...");
+                return;
+            }
         }
-        
-        if(file != null) {
+        if (file != null) {
             try {
                 String assetsDir = SystemConfig.getConfig("AssetsDir");
-                String outputTmpDir = assetsDir+ SystemConfig.getConfig("audioOutputTmp");
-                if(!new File(outputTmpDir).exists()){
-                    new File(outputTmpDir).mkdirs();
+                String outputTmpDir = assetsDir + SystemConfig.getConfig("audioOutputTmp");
+                if (!(new File(outputTmpDir)).exists()) {
+                    (new File(outputTmpDir)).mkdirs();
                 }
-                String timestamp = System.currentTimeMillis()+"";
-                String outputPath = outputTmpDir + timestamp + "_"+file.getFileName();
-                
+                String timestamp = System.currentTimeMillis() + "";
+                String outputPath = outputTmpDir + timestamp + "_" + file.getFileName();
                 saveInputStreamToFile(file.getInputstream(), outputPath);
-                //AudioSystem.write(AudioSystem.getAudioInputStream(new File(convertAudio(audioFile))), AudioFileFormat.Type.WAVE, new File(outputPath));
-                
-                
-                float bitrate = 0;
+                float bitrate = 0.0F;
                 if (ext.equals("MP3")) {
                     Mp3File mp3 = new Mp3File(outputPath);
                     bitrate = mp3.getBitrate();
@@ -1066,155 +893,118 @@ public class AreaController extends TSPermission implements Serializable {
                     AudioFormat format = audioInputStream.getFormat();
                     int frameSize = format.getFrameSize();
                     float frameRate = format.getFrameRate();
-                    bitrate = frameSize * frameRate * 8 /1000;
+                    bitrate = frameSize * frameRate * 8.0F / 1000.0F;
                 }
-               
-                if (bitrate > Long.parseLong(SystemConfig.getConfig("maxBitRate"))) { 
-                    ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Hệ thống chỉ hỗ trợ file có bitrate tối đa " + SystemConfig.getConfig("maxBitRate") + "kbps"); 
+                if (bitrate > (float) Long.parseLong(SystemConfig.getConfig("maxBitRate"))) {
+                    ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Hệ thống chỉ hỗ trợ file có bitrate tối đa " + SystemConfig.getConfig("maxBitRate") + "kbps");
                     return;
                 }
-                
-                audioFile = file;
-                tmpAudioFile = new File(outputPath);
-                fileName = file.getFileName();
-                //RequestContext.getCurrentInstance().update("fileName");
-                RequestContext.getCurrentInstance().execute("reloadPlayer()");  
-                System.out.print("Succesful"+ file.getFileName() + " is uploaded.");
-                
-                
+                this.audioFile = file;
+                this.tmpAudioFile = new File(outputPath);
+                this.fileName = file.getFileName();
+                RequestContext.getCurrentInstance().execute("reloadPlayer()");
+                System.out.print("Succesful" + file.getFileName() + " is uploaded.");
             } catch (IOException ex) {
-                Logger.getLogger(RecordController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(RecordController.class.getName()).log(Level.SEVERE, (String) null, ex);
             } catch (UnsupportedTagException ex) {
-                Logger.getLogger(RecordController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(RecordController.class.getName()).log(Level.SEVERE, (String) null, (Throwable) ex);
             } catch (InvalidDataException ex) {
-                Logger.getLogger(RecordController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(RecordController.class.getName()).log(Level.SEVERE, (String) null, (Throwable) ex);
             } catch (UnsupportedAudioFileException ex) {
-                Logger.getLogger(RecordController.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(RecordController.class.getName()).log(Level.SEVERE, (String) null, ex);
             }
+        }
+    }
 
-        }
-    }
-    
     public StreamedContent getPlaybackStream() throws FileNotFoundException, IOException {
-                
-        if(tmpAudioFile!= null && tmpAudioFile.exists()){
-            InputStream is = new FileInputStream(tmpAudioFile);
+        if (this.tmpAudioFile != null && this.tmpAudioFile.exists()) {
+            InputStream is = new FileInputStream(this.tmpAudioFile);
             String mimeType = URLConnection.guessContentTypeFromStream(is);
-            return new DefaultStreamedContent(is, mimeType, tmpAudioFile.getName()," identity;q=1, *;q=0",(int)tmpAudioFile.length());
-//        }else if(this.selectedRecord != null && this.selectedRecord.getRec_url()!=null){
-//          
-//            URLConnection connection = new URL(SystemConfig.getConfig("WSAudioDownload") + selectedRecord.getRec_url().replace("/", "%2f")).openConnection();
-//            connection.setRequestProperty("username", SystemConfig.getConfig("AudioWSUser"));
-//            connection.setRequestProperty("password", SystemConfig.getConfig("AudioWSPass"));
-//            InputStream response = connection.getInputStream();
-//       
-//            return new DefaultStreamedContent(response, "audio/wav", selectedRecord.getRecFileName());
-        }else{
-            return null;
+            return (StreamedContent) new DefaultStreamedContent(is, mimeType, this.tmpAudioFile.getName(), " identity;q=1, *;q=0", Integer.valueOf((int) this.tmpAudioFile.length()));
         }
+        return null;
     }
-     
+
     public boolean uploadRecordToFileServer(UploadedFile uploadedFile) {
         String ext = uploadedFile.getFileName().substring(uploadedFile.getFileName().lastIndexOf(".") + 1);
         ext = ext.toUpperCase();
         File convertedFile = null;
-        
         convertedFile = new File(convertAudio(uploadedFile));
-        if(!convertedFile.exists()){
-            ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Quá trình xử lý file gặp lỗi");
+        if (!convertedFile.exists()) {
+            ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Qutrxlfile gl");
             return false;
         }
-        
-        HttpClient client = new DefaultHttpClient();
+        DefaultHttpClient defaultHttpClient = new DefaultHttpClient();
         HttpPost postRequest = new HttpPost(SystemConfig.getConfig("WSAudioUrl"));
         try {
-            //Set various attributes
             MultipartEntity multiPartEntity = new MultipartEntity();
-            multiPartEntity.addPart("fileDescription", new StringBody(""));
-            multiPartEntity.addPart("fileName", new StringBody(convertedFile.getName()));
-            InputStreamBody fileBody = new InputStreamBody(new FileInputStream(convertedFile),"application/octect-stream",convertedFile.getName());
-            //Prepare payload
-            multiPartEntity.addPart("file", fileBody);
-            //Set to request body
-            
-            postRequest.setEntity(multiPartEntity);
+            multiPartEntity.addPart("fileDescription", (ContentBody) new StringBody(""));
+            multiPartEntity.addPart("fileName", (ContentBody) new StringBody(convertedFile.getName()));
+            InputStreamBody fileBody = new InputStreamBody(new FileInputStream(convertedFile), "application/octect-stream", convertedFile.getName());
+            multiPartEntity.addPart("file", (ContentBody) fileBody);
+            postRequest.setEntity((HttpEntity) multiPartEntity);
             postRequest.addHeader("username", "cmsuser");
             postRequest.addHeader("password", "cmspass!@#");
-            //Send request
-            HttpResponse response = client.execute(postRequest);
-            //Verify response if any
-            if (response != null) {
-                if (response.getStatusLine().getStatusCode()==200){
-                    HttpEntity entity = response.getEntity();
-                    String responseString = EntityUtils.toString(entity, "UTF-8");
-                    JsonParser jsonParser = new JsonParser();
-                    JsonObject entityJs = (JsonObject)jsonParser.parse(responseString);
-                    JsonObject javaResponse= entityJs.get("javaResponse").getAsJsonObject();
-                    if (javaResponse!=null)
-                    //addedArea.setAudio_path(javaResponse.get("audioUri").getAsString());
-                    audioPath = javaResponse.get("audioUri").getAsString();
-
-                    return true;
+            HttpResponse response = defaultHttpClient.execute((HttpUriRequest) postRequest);
+            if (response != null
+                    && response.getStatusLine().getStatusCode() == 200) {
+                HttpEntity entity = response.getEntity();
+                String responseString = EntityUtils.toString(entity, "UTF-8");
+                JsonParser jsonParser = new JsonParser();
+                JsonObject entityJs = (JsonObject) jsonParser.parse(responseString);
+                JsonObject javaResponse = entityJs.get("javaResponse").getAsJsonObject();
+                if (javaResponse != null) {
+                    this.audioPath = javaResponse.get("audioUri").getAsString();
                 }
+                return true;
             }
-
         } catch (Exception ex) {
-            //addedArea.setAudio_path(null);
-            audioPath = "";
+            this.audioPath = "";
             ex.printStackTrace();
             return false;
         }
         return false;
     }
-     
-    public String convertAudio(UploadedFile audioFile){
+
+    public String convertAudio(UploadedFile audioFile) {
         String outputFile = null;
         try {
-           String timestamp = System.currentTimeMillis()+"";
+            String timestamp = System.currentTimeMillis() + "";
             String assetsDir = SystemConfig.getConfig("AssetsDir");
-            String outputRaw = assetsDir+ SystemConfig.getConfig("audioOutputRaw");
-            String outputConverted =assetsDir+ SystemConfig.getConfig("audioOutputConverted");
-
-
+            String outputRaw = assetsDir + SystemConfig.getConfig("audioOutputRaw");
+            String outputConverted = assetsDir + SystemConfig.getConfig("audioOutputConverted");
             File folderConverted = new File(outputConverted);
             File folderRow = new File(outputRaw);
-            if(!folderRow.exists()|| !folderRow.isDirectory()){
+            if (!folderRow.exists() || !folderRow.isDirectory()) {
                 folderRow.mkdirs();
             }
-            if(!folderConverted.exists()|| !folderConverted.isDirectory()){
+            if (!folderConverted.exists() || !folderConverted.isDirectory()) {
                 folderConverted.mkdirs();
             }
-
-
             String audioFormat = SystemConfig.getConfig("audioAudioFormat");
             String audioCodec = SystemConfig.getConfig("audioCodec");
             String samplingRate = SystemConfig.getConfig("audioSamplingRate");
-            
-            String outputFileName = timestamp+"_"+audioFile.getFileName().replaceAll("[^A-Za-z0-9\\.]","");
-            String outputFilePath = outputRaw+outputFileName;
+            String outputFileName = timestamp + "_" + audioFile.getFileName().replaceAll("[^A-Za-z0-9\\.]", "");
+            String outputFilePath = outputRaw + outputFileName;
             saveInputStreamToFile(audioFile.getInputstream(), outputFilePath);
             File f = new File(outputFilePath);
-            if(!f.exists()){
+            if (!f.exists()) {
                 throw new FileNotFoundException("upload failed");
             }
-
-            Attributes alaw = new Attributes(audioFormat, audioCodec, Integer.parseInt(samplingRate), 1);
-            outputFile = outputConverted+outputFileName+ "."+ alaw.getFormat();
+            Attributes alaw = new Attributes(audioFormat, audioCodec, Integer.valueOf(Integer.parseInt(samplingRate)), Integer.valueOf(1));
+            outputFile = outputConverted + outputFileName + "." + alaw.getFormat();
             Transcoder.transcode(f.getAbsolutePath(), outputFile, alaw);
-       } catch (Exception e) {
-           e.printStackTrace();
-           ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Xảy ra lỗi trong quá trình convert file: " + e);
-       }
-        
-        if(outputFile!=null && new File(outputFile).exists()){
-            return outputFile;            
-        }else{
-            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, "Xảy ra lỗi trong quá trình convert file: " + e);
         }
- 
+        if (outputFile != null && (new File(outputFile)).exists()) {
+            return outputFile;
+        }
+        return null;
     }
-    
-      //////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////////////////////////////////
     // Ai Camera
     //- ----  quyen doi voi ai camera
     public boolean isAllowUpdateAiCamera() {
@@ -1383,8 +1173,8 @@ public class AreaController extends TSPermission implements Serializable {
         }
 
     }
-    
-        /////////////////////////////////////////
+
+    /////////////////////////////////////////
     // Ai Camera Slot
     public class SlotForAiCamera {
 
@@ -1714,5 +1504,4 @@ public class AreaController extends TSPermission implements Serializable {
             ClientMessage.logErr(ClientMessage.MESSAGE_TYPE.ERR, response.getCodeDescVn());
         }
     }
-    
 }

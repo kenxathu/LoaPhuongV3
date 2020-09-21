@@ -227,6 +227,7 @@ public class RecordController extends TSPermission implements Serializable  {
 
         SELECT,
         CREATE,
+        CREATE2,
         DELETE,
         VIEW,
         APPROVE,
@@ -3875,7 +3876,8 @@ public class RecordController extends TSPermission implements Serializable  {
 //    }
 //    
     private void saveInputStreamToFile(InputStream inStream, String target) throws IOException {
-		OutputStream out = null;
+        try {
+            OutputStream out = null;
 		int read = 0;
 		byte[] bytes = new byte[1024];
 
@@ -3885,6 +3887,9 @@ public class RecordController extends TSPermission implements Serializable  {
 		}
 		out.flush();
 		out.close();
+        } catch (Exception e) {
+        }
+		
     }
     
     private void saveAudioInputStreamToFile(AudioInputStream inStream, String target) throws IOException {

@@ -15,7 +15,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.event.ActionEvent;
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.Visibility;
-import vn.mobifone.loaphuong.controller.AreaController;
+
 import vn.mobifone.loaphuong.entity.DataResponse;
 import vn.mobifone.loaphuong.entity.HouseHold;
 import vn.mobifone.loaphuong.lib.ClientMessage;
@@ -283,7 +283,7 @@ public class UserController extends TSPermission implements Serializables {
             mlistUserFilter = null;
 
         } catch (Exception ex) {
-            Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
+          //  Logger.getLogger(AreaController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

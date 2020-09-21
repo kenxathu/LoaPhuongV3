@@ -17,6 +17,11 @@ html, body {
     overflow:hidden;
 }
 
+/*#form_resendOtp{
+    height:100px; 
+    width: 100px;
+}*/
+
 .tablewrapper {
     width: 100%;
     /* height: 100vh; */
@@ -68,6 +73,10 @@ html, body {
     margin-top: -6px;
 }
 
+/*#form_resendOtp\:resend_otp .ui-icon, #form_resendOtp\:resend_otp .ui-icon {
+    margin-top: -6px;
+}*/
+
 #form_login\:messages {
     text-align: left;
 }
@@ -75,6 +84,10 @@ html, body {
 #form_otp\:messages {
     text-align: left;
 }
+
+/*#form_resendOtp\:messages {
+    text-align: left;
+}*/
 
 .ajax-status {
     position: fixed;

@@ -131,7 +131,20 @@
     border-color:#303f9f;
     position: static;
     bottom: auto;
+   
 }
+
+/*#form_resendOtp\:resend_otp {
+    white-space:nowrap;
+    background:#0060AF;
+    width:100%!important;
+    height:48px;
+    box-shadow:none;
+    background-color:#0061a8;
+    border-color:#303f9f;
+    position: static;
+    bottom: auto;
+}*/
 
 #login .form-group .form input {
     background-repeat:repeat;
@@ -162,8 +175,18 @@
     color:#fff;
     text-indent:100%;
     white-space:nowrap;
-    overflow:hidden
+    overflow:hidden;
+  
 }
+
+/*#form_resendOtp\:resend_otp span {
+    content:"Joe's Task:";
+    display:none;
+    color:#fff;
+    text-indent:100%;
+    white-space:nowrap;
+    overflow:hidden
+}*/
 
 button#form_login\:login_button::after {
     content:"Đăng nhập";
@@ -172,12 +195,17 @@ button#form_login\:login_button::after {
 }
 
 button#form_otp\:otp_button::after {
-    content:"Gửi OTP";
+    content:"Xác thực OTP";
+    color:#fff;
+    text-transform:uppercase
+        
+}
+
+button#form_resendOtp\:resend_otp::after {
+    content:"Gửi lại OTP";
     color:#fff;
     text-transform:uppercase
 }
-
-
 
 
 
@@ -201,6 +229,11 @@ button#form_otp\:otp_button::after {
     border-color:#303f9f
 }
 
+/*#form_resendOtp\:resend_otp:hover {
+    background:none;
+    background-color:rgba(0,97,168,0.85);
+    border-color:#303f9f
+}*/
 body {
     overflow:hidden;
     width:auto;
