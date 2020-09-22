@@ -364,40 +364,40 @@ public class LoginWebservice extends DataPreprocessor {
         return otpEntity;
 
     }
-    
-      public static HttpOutput executeReSendOtpPOST(String actionLink, String sessionId, String username) {
-    HttpOutput output = new HttpOutput();
-    try {
-      Client client = Client.create();
-      WebResource webResource = client.resource(WS_LINK + actionLink);
-      MultivaluedMapImpl multivaluedMapImpl = new MultivaluedMapImpl();
-      multivaluedMapImpl.add("sessionId", sessionId);
-      multivaluedMapImpl.add("username", username);
-      ClientResponse response = (ClientResponse)((WebResource.Builder)webResource.header("username", "cmsuser").header("password", "cmspass!@#")).post(ClientResponse.class, multivaluedMapImpl);
-      if (response.getStatus() != 201 && response.getStatus() != 200) {
-        output.setHeaderHttp(response.getStatus() + "");
-        output.setMessageHttp("Lỗi khi kết nối, mã lỗi" + response.getStatus());
-        Gson gson = new Gson();
-        String outputStr = (String)response.getEntity(String.class);
-        SystemLogger.getLogger().debug(outputStr);
-        output.setResponseJson(outputStr);
-      } else {
-        output.setHeaderHttp("200");
-        output.setMessageHttp("Kết nối thành công");
-        Gson gson = new Gson();
-        String outputStr = (String)response.getEntity(String.class);
-        SystemLogger.getLogger().debug(outputStr);
-        output.setResponseJson(outputStr);
-        OtpResponse otpRes = (OtpResponse)gson.fromJson(outputStr, OtpResponse.class);
-        output.setOtpRes(otpRes);
-      } 
-    } catch (Exception e) {
-      SystemLogger.getLogger().error(e, e);
-      output.setHeaderHttp("ERROR_TIMEOUT");
-      output.setMessageHttp(e.getMessage());
-    } 
-    return output;
-  }
+
+    public static HttpOutput executeReSendOtpPOST(String actionLink, String sessionId, String username) {
+        HttpOutput output = new HttpOutput();
+        try {
+            Client client = Client.create();
+            WebResource webResource = client.resource(WS_LINK + actionLink);
+            MultivaluedMapImpl multivaluedMapImpl = new MultivaluedMapImpl();
+            multivaluedMapImpl.add("sessionId", sessionId);
+            multivaluedMapImpl.add("username", username);
+            ClientResponse response = (ClientResponse) ((WebResource.Builder) webResource.header("username", "cmsuser").header("password", "cmspass!@#")).post(ClientResponse.class, multivaluedMapImpl);
+            if (response.getStatus() != 201 && response.getStatus() != 200) {
+                output.setHeaderHttp(response.getStatus() + "");
+                output.setMessageHttp("Lỗi khi kết nối, mã lỗi" + response.getStatus());
+                Gson gson = new Gson();
+                String outputStr = (String) response.getEntity(String.class);
+                SystemLogger.getLogger().debug(outputStr);
+                output.setResponseJson(outputStr);
+            } else {
+                output.setHeaderHttp("200");
+                output.setMessageHttp("Kết nối thành công");
+                Gson gson = new Gson();
+                String outputStr = (String) response.getEntity(String.class);
+                SystemLogger.getLogger().debug(outputStr);
+                output.setResponseJson(outputStr);
+                OtpResponse otpRes = (OtpResponse) gson.fromJson(outputStr, OtpResponse.class);
+                output.setOtpRes(otpRes);
+            }
+        } catch (Exception e) {
+            SystemLogger.getLogger().error(e, e);
+            output.setHeaderHttp("ERROR_TIMEOUT");
+            output.setMessageHttp(e.getMessage());
+        }
+        return output;
+    }
 
     public OtpResponse reSendOtp(String sessionId, String username) {
         OtpResponse otpEntity = new OtpResponse();

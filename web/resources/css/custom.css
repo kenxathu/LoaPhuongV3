@@ -1284,9 +1284,14 @@ span.ui-paginator-current + a + a + span.ui-paginator-pages .ui-state-active {
 .ui-chkbox-icon.ui-icon {
     border: solid 1px #ccc;
 }
-body {
+body  {
     background: white !important;
     background: url('') !important;
+    
+/*    -webkit-filter: blur(5px);
+    -o-filter: blur(5px);
+    -moz-filter: blur(5px);
+    filter: blur(5px);*/
 }
 /*map-box*/
 

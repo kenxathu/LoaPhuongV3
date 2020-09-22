@@ -17,19 +17,23 @@ public class RadioChannel implements Serializable{
     private String description;
     private String url;
     private double frequency;
+    private Integer type; 
+    
 
-    public RadioChannel(long id, String name, String description, String url, double frequency) {
+    public RadioChannel(long id, String name, String description, String url, double frequency, Integer type) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.url = url;
         this.frequency = frequency;
+        this.type = type;
     }
+    
+    
 
     public RadioChannel() {
     }
-    
-    
+       
 
     public long getId() {
         return id;
@@ -69,6 +73,14 @@ public class RadioChannel implements Serializable{
 
     public void setFrequency(double frequency) {
         this.frequency = frequency;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 
     

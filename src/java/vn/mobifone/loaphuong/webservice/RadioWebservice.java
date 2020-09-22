@@ -61,7 +61,6 @@ public class RadioWebservice extends DataPreprocessor{
     public RadioWebservice() {
 
     }
-
     /**
      * Ex
      *
@@ -332,6 +331,7 @@ public class RadioWebservice extends DataPreprocessor{
 
             List<RadioChannel> listChannel = new ArrayList<>();
             ListDataResponse response = new ListDataResponse();
+            //System.out.println("====== " +SecUser.getMainArea());
             try {
                 
                 
@@ -359,14 +359,13 @@ public class RadioWebservice extends DataPreprocessor{
     
     
     public DataResponse executeChannel(RadioChannel channel, int action) {   // action   =1 : create/ 2: update
-
             DataResponse response = new DataResponse();
             
             try {
                 String queryParam = (action==1?"addRadioChannel":"updateRadioChannel") + "?name=" + URLEncoder.encode(channel.getName(), "UTF-8")
                                   + "&description=" + URLEncoder.encode(channel.getDescription(), "UTF-8")
                                   + "&url=" + ((channel.getUrl()==null)?"":URLEncoder.encode(channel.getUrl(), "UTF-8"))
-                                  + "&frequency=" + channel.getFrequency();
+                                  + "&frequency=" + channel.getFrequency() + "&type=" +channel.getType() ;
                 if (action == 1) {
                     queryParam += "&area_id=" + SecUser.getMainArea();
                 }
@@ -378,7 +377,7 @@ public class RadioWebservice extends DataPreprocessor{
                 
                 ObjectMapper objectMapper = new ObjectMapper();
                 response = objectMapper.readValue(output.getResponseJson(), DataResponse.class);
-                
+                //System.out.println("response " +response.toString());
                 if (response.getCode() == 200) {
                     ClientMessage.logSuccess( (action==1?"Thêm":"Cập nhật") + " kênh đài thành công!");
                 } else {

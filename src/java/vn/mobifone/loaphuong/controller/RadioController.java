@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package vn.mobifone.loaphuong.controller;
 
 import java.awt.event.ActionEvent;
@@ -18,11 +14,6 @@ import vn.mobifone.loaphuong.lib.ClientMessage;
 import vn.mobifone.loaphuong.lib.TSPermission;
 import vn.mobifone.loaphuong.security.SecUser;
 import vn.mobifone.loaphuong.webservice.RadioWebservice;
-
-
-
-
-
 /**
  *
  * @author cuong.trinh
@@ -30,15 +21,13 @@ import vn.mobifone.loaphuong.webservice.RadioWebservice;
 @ManagedBean(name = "RadioController")
 @ViewScoped
 public class RadioController extends TSPermission implements Serializable  {
-
     //Servey
     private List<RadioChannel> listChanel;
     private RadioWebservice radioWS;
     private RadioChannel selectedChannel;
     private PersistAction channelAction;
 
-    
-    
+        
     //private final String APP_PATH = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/");
 
         // Operation Flag -- Enum
@@ -53,26 +42,21 @@ public class RadioController extends TSPermission implements Serializable  {
     }
     
 
-
     public RadioController() {
         radioWS = new RadioWebservice();
         loadChannel();
-        channelAction = PersistAction.SELECT;
-        
+        channelAction = PersistAction.SELECT;        
     }
- 
  
 
     public void loadChannel() {
         try {
-             listChanel = radioWS.getListChannel();
-            
+             listChanel = radioWS.getListChannel();            
         } catch (Exception ex) {
                 Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    
+       
     
     public void addChannelEvent(ActionEvent evt) { 
         selectedChannel = new RadioChannel();
@@ -103,9 +87,7 @@ public class RadioController extends TSPermission implements Serializable  {
                 
                 break;
             case DELETE:
-                radioWS.deleteChannel(selectedChannel.getId());
-                
-                
+                radioWS.deleteChannel(selectedChannel.getId());                              
                 
                 break;
             }
@@ -115,8 +97,7 @@ public class RadioController extends TSPermission implements Serializable  {
         } catch (Exception e) {
             ClientMessage.logErr("Không thành công: đã xảy ra lỗi không xác định!");
             return;
-        }
-        
+        }        
     }
     
 
@@ -142,7 +123,12 @@ public class RadioController extends TSPermission implements Serializable  {
 
     public void setChannelAction(PersistAction channelAction) {
         this.channelAction = channelAction;
-    }
+    }       
+      
+    
+ 
+}
+
     
     
     
@@ -150,4 +136,4 @@ public class RadioController extends TSPermission implements Serializable  {
     
     
  
-}
+
